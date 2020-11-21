@@ -242,8 +242,7 @@ export default async function ({ addon, global, console, msg }) {
     ];
     blockSwitches["control_forever"] = [
       {
-        opcode: "control_repeat_until",
-        remap: { SUBSTACK: "split" },
+        opcode: "control_repeat_until"
       },
       noopSwitch,
     ];
