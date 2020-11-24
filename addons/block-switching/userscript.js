@@ -503,7 +503,7 @@ export default async function ({ addon, global, console, msg }) {
     ];
   }
 
-  if (addon.settings.get("arguments")) {
+  if (addon.settings.get("argument")) {
     // Special handling is done in click handler
     blockSwitches["argument_reporter_string_number"] = argumentSwitcher;
     blockSwitches["argument_reporter_boolean"] = argumentSwitcher;

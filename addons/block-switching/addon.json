@@ -75,8 +75,8 @@
       "default": true
     },
     {
-      "name": "Arguments",
-      "id": "arguments",
+      "name": "Argument blocks",
+      "id": "argument",
       "type": "boolean",
       "default": true
     },
