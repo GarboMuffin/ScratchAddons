@@ -240,7 +240,7 @@ export default async function ({ addon, global, console, msg }) {
       },
       {
         opcode: "control_forever",
-        split: ["SUBSTACK"],
+        split: ["CONDITION"],
       },
     ];
     blockSwitches["control_forever"] = [
