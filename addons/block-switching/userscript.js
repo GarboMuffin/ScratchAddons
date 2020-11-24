@@ -625,6 +625,7 @@ export default async function ({ addon, global, console, msg }) {
 
   const getArgumentType = (block) => {
     const connection = block.getConnections_()[0];
+    if (!connection || !connection.check_) return -1;
     return connection.check_.includes("Boolean") ? 1 : 0;
   };
 
@@ -635,7 +636,7 @@ export default async function ({ addon, global, console, msg }) {
     }
 
     const definition = root.getChildren()[0];
-    if (definition.type !== "procedures_prototype") {
+    if (!definition || definition.type !== "procedures_prototype") {
       return [];
     }
 
@@ -651,6 +652,9 @@ export default async function ({ addon, global, console, msg }) {
 
       const childName = getArgumentName(child);
       if (!includeSelf && childName === selfName) {
+        continue;
+      }
+      if (result.includes(childName)) {
         continue;
       }
       result.push(childName);
