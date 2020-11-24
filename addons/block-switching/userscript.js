@@ -566,7 +566,7 @@ export default async function ({ addon, global, console, msg }) {
         child.setAttribute("name", remap[inputName]);
       }
 
-      if (mutateFields[inputName]) {
+      if (child.tagName === "FIELD" && mutateFields[inputName]) {
         child.textContent = mutateFields[inputName];
       }
 
