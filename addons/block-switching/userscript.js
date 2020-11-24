@@ -27,59 +27,59 @@ export default async function ({ addon, global, console, msg }) {
       noopSwitch,
       {
         opcode: "motion_changexby",
-        remapInputs: { X: "DX" },
+        remap: { X: "DX" },
       },
       {
         opcode: "motion_sety",
-        remapInputs: { X: "Y" },
+        remap: { X: "Y" },
       },
       {
         opcode: "motion_changeyby",
-        remapInputs: { X: "DY" },
+        remap: { X: "DY" },
       },
     ];
     blockSwitches["motion_changexby"] = [
       {
         opcode: "motion_setx",
-        remapInputs: { DX: "X" },
+        remap: { DX: "X" },
       },
       noopSwitch,
       {
         opcode: "motion_sety",
-        remapInputs: { DX: "Y" },
+        remap: { DX: "Y" },
       },
       {
         opcode: "motion_changeyby",
-        remapInputs: { DX: "DY" },
+        remap: { DX: "DY" },
       },
     ];
     blockSwitches["motion_sety"] = [
       {
         opcode: "motion_setx",
-        remapInputs: { Y: "X" },
+        remap: { Y: "X" },
       },
       {
         opcode: "motion_changexby",
-        remapInputs: { Y: "DX" },
+        remap: { Y: "DX" },
       },
       noopSwitch,
       {
         opcode: "motion_changeyby",
-        remapInputs: { Y: "DY" },
+        remap: { Y: "DY" },
       },
     ];
     blockSwitches["motion_changeyby"] = [
       {
         opcode: "motion_setx",
-        remapInputs: { DY: "X" },
+        remap: { DY: "X" },
       },
       {
         opcode: "motion_changexby",
-        remapInputs: { DY: "DX" },
+        remap: { DY: "DX" },
       },
       {
         opcode: "motion_sety",
-        remapInputs: { DY: "Y" },
+        remap: { DY: "Y" },
       },
       noopSwitch,
     ];
@@ -102,13 +102,13 @@ export default async function ({ addon, global, console, msg }) {
       noopSwitch,
       {
         opcode: "looks_changeeffectby",
-        remapInputs: { VALUE: "CHANGE" },
+        remap: { VALUE: "CHANGE" },
       },
     ];
     blockSwitches["looks_changeeffectby"] = [
       {
         opcode: "looks_seteffectto",
-        remapInputs: { CHANGE: "VALUE" },
+        remap: { CHANGE: "VALUE" },
       },
       noopSwitch,
     ];
@@ -116,13 +116,13 @@ export default async function ({ addon, global, console, msg }) {
       noopSwitch,
       {
         opcode: "looks_changesizeby",
-        remapInputs: { SIZE: "CHANGE" },
+        remap: { SIZE: "CHANGE" },
       },
     ];
     blockSwitches["looks_changesizeby"] = [
       {
         opcode: "looks_setsizeto",
-        remapInputs: { CHANGE: "SIZE" },
+        remap: { CHANGE: "SIZE" },
       },
       noopSwitch,
     ];
@@ -555,15 +555,15 @@ export default async function ({ addon, global, console, msg }) {
     }
 
     const pasteSeparately = [];
-    const remapInputs = opcodeData.remapInputs || {};
+    const remap = opcodeData.remap || {};
     const split = opcodeData.split || [];
     const mutateFields = opcodeData.mutateFields || {};
     const childNodes = Array.from(xml.children);
     for (const child of childNodes) {
       const inputName = child.getAttribute("name");
 
-      if (remapInputs[inputName]) {
-        child.setAttribute("name", remapInputs[inputName]);
+      if (remap[inputName]) {
+        child.setAttribute("name", remap[inputName]);
       }
 
       if (mutateFields[inputName]) {
