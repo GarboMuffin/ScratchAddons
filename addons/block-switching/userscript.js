@@ -570,7 +570,7 @@ export default async function ({ addon, global, console, msg }) {
         child.textContent = mutateFields[inputName];
       }
 
-      if (split.includes(split)) {
+      if (split.includes(inputName)) {
         const inputXml = child.firstChild;
         const inputId = inputXml.id;
         const inputBlock = workspace.getBlockById(inputId);
