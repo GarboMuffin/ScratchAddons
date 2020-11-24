@@ -75,6 +75,12 @@
       "default": true
     },
     {
+      "name": "Arguments",
+      "id": "arguments",
+      "type": "boolean",
+      "default": true
+    },
+    {
       "name": "Extension blocks",
       "id": "extension",
       "type": "boolean",

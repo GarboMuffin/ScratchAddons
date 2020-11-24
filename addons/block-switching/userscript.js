@@ -7,6 +7,9 @@ export default async function ({ addon, global, console, msg }) {
     opcode: "noop",
   };
 
+  // Special value
+  const argumentSwitcher = [];
+
   if (addon.settings.get("motion")) {
     blockSwitches["motion_turnright"] = [
       noopSwitch,
@@ -24,59 +27,59 @@ export default async function ({ addon, global, console, msg }) {
       noopSwitch,
       {
         opcode: "motion_changexby",
-        remap: { X: "DX" },
+        remapInputs: { X: "DX" },
       },
       {
         opcode: "motion_sety",
-        remap: { X: "Y" },
+        remapInputs: { X: "Y" },
       },
       {
         opcode: "motion_changeyby",
-        remap: { X: "DY" },
+        remapInputs: { X: "DY" },
       },
     ];
     blockSwitches["motion_changexby"] = [
       {
         opcode: "motion_setx",
-        remap: { DX: "X" },
+        remapInputs: { DX: "X" },
       },
       noopSwitch,
       {
         opcode: "motion_sety",
-        remap: { DX: "Y" },
+        remapInputs: { DX: "Y" },
       },
       {
         opcode: "motion_changeyby",
-        remap: { DX: "DY" },
+        remapInputs: { DX: "DY" },
       },
     ];
     blockSwitches["motion_sety"] = [
       {
         opcode: "motion_setx",
-        remap: { Y: "X" },
+        remapInputs: { Y: "X" },
       },
       {
         opcode: "motion_changexby",
-        remap: { Y: "DX" },
+        remapInputs: { Y: "DX" },
       },
       noopSwitch,
       {
         opcode: "motion_changeyby",
-        remap: { Y: "DY" },
+        remapInputs: { Y: "DY" },
       },
     ];
     blockSwitches["motion_changeyby"] = [
       {
         opcode: "motion_setx",
-        remap: { DY: "X" },
+        remapInputs: { DY: "X" },
       },
       {
         opcode: "motion_changexby",
-        remap: { DY: "DX" },
+        remapInputs: { DY: "DX" },
       },
       {
         opcode: "motion_sety",
-        remap: { DY: "Y" },
+        remapInputs: { DY: "Y" },
       },
       noopSwitch,
     ];
@@ -99,13 +102,13 @@ export default async function ({ addon, global, console, msg }) {
       noopSwitch,
       {
         opcode: "looks_changeeffectby",
-        remap: { VALUE: "CHANGE" },
+        remapInputs: { VALUE: "CHANGE" },
       },
     ];
     blockSwitches["looks_changeeffectby"] = [
       {
         opcode: "looks_seteffectto",
-        remap: { CHANGE: "VALUE" },
+        remapInputs: { CHANGE: "VALUE" },
       },
       noopSwitch,
     ];
@@ -113,13 +116,13 @@ export default async function ({ addon, global, console, msg }) {
       noopSwitch,
       {
         opcode: "looks_changesizeby",
-        remap: { SIZE: "CHANGE" },
+        remapInputs: { SIZE: "CHANGE" },
       },
     ];
     blockSwitches["looks_changesizeby"] = [
       {
         opcode: "looks_setsizeto",
-        remap: { CHANGE: "SIZE" },
+        remapInputs: { CHANGE: "SIZE" },
       },
       noopSwitch,
     ];
@@ -225,7 +228,7 @@ export default async function ({ addon, global, console, msg }) {
     blockSwitches["control_if_else"] = [
       {
         opcode: "control_if",
-        remap: { SUBSTACK2: "split" },
+        split: ["SUBSTACK2"],
       },
       noopSwitch,
     ];
@@ -233,11 +236,11 @@ export default async function ({ addon, global, console, msg }) {
       noopSwitch,
       {
         opcode: "control_wait_until",
-        remap: { SUBSTACK: "split" },
+        split: ["SUBSTACK"],
       },
       {
         opcode: "control_forever",
-        remap: { CONDITION: "split" },
+        split: ["SUBSTACK"],
       },
     ];
     blockSwitches["control_forever"] = [
@@ -500,6 +503,12 @@ export default async function ({ addon, global, console, msg }) {
     ];
   }
 
+  if (addon.settings.get("arguments")) {
+    // Special handling is done in click handler
+    blockSwitches["argument_reporter_string_number"] = argumentSwitcher;
+    blockSwitches["argument_reporter_boolean"] = argumentSwitcher;
+  }
+
   // Switching for these is implemented by Scratch. We only define them here to optionally add a border.
   // Because we don't implement the switching ourselves, this is not controlled by the data category option.
   blockSwitches["data_variable"] = [];
@@ -546,29 +555,30 @@ export default async function ({ addon, global, console, msg }) {
     }
 
     const pasteSeparately = [];
-    // Apply input remappings.
-    if (opcodeData.remap) {
-      const childNodes = Array.from(xml.children);
-      for (const child of childNodes) {
-        const oldName = child.getAttribute("name");
-        const newName = opcodeData.remap[oldName];
-        if (newName) {
-          if (newName === "split") {
-            // This input will be split off into its own script.
-            const inputXml = child.firstChild;
-            const inputId = inputXml.id;
-            const inputBlock = workspace.getBlockById(inputId);
+    const remapInputs = opcodeData.remapInputs || {};
+    const split = opcodeData.split || [];
+    const mutateFields = opcodeData.mutateFields || {};
+    const childNodes = Array.from(xml.children);
+    for (const child of childNodes) {
+      const inputName = child.getAttribute("name");
 
-            const position = inputBlock.getRelativeToSurfaceXY();
-            inputXml.setAttribute("x", Math.round(workspace.RTL ? -position.x : position.x));
-            inputXml.setAttribute("y", Math.round(position.y));
+      if (remapInputs[inputName]) {
+        child.setAttribute("name", remapInputs[inputName]);
+      }
 
-            pasteSeparately.push(inputXml);
-            xml.removeChild(child);
-          } else {
-            child.setAttribute("name", newName);
-          }
-        }
+      if (mutateFields[inputName]) {
+        child.textContent = mutateFields[inputName];
+      }
+
+      if (split.includes(split)) {
+        const inputXml = child.firstChild;
+        const inputId = inputXml.id;
+        const inputBlock = workspace.getBlockById(inputId);
+        const position = inputBlock.getRelativeToSurfaceXY();
+        inputXml.setAttribute("x", Math.round(workspace.RTL ? -position.x : position.x));
+        inputXml.setAttribute("y", Math.round(position.y));
+        pasteSeparately.push(inputXml);
+        xml.removeChild(child);
       }
     }
 
@@ -606,6 +616,49 @@ export default async function ({ addon, global, console, msg }) {
     }, 0);
   };
 
+  const getArgumentName = (block) => {
+    const input = block.inputList[0];
+    const field = input.fieldRow[0];
+    const argumentName = field.text_;
+    return argumentName || "";
+  };
+
+  const getArgumentType = (block) => {
+    const connection = block.getConnections_()[0];
+    return connection.check_.includes("Boolean") ? 1 : 0;
+  };
+
+  const getAllArguments = (block, includeSelf) => {
+    const root = block.getRootBlock();
+    if (root.type !== "procedures_definition") {
+      return [];
+    }
+
+    const definition = root.getChildren()[0];
+    if (definition.type !== "procedures_prototype") {
+      return [];
+    }
+
+    const result = [];
+    const selfName = getArgumentName(block);
+    const selfType = getArgumentType(block);
+
+    for (const child of definition.getChildren()) {
+      const childType = getArgumentType(child);
+      if (selfType !== childType) {
+        continue;
+      }
+
+      const childName = getArgumentName(child);
+      if (!includeSelf && childName === selfName) {
+        continue;
+      }
+      result.push(childName);
+    }
+
+    return result;
+  };
+
   const customContextMenuHandler = function (options) {
     if (addon.settings.get("border")) {
       addBorderToContextMenuItem = options.length;
@@ -616,13 +669,31 @@ export default async function ({ addon, global, console, msg }) {
     }
 
     const switches = blockSwitches[this.type];
+    const isArgument = switches === argumentSwitcher;
+    let includeSelf = addon.settings.get("noop");
+
+    if (isArgument) {
+      switches.length = 0;
+      const names = getAllArguments(this, includeSelf);
+      for (const name of names) {
+        switches.push({
+          opcode: this.type,
+          message: name,
+          mutateFields: {
+            VALUE: name,
+          },
+        });
+      }
+      // All the switches will have the same opcode as the original block, so force showing self to be enabled.
+      includeSelf = true;
+    }
+
     for (const opcodeData of switches) {
-      const isNoop = opcodeData.opcode === "noop";
-      if (isNoop && !addon.settings.get("noop")) {
+      const isSelf = opcodeData.opcode === "noop";
+      if (isSelf && !includeSelf) {
         continue;
       }
-      const translationOpcode = isNoop ? this.type : opcodeData.opcode;
-      const translation = msg(translationOpcode);
+      const translation = opcodeData.message || msg(isSelf ? this.type : opcodeData.opcode);
       options.push({
         enabled: true,
         text: translation,
