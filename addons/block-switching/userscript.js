@@ -671,7 +671,8 @@ export default async function ({ addon, global, console, msg }) {
 
     const switches = blockSwitches[this.type];
     const isArgument = switches === argumentSwitcher;
-    let includeSelf = addon.settings.get("noop");
+    // When showing argument switches, all switches will have the same opcode as the original block.
+    const includeSelf = addon.settings.get("noop") || isArgument;
 
     if (isArgument) {
       switches.length = 0;
@@ -685,8 +686,6 @@ export default async function ({ addon, global, console, msg }) {
           },
         });
       }
-      // All the switches will have the same opcode as the original block, so force showing self to be enabled.
-      includeSelf = true;
     }
 
     for (const opcodeData of switches) {
