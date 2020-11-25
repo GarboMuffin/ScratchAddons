@@ -629,7 +629,7 @@ export default async function ({ addon, global, console, msg }) {
     return connection.check_.includes("Boolean") ? 1 : 0;
   };
 
-  const getAllArguments = (block, includeSelf) => {
+  const getAllArguments = (block) => {
     const root = block.getRootBlock();
     if (root.type !== "procedures_definition") {
       return [];
@@ -651,10 +651,7 @@ export default async function ({ addon, global, console, msg }) {
       }
 
       const childName = getArgumentName(child);
-      if (!includeSelf && childName === selfName) {
-        continue;
-      }
-      if (result.includes(childName)) {
+      if (childName === selfName || result.includes(childName)) {
         continue;
       }
       result.push(childName);
@@ -678,7 +675,7 @@ export default async function ({ addon, global, console, msg }) {
 
     if (isArgument) {
       switches.length = 0;
-      const names = getAllArguments(this, includeSelf);
+      const names = getAllArguments(this);
       for (const name of names) {
         switches.push({
           opcode: this.type,
