@@ -562,11 +562,11 @@ export default async function ({ addon, global, console, msg }) {
     for (const child of childNodes) {
       const inputName = child.getAttribute("name");
 
-      if (remap[inputName]) {
+      if (remap.hasOwnProperty(inputName)) {
         child.setAttribute("name", remap[inputName]);
       }
 
-      if (child.tagName === "FIELD" && mutateFields[inputName]) {
+      if (child.tagName === "FIELD" && mutateFields.hasOwnProperty(inputName)) {
         child.textContent = mutateFields[inputName];
       }
 
