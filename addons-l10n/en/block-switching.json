@@ -54,7 +54,7 @@
   "block-switching/pen_setPenSizeTo": "set pen size to",
   "block-switching/sensing_mousex": "mouse x",
   "block-switching/sensing_mousey": "mouse y",
-  "block-switching/sound_play": "play sound",
+  "block-switching/sound_play": "start sound",
   "block-switching/sound_playuntildone": "play sound until done",
   "block-switching/sound_changeeffectby": "change effect by",
   "block-switching/sound_seteffectto": "set effect to",
