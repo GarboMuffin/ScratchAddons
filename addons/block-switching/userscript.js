@@ -733,6 +733,10 @@ export default async function ({ addon, global, console, msg }) {
     // The new block will have the same ID as the old one.
     const newBlock = workspace.getBlockById(id);
 
+    if (block._blockswitchingOriginalProcedure) {
+      newBlock._blockswitchingOriginalProcedure = block._blockswitchingOriginalProcedure;
+    }
+
     if (parentConnection) {
       // Search for the same type of connection on the new block as on the old block.
       const newBlockConnections = newBlock.getConnections_();
@@ -763,14 +767,34 @@ export default async function ({ addon, global, console, msg }) {
     return connection.check_.includes("Boolean") ? 1 : 0;
   };
 
-  const getAllArguments = (block) => {
+  const getProcedureDefinition = (block) => {
     const root = block.getRootBlock();
-    if (root.type !== "procedures_definition") {
-      return [];
+
+    if (root.type === "procedures_definition") {
+      const definition = root.getChildren()[0];
+      if (definition && definition.type === "procedures_prototype") {
+        return definition;
+      }
     }
 
-    const definition = root.getChildren()[0];
-    if (!definition || definition.type !== "procedures_prototype") {
+    const originalProcedure = block._blockswitchingOriginalProcedure;
+    if (originalProcedure) {
+      for (const topBlock of block.workspace.getTopBlocks()) {
+        if (topBlock.type === "procedures_definition") {
+          const definition = topBlock.getChildren()[0];
+          if (definition && definition.type === "procedures_prototype" && definition.procCode_ === originalProcedure) {
+            return definition;
+          }
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const getAllArguments = (block) => {
+    const definition = getProcedureDefinition(block);
+    if (!definition) {
       return [];
     }
 
@@ -854,15 +878,57 @@ export default async function ({ addon, global, console, msg }) {
     block.customContextMenu = customContextMenuHandler;
   };
 
-  const changeListener = (change) => {
-    if (change.type !== "create") {
+  const handleCreate = (change) => {
+    const workspace = Blockly.getMainWorkspace();
+    for (const id of change.ids) {
+      const block = workspace.getBlockById(id);
+      if (!block) continue;
+
+      // If argument switching is enabled...
+      if (blockSwitches["argument_reporter_string_number"]) {
+        // If this block is an argument reporter...
+        if (block.type === "argument_reporter_boolean" || block.type === "argument_reporter_string_number") {
+          // If this block is being dragged...
+          const gesture = workspace.currentGesture_;
+          if (gesture && gesture.isDraggingBlock_ && gesture.targetBlock_ === block) {
+            // Try to figure out which procedure it came from.
+            const startBlock = gesture.startBlock_;
+            const parent = startBlock.getParent();
+            if (parent && parent.type === "procedures_prototype") {
+              block._blockswitchingOriginalProcedure = parent.procCode_;
+            }
+          }
+        }
+      }
+
+      injectCustomContextMenu(block);
+    }
+  };
+
+  const handleMove = (change) => {
+    if (!change.newParentId) {
       return;
     }
+    const workspace = Blockly.getMainWorkspace();
+    const block = workspace.getBlockById(change.blockId);
+    if (!block) {
+      return;
+    }
+    if (block.type !== "argument_reporter_boolean" && block.type !== "argument_reporter_string_number") {
+      return;
+    }
+    const definition = getProcedureDefinition(block);
+    if (definition) {
+      block._blockswitchingOriginalProcedure = definition.procCode_;
+    }
+  };
 
-    for (const id of change.ids) {
-      const block = Blockly.getMainWorkspace().getBlockById(id);
-      if (!block) continue;
-      injectCustomContextMenu(block);
+  const changeListener = (change) => {
+    if (change.type === "create") {
+      handleCreate(change);
+    }
+    if (change.type === "move") {
+      handleMove(change);
     }
   };
 
