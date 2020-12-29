@@ -691,7 +691,11 @@ export default async function ({ addon, global, console, msg }) {
         for (const topBlock of block.workspace.getTopBlocks()) {
           if (topBlock.type === "procedures_definition") {
             const definition = topBlock.getChildren()[0];
-            if (definition && definition.type === "procedures_prototype" && definition.procCode_ === originalProcedure) {
+            if (
+              definition &&
+              definition.type === "procedures_prototype" &&
+              definition.procCode_ === originalProcedure
+            ) {
               return definition;
             }
           }
@@ -730,7 +734,7 @@ export default async function ({ addon, global, console, msg }) {
 
   const isArgumentReporter = (block) => {
     return block.type === "argument_reporter_boolean" || block.type === "argument_reporter_string_number";
-  }
+  };
 
   const rememberArgumentReporterCurrentProcedure = (block) => {
     const definition = getProcedureDefinition(block, false);
