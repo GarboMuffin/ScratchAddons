@@ -7,6 +7,9 @@ export default async function ({ addon, global, console, msg }) {
     opcode: "noop",
   };
 
+  // Special value
+  const argumentSwitcher = [];
+
   if (addon.settings.get("motion")) {
     blockSwitches["motion_turnright"] = [
       noopSwitch,
@@ -261,7 +264,7 @@ export default async function ({ addon, global, console, msg }) {
     blockSwitches["control_if_else"] = [
       {
         opcode: "control_if",
-        remap: { SUBSTACK2: "split" },
+        split: ["SUBSTACK2"],
       },
       noopSwitch,
     ];
@@ -269,17 +272,16 @@ export default async function ({ addon, global, console, msg }) {
       noopSwitch,
       {
         opcode: "control_wait_until",
-        remap: { SUBSTACK: "split" },
+        split: ["SUBSTACK"],
       },
       {
         opcode: "control_forever",
-        remap: { CONDITION: "split" },
+        split: ["CONDITION"],
       },
     ];
     blockSwitches["control_forever"] = [
       {
         opcode: "control_repeat_until",
-        remap: { SUBSTACK: "split" },
       },
       noopSwitch,
     ];
@@ -595,29 +597,30 @@ export default async function ({ addon, global, console, msg }) {
     }
 
     const pasteSeparately = [];
-    // Apply input remappings.
-    if (opcodeData.remap) {
-      const childNodes = Array.from(xml.children);
-      for (const child of childNodes) {
-        const oldName = child.getAttribute("name");
-        const newName = opcodeData.remap[oldName];
-        if (newName) {
-          if (newName === "split") {
-            // This input will be split off into its own script.
-            const inputXml = child.firstChild;
-            const inputId = inputXml.id;
-            const inputBlock = workspace.getBlockById(inputId);
+    const remap = opcodeData.remap || {};
+    const split = opcodeData.split || [];
+    const mutateFields = opcodeData.mutateFields || {};
+    const childNodes = Array.from(xml.children);
+    for (const child of childNodes) {
+      const inputName = child.getAttribute("name");
 
-            const position = inputBlock.getRelativeToSurfaceXY();
-            inputXml.setAttribute("x", Math.round(workspace.RTL ? -position.x : position.x));
-            inputXml.setAttribute("y", Math.round(position.y));
+      if (remap.hasOwnProperty(inputName)) {
+        child.setAttribute("name", remap[inputName]);
+      }
 
-            pasteSeparately.push(inputXml);
-            xml.removeChild(child);
-          } else {
-            child.setAttribute("name", newName);
-          }
-        }
+      if (child.tagName === "FIELD" && mutateFields.hasOwnProperty(inputName)) {
+        child.textContent = mutateFields[inputName];
+      }
+
+      if (split.includes(inputName)) {
+        const inputXml = child.firstChild;
+        const inputId = inputXml.id;
+        const inputBlock = workspace.getBlockById(inputId);
+        const position = inputBlock.getRelativeToSurfaceXY();
+        inputXml.setAttribute("x", Math.round(workspace.RTL ? -position.x : position.x));
+        inputXml.setAttribute("y", Math.round(position.y));
+        pasteSeparately.push(inputXml);
+        xml.removeChild(child);
       }
     }
 
@@ -638,6 +641,10 @@ export default async function ({ addon, global, console, msg }) {
     // The new block will have the same ID as the old one.
     const newBlock = workspace.getBlockById(id);
 
+    if (block._blockswitchingOriginalProcedure) {
+      newBlock._blockswitchingOriginalProcedure = block._blockswitchingOriginalProcedure;
+    }
+
     if (parentConnection) {
       // Search for the same type of connection on the new block as on the old block.
       const newBlockConnections = newBlock.getConnections_();
@@ -655,6 +662,83 @@ export default async function ({ addon, global, console, msg }) {
     }, 0);
   };
 
+  const getArgumentName = (block) => {
+    const input = block.inputList[0];
+    const field = input.fieldRow[0];
+    const argumentName = field.text_;
+    return argumentName || "";
+  };
+
+  const getArgumentType = (block) => {
+    const connection = block.getConnections_()[0];
+    if (!connection || !connection.check_) return -1;
+    return connection.check_.includes("Boolean") ? 1 : 0;
+  };
+
+  const getProcedureDefinition = (block, useMemory) => {
+    const root = block.getRootBlock();
+
+    if (root.type === "procedures_definition") {
+      const definition = root.getChildren()[0];
+      if (definition && definition.type === "procedures_prototype") {
+        return definition;
+      }
+    }
+
+    if (useMemory) {
+      const originalProcedure = block._blockswitchingOriginalProcedure;
+      if (originalProcedure) {
+        for (const topBlock of block.workspace.getTopBlocks()) {
+          if (topBlock.type === "procedures_definition") {
+            const definition = topBlock.getChildren()[0];
+            if (definition && definition.type === "procedures_prototype" && definition.procCode_ === originalProcedure) {
+              return definition;
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const getAllArguments = (block) => {
+    const definition = getProcedureDefinition(block, true);
+    if (!definition) {
+      return [];
+    }
+
+    const result = [];
+    const selfName = getArgumentName(block);
+    const selfType = getArgumentType(block);
+
+    for (const child of definition.getChildren()) {
+      const childType = getArgumentType(child);
+      if (selfType !== childType) {
+        continue;
+      }
+
+      const childName = getArgumentName(child);
+      if (childName === selfName || result.includes(childName)) {
+        continue;
+      }
+      result.push(childName);
+    }
+
+    return result;
+  };
+
+  const isArgumentReporter = (block) => {
+    return block.type === "argument_reporter_boolean" || block.type === "argument_reporter_string_number";
+  }
+
+  const rememberArgumentReporterCurrentProcedure = (block) => {
+    const definition = getProcedureDefinition(block, false);
+    if (definition) {
+      block._blockswitchingOriginalProcedure = definition.procCode_;
+    }
+  };
+
   const customContextMenuHandler = function (options) {
     if (addon.settings.get("border")) {
       addBorderToContextMenuItem = options.length;
@@ -665,13 +749,30 @@ export default async function ({ addon, global, console, msg }) {
     }
 
     const switches = blockSwitches[this.type];
+    const isArgument = switches === argumentSwitcher;
+    // When showing argument switches, all switches will have the same opcode as the original block.
+    const includeSelf = addon.settings.get("noop") || isArgument;
+
+    if (isArgument) {
+      switches.length = 0;
+      const names = getAllArguments(this);
+      for (const name of names) {
+        switches.push({
+          opcode: this.type,
+          message: name,
+          mutateFields: {
+            VALUE: name,
+          },
+        });
+      }
+    }
+
     for (const opcodeData of switches) {
-      const isNoop = opcodeData.opcode === "noop";
-      if (isNoop && !addon.settings.get("noop")) {
+      const isSelf = opcodeData.opcode === "noop";
+      if (isSelf && !includeSelf) {
         continue;
       }
-      const translationOpcode = isNoop ? this.type : opcodeData.opcode;
-      const translation = msg(translationOpcode);
+      const translation = opcodeData.message || msg(isSelf ? this.type : opcodeData.opcode);
       options.push({
         enabled: true,
         text: translation,
@@ -698,15 +799,50 @@ export default async function ({ addon, global, console, msg }) {
     block.customContextMenu = customContextMenuHandler;
   };
 
-  const changeListener = (change) => {
-    if (change.type !== "create") {
+  const handleCreate = (change) => {
+    const workspace = Blockly.getMainWorkspace();
+    for (const id of change.ids) {
+      const block = workspace.getBlockById(id);
+      if (!block) continue;
+
+      if (argumentSwitchingEnabled) {
+        if (isArgumentReporter(block)) {
+          const gesture = workspace.currentGesture_;
+          if (gesture && gesture.isDraggingBlock_ && gesture.targetBlock_ === block) {
+            const startBlock = gesture.startBlock_;
+            const definition = startBlock.getParent();
+            if (definition && definition.type === "procedures_prototype") {
+              block._blockswitchingOriginalProcedure = definition.procCode_;
+            }
+          } else {
+            rememberArgumentReporterCurrentProcedure(block);
+          }
+        }
+      }
+
+      injectCustomContextMenu(block);
+    }
+  };
+
+  const handleMove = (change) => {
+    if (!argumentSwitchingEnabled) {
       return;
     }
+    if (!change.newParentId) {
+      return;
+    }
+    const workspace = Blockly.getMainWorkspace();
+    const block = workspace.getBlockById(change.blockId);
+    if (block && isArgumentReporter(block)) {
+      rememberArgumentReporterCurrentProcedure(block);
+    }
+  };
 
-    for (const id of change.ids) {
-      const block = Blockly.getMainWorkspace().getBlockById(id);
-      if (!block) continue;
-      injectCustomContextMenu(block);
+  const changeListener = (change) => {
+    if (change.type === "create") {
+      handleCreate(change);
+    } else if (change.type === "move") {
+      handleMove(change);
     }
   };
 
@@ -738,7 +874,12 @@ export default async function ({ addon, global, console, msg }) {
       childList: true,
     });
     workspace._blockswitchingInjected = true;
-    workspace.getAllBlocks().forEach(injectCustomContextMenu);
+    workspace.getAllBlocks().forEach((block) => {
+      injectCustomContextMenu(block);
+      if (isArgumentReporter(block)) {
+        rememberArgumentReporterCurrentProcedure(block);
+      }
+    });
     workspace.addChangeListener(changeListener);
   };
 
