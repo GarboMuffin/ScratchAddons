@@ -34,9 +34,9 @@ export default async ({ addon, console, msg }) => {
         recorder.stop();
       }
     };
-    const startRecording = () => {
+    const startRecording = async () => {
       // Timer
-      let secs = Number(prompt(msg("seconds")));
+      let secs = Number(await prompt(msg("seconds")));
       if (!secs) return;
       secs = Math.max(5, Math.min(30, secs));
 
