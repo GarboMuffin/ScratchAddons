@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: hsla(215, 100%, 65%, 0.9);
+  background-color: hsla(0, 100%, 65%, 0.9);
   z-index: 20000;
 }
 
@@ -23,6 +23,10 @@
   margin-right: auto;
   user-select: none;
   padding: 1em 2em 2em;
+}
+[theme="dark"] .mediaRecorderPopup > div {
+    color: var(--text-primary);
+    background-color: var(--ui-primary);
 }
 
 .mediaRecorderPopup p {
@@ -53,8 +57,8 @@
 }
 
 .mediaRecorderPopupStartButton {
-  border-color: var(--scratchr2-primaryColor, hsl(215, 100%, 65%));
-  background-color: var(--scratchr2-primaryColor, hsl(215, 100%, 65%));
+  border-color: var(--scratchr2-primaryColor, hsl(0, 100%, 65%));
+  background-color: var(--scratchr2-primaryColor, hsl(0, 100%, 65%));
   color: white;
 }
 
