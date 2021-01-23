@@ -450,6 +450,9 @@ div.s3devDDOut.vis ul.s3devDD {
   margin-right: auto;
   padding: 1em 2em 4em;
 }
+[theme="dark"] #s3devHelpPop > div {
+  background: #111;
+}
 
 #s3devFloatingBar {
   display: flex;
