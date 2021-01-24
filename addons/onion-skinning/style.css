@@ -81,6 +81,6 @@
   stroke: #ddd;
 }
 
-.sa-onion-image[data-image="settings"] {
+[theme="dark"] .sa-onion-image[data-image="settings"] {
   filter: invert(1);
 }
