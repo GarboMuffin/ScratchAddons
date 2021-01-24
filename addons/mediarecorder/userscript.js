@@ -7,17 +7,17 @@ export default async ({ addon, console, msg }) => {
     });
     const getOptions = () => {
       const recordOption = Object.assign(document.createElement("div"), {
-        className: "modal_modal-overlay_1Lcbx",
+        className: "modal_modal-overlay_1Lcbx[[FIXCLASS]]",
       });
       const recordOptionPopup = Object.assign(document.createElement("div"), {
-        className: "mediaRecorderPopup modal_modal-content_1h3ll",
+        className: "mediaRecorderPopup modal_modal-content_1h3ll[[FIXCLASS]]",
       });
       const recordOptionHeader = Object.assign(document.createElement("div"), {
-        className: "modal_header_1h7ps",
+        className: "modal_header_1h7ps[[FIXCLASS]]",
       });
       recordOptionHeader.appendChild(
         Object.assign(document.createElement("div"), {
-          className: "modal_header-item_2zQTd modal_header-item-title_tLOU5",
+          className: "modal_header-item_2zQTd[[FIXCLASS]] modal_header-item-title_tLOU5[[FIXCLASS]]",
           textContent: msg("option-title"),
           title: msg("added-by"),
         })
@@ -42,7 +42,7 @@ export default async ({ addon, console, msg }) => {
         max: 300,
         defaultValue: 30,
         id: "recordOptionSecondsInput",
-        className: "prompt_variable-name-text-input_1iu8-",
+        className: "prompt_variable-name-text-input_1iu8-[[FIXCLASS]]",
       });
       const recordOptionSecondsLabel = Object.assign(document.createElement("label"), {
         htmlFor: "recordOptionSecondsInput",
@@ -130,7 +130,7 @@ export default async ({ addon, console, msg }) => {
       };
 
       const buttonRow = Object.assign(document.createElement("div"), {
-        className: "mediaRecorderPopupButtons prompt_button-row_3Wc5Z",
+        className: "mediaRecorderPopupButtons prompt_button-row_3Wc5Z[[FIXCLASS]]",
       });
       const cancelButton = Object.assign(document.createElement("button"), {
         textContent: msg("cancel"),
@@ -139,7 +139,7 @@ export default async ({ addon, console, msg }) => {
       buttonRow.appendChild(cancelButton);
       const startButton = Object.assign(document.createElement("button"), {
         textContent: msg("start"),
-        className: "prompt_ok-button_3QFdD",
+        className: "prompt_ok-button_3QFdD[[FIXCLASS]]",
       });
       startButton.addEventListener(
         "click",
