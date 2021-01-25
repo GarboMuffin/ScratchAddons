@@ -6,6 +6,7 @@
 
 .sa-onion-button {
   position: relative;
+  border-color: #d9d9d9 !important; /* override dark mode */
 }
 .sa-onion-button:focus-within {
   background-color: hsla(215, 100%, 65%, 0.2);
