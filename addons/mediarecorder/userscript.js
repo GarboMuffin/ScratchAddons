@@ -2,11 +2,8 @@ import downloadBlob from "../../libraries/download-blob.js";
 
 export default async ({ addon, console, msg }) => {
   // Safari supports mp4 but not webm
-  const CHECK_TYPES = [
-    "video/webm",
-    "video/mp4"
-  ];
-  const supportedVideoType = CHECK_TYPES.find(i => MediaRecorder.isTypeSupported(i));
+  const CHECK_TYPES = ["video/webm", "video/mp4"];
+  const supportedVideoType = CHECK_TYPES.find((i) => MediaRecorder.isTypeSupported(i));
   if (!supportedVideoType) throw new Error("no video types supported");
 
   while (true) {
@@ -41,7 +38,10 @@ export default async ({ addon, console, msg }) => {
 
       recordOptionInner.appendChild(
         Object.assign(document.createElement("p"), {
-          textContent: supportedVideoType === 'video/webm' ? msg("record-description") : msg("record-description").replace("WebM", "MP4"),
+          textContent:
+            supportedVideoType === "video/webm"
+              ? msg("record-description")
+              : msg("record-description").replace("WebM", "MP4"),
           className: "recordOptionDescription",
         })
       );
@@ -217,7 +217,7 @@ export default async ({ addon, console, msg }) => {
       } else {
         recorder.onstop = () => {
           const blob = new Blob(recordBuffer, { type: supportedVideoType });
-          downloadBlob("video" + supportedVideoType.split('/')[1], blob);
+          downloadBlob("video" + supportedVideoType.split("/")[1], blob);
           disposeRecorder();
         };
         recorder.stop();
