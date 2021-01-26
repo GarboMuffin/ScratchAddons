@@ -68,8 +68,8 @@ export default async function ({ addon, global, console }) {
     TurboWarp: {
       color: "#ff4c4c",
       alt: "tw",
-      var: "tw"
-    }
+      var: "tw",
+    },
   };
 
   for (var prop of Object.keys(categories)) {
