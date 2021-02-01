@@ -1,0 +1,19 @@
+{
+  "name": "High quality pen",
+  "description": "aaaaaaaaaaaa.",
+  "credits": [
+    {
+      "name": "GarboMuffin"
+    }
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["https://scratch.mit.edu/projects/*"]
+    }
+  ],
+  "tags": ["beta"],
+  "libraries": ["twgl"],
+  "enabledByDefault": false,
+  "l10n": true
+}
