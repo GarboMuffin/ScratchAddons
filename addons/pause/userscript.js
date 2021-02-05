@@ -6,7 +6,7 @@ export default async function ({ addon, global, console, msg }) {
   var playing = true;
   var threads = [];
 
-  const oldStepToProcedure = vm.runtime.sequencer.stepToProcedure;
+  /*const oldStepToProcedure = vm.runtime.sequencer.stepToProcedure;
 
   vm.runtime.sequencer.stepToProcedure = function (thread, proccode) {
     if (proccode.startsWith("sa-pause")) {
@@ -22,7 +22,7 @@ export default async function ({ addon, global, console, msg }) {
       return;
     }
     return oldStepToProcedure.call(this, thread, proccode);
-  };
+  };*/
 
   const oldFlag = vm.runtime.greenFlag;
 
