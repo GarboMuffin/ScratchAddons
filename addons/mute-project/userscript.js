@@ -5,7 +5,7 @@ export default async function ({ addon, global, console }) {
     let container = button.parentElement;
     let icon = document.createElement("img");
     container.appendChild(icon);
-    icon.src = "/static/assets/e21225ab4b675bc61eed30cfb510c288.svg";
+    icon.src = addon.self.dir + "/icon--mute.svg";
     icon.style.display = "none";
     let mode = false;
     button.addEventListener("click", (e) => {
