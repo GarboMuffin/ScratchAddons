@@ -38,3 +38,7 @@
 .mediaRecorderPopupButtons button {
   margin-left: 0.5rem;
 }
+
+.mediaRecorderPopupButtons button:nth-of-type(1) {
+  color: black;
+}
