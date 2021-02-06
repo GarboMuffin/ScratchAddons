@@ -1,6 +1,4 @@
 export default async function ({ addon, global, console }) {
-  console.log("mouse pos enabled");
-
   let pos = null;
 
   const vm = addon.tab.traps.vm;
