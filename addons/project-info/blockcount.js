@@ -23,12 +23,12 @@ export default async function ({ addon, console, msg }) {
         let display = topBar.appendChild(document.createElement("span"));
         display.style.order = 1;
         display.style.padding = "9px";
-        display.innerText = msg("blocks", { num: getBlockCount().blockCount });
+        display.innerText = msg("blocks", { num: getBlockCount().blockCount }); // ensure tw-project-info matches
         let debounce; // debouncing values because of the way 'PROJECT_CHANGED' works
         vm.on("PROJECT_CHANGED", async () => {
           clearTimeout(debounce);
           debounce = setTimeout(async () => {
-            display.innerText = msg("blocks", { num: getBlockCount().blockCount });
+            display.innerText = msg("blocks", { num: getBlockCount().blockCount }); // ensure tw-project-info matches
           }, 1000);
         });
       }
