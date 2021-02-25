@@ -33,6 +33,8 @@ export default async function ({ addon, global, console, msg }) {
     afterTint: parseHexColor(addon.settings.get("afterTint")),
   };
 
+  const alwaysTrue = () => true;
+
   const foundPaper = (_project) => {
     if (project === _project) {
       return;
@@ -240,7 +242,7 @@ export default async function ({ addon, global, console, msg }) {
     context.putImageData(imageData, 0, 0);
   };
 
-  const makeVectorLayer = (layer, costume, asset, isBefore) =>
+  const makeVectorLayer = (layer, costume, asset, isBefore, opacity) =>
     new Promise((resolve, reject) => {
       const { rotationCenterX, rotationCenterY } = costume;
       // https://github.com/LLK/scratch-paint/blob/cdf0afc217633e6cfb8ba90ea4ae38b79882cf6c/src/containers/paper-canvas.jsx#L196-L218
@@ -283,6 +285,8 @@ export default async function ({ addon, global, console, msg }) {
             }
             i.locked = true;
             i.guide = true;
+            i.opacity = opacity;
+            i._canComposite = alwaysTrue;
           });
           root.scale(2, new PaperConstants.Point(0, 0));
 
@@ -327,7 +331,7 @@ export default async function ({ addon, global, console, msg }) {
       });
     });
 
-  const makeRasterLayer = (layer, costume, asset, isBefore) =>
+  const makeRasterLayer = (layer, costume, asset, isBefore, opacity) =>
     new Promise((resolve, reject) => {
       let { rotationCenterX, rotationCenterY } = costume;
 
@@ -345,6 +349,8 @@ export default async function ({ addon, global, console, msg }) {
         }
 
         const raster = new PaperConstants.Raster(createCanvas(width, height));
+        raster.opacity = opacity;
+        raster._canComposite = alwaysTrue;
         raster.parent = layer;
         raster.guide = true;
         raster.locked = true;
@@ -407,7 +413,7 @@ export default async function ({ addon, global, console, msg }) {
 
         const isBefore = i < selectedCostumeIndex;
         const distance = Math.abs(i - selectedCostumeIndex) - 1;
-        const opacity = settings.opacity - settings.opacityStep * distance;
+        const opacity = (settings.opacity - settings.opacityStep * distance) / 100;
 
         if (opacity <= 0) {
           continue;
@@ -415,7 +421,6 @@ export default async function ({ addon, global, console, msg }) {
 
         const layer = createOnionLayer();
         layer.data.sa_onionIndex = i;
-        layer.opacity = opacity / 100;
         relayerOnionLayers();
 
         // Important: Make sure that we do not change the active layer of the editor as doing so can cause corruption.
@@ -425,9 +430,9 @@ export default async function ({ addon, global, console, msg }) {
         const onionAsset = vm.getCostume(i);
 
         if (onionCostume.dataFormat === "svg") {
-          await makeVectorLayer(layer, onionCostume, onionAsset, isBefore);
+          await makeVectorLayer(layer, onionCostume, onionAsset, isBefore, opacity);
         } else if (onionCostume.dataFormat === "png" || onionCostume.dataFormat === "jpg") {
-          await makeRasterLayer(layer, onionCostume, onionAsset, isBefore);
+          await makeRasterLayer(layer, onionCostume, onionAsset, isBefore, opacity);
         } else {
           throw new Error(`Unknown data format: ${onionCostume.dataFormat}`);
         }
