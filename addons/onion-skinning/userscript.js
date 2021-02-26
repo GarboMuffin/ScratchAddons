@@ -466,43 +466,46 @@ export default async function ({ addon, global, console, msg }) {
     toggleButton.dataset.enabled = settings.enabled;
   };
 
-  const installPrototypeHacks = () => {
-    // https://github.com/LLK/paper.js/blob/16d5ff0267e3a0ef647c25e58182a27300afad20/src/item/Project.js#L64-L65
-    Object.defineProperty(Object.prototype, "_view", {
-      set(value) {
-        Object.defineProperty(this, "_view", {
-          value: value,
-          writable: true,
-          enumerable: true,
-          configurable: true,
-        });
-        if (
-          typeof this._activeLayer === "object" &&
-          Array.isArray(this.layers) &&
-          typeof this.addLayer === "function" &&
-          typeof this.importJSON === "function" &&
-          typeof this.importSVG === "function"
-        ) {
-          foundPaper(this);
-        }
-      },
-    });
+  const untilInEditor = () => {
+    if (addon.tab.editorMode !== "editor") {
+      return new Promise((resolve, reject) => {
+        const handler = () => {
+          if (addon.tab.editorMode === "editor") {
+            resolve();
+            addon.tab.removeEventListener("urlChange", handler);
+          }
+        };
+        addon.tab.addEventListener("urlChange", handler);
+      });
+    }
+  };
 
-    // https://github.com/LLK/scratch-paint/blob/cdf0afc217633e6cfb8ba90ea4ae38b79882cf6c/src/containers/paper-canvas.jsx#L45-L51
-    // In Scratch, this code block should always run.
-    Object.defineProperty(Object.prototype, "shouldZoomToFit", {
-      set(value) {
-        Object.defineProperty(this, "shouldZoomToFit", {
-          value: value,
-          writable: true,
-          enumerable: true,
-          configurable: true,
-        });
-        if (typeof this.importImage === "function" && typeof this.recalibrateSize === "function") {
-          foundPaperCanvas(this);
-        }
-      },
-    });
+  const startTryingToAccessInternals = async () => {
+    const REACT_INTERNAL_PREFIX = "__reactInternalInstance$"; 
+
+    // We can access paper through .tool on tools, for example:
+    // https://github.com/LLK/scratch-paint/blob/develop/src/containers/bit-brush-mode.jsx#L60-L62
+    // It happens that paper's Tool objects contain a reference to the project.
+    const modeSelector = await addon.tab.waitForElement("[class*='paint-editor_mode-selector']");
+    const reactInternalKey = Object.keys(modeSelector).find((i) => i.startsWith(REACT_INTERNAL_PREFIX));
+    const internalState = modeSelector[reactInternalKey].child;
+
+    // .tool only exists on the selected tool
+    let toolState = internalState;
+    let tool;
+    while (!(tool = toolState.child.stateNode.tool)) {
+      toolState = toolState.sibling;
+    }
+    const paperProject = tool._scope.project;
+
+    // Now try to access https://github.com/LLK/scratch-paint/blob/develop/src/containers/paper-canvas.jsx
+    const paintEditorCanvasContainer = document.querySelector("[class*='paint-editor_canvas-container']");
+    const paperCanvas = paintEditorCanvasContainer[reactInternalKey].child.child.child.stateNode;
+
+    if (paperProject && paperCanvas) {
+      foundPaper(paperProject);
+      foundPaperCanvas(paperCanvas);
+    }
   };
 
   const settingsChanged = (onlyRelayerNeeded) => {
@@ -766,17 +769,8 @@ export default async function ({ addon, global, console, msg }) {
     }
   };
 
-  if (addon.tab.editorMode === "editor") {
-    installPrototypeHacks();
-  } else {
-    const listener = () => {
-      if (addon.tab.editorMode === "editor") {
-        installPrototypeHacks();
-        addon.tab.removeEventListener("urlChange", listener);
-      }
-    };
-    addon.tab.addEventListener("urlChange", listener);
-  }
-
-  controlsLoop();
+  // Order of these matters.
+  await untilInEditor();
+  await startTryingToAccessInternals();
+  await controlsLoop();
 }
