@@ -363,7 +363,6 @@ export default async function ({ addon, global, console, msg }) {
       image.onerror = () => {
         reject(new Error("could not load image"));
       };
-      image.loading = "lazy";
       image.src = asset;
     });
 
@@ -535,6 +534,7 @@ export default async function ({ addon, global, console, msg }) {
     el.className = "sa-onion-image";
     el.draggable = false;
     el.dataset.image = name;
+    el.loading = "lazy";
     el.src = addon.self.dir + "/" + name + ".svg";
     return el;
   };
