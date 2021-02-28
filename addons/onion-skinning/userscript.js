@@ -363,6 +363,7 @@ export default async function ({ addon, global, console, msg }) {
       image.onerror = () => {
         reject(new Error("could not load image"));
       };
+      image.loading = "lazy";
       image.src = asset;
     });
 
