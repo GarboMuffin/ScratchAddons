@@ -62,9 +62,9 @@ export default async function ({ addon, global, console, msg }) {
             stackFrame.executionContext.timer.startTime += dt;
           }
           // Compiler state is stored differently
-          if (thread._timer) {
+          if (thread.timer) {
             const dt = now - pauseState.pauseTime;
-            thread._timer.startTime += dt;
+            thread.timer.startTime += dt;
           }          
           Object.defineProperty(thread, "status", {
             value: pauseState.status,
