@@ -65,7 +65,7 @@ export default async function ({ addon, global, console, msg }) {
           if (thread.timer) {
             const dt = now - pauseState.pauseTime;
             thread.timer.startTime += dt;
-          }          
+          }
           Object.defineProperty(thread, "status", {
             value: pauseState.status,
             configurable: true,
