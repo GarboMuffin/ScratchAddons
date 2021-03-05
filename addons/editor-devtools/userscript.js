@@ -22,7 +22,7 @@ export default async function ({ addon, global, console, msg, safeMsg: m }) {
     })}">
 	  <img class="${addon.tab.scratchClass(
       "close-button_close-icon"
-    )}" src="/static/assets/cb666b99d3528f91b52f985dfb102afa.svg">
+    )}" src="${addon.self.dir + "/icon--close.svg"}">
 	</div>
   </div>
 </div>
