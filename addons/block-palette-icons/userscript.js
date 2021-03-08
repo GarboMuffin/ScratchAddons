@@ -27,18 +27,22 @@ export default async function ({ addon, global, console }) {
       //Position it relative so that absolute positioning will be relative to the bubble.
       item.style.position = "relative";
       let k = document.createElement("img");
-      k.src = addon.self.dir + `/icons/${icons[i]}.svg`;
-      Object.assign(k.style, {
-        filter: "brightness(50000%)",
-        top: "50%",
-        color: "white",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        position: "absolute",
-        width: "17px",
-        height: "17px",
-      });
-      item.appendChild(k);
+      try {
+        k.src = addon.self.dir + `/icons/${icons[i]}.svg`;
+        Object.assign(k.style, {
+          filter: "brightness(50000%)",
+          top: "50%",
+          color: "white",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          position: "absolute",
+          width: "17px",
+          height: "17px",
+        });
+        item.appendChild(k);
+      } catch (e) {
+        // ignore
+      }
     });
   }
 }
