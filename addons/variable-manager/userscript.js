@@ -27,6 +27,7 @@ export default async function ({ addon, global, console, msg }) {
 
   // begin feedback button stuff (remove when out of beta)
 
+  /*
   const feedbackWrapper = document.createElement("span");
   feedbackWrapper.className = "sa-var-manager-feedback";
 
@@ -44,6 +45,7 @@ export default async function ({ addon, global, console, msg }) {
   feedbackWrapper.appendChild(feedbackDesc);
   feedbackWrapper.appendChild(feedbackButton);
   manager.appendChild(feedbackWrapper);
+  */
 
   // end feedback button stuff
 
