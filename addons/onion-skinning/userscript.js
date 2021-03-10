@@ -1,7 +1,5 @@
 export default async function ({ addon, global, console, msg }) {
   let project = null;
-  let paperCanvas = null;
-  let expectingImport = false;
   const storedOnionLayers = [];
   const PaperConstants = {
     Raster: null,
@@ -54,80 +52,30 @@ export default async function ({ addon, global, console, msg }) {
       return result;
     };
 
-    // Scratch uses importJSON to undo or redo
-    // https://github.com/LLK/scratch-paint/blob/cdf0afc217633e6cfb8ba90ea4ae38b79882cf6c/src/helper/undo.js#L37
-    // The code prior to this will remove our onion layers, so we have to manually add them back.
-    const originalImportJSON = project.importJSON;
-    project.importJSON = function (json) {
-      const result = originalImportJSON.call(this, json);
-      if (settings.enabled) {
-        updateOnionLayers();
+    // https://github.com/LLK/scratch-paint/blob/cdf0afc217633e6cfb8ba90ea4ae38b79882cf6c/src/helper/layer.js#L114
+    // When background guide layer is removed, hide onion layers.
+    const backgroundGuideLayer = project.layers.find((i) => i.data.isBackgroundGuideLayer);
+    const originalRemove = backgroundGuideLayer.remove;
+    backgroundGuideLayer.remove = function () {
+      originalRemove.call(this);
+      for (const layer of project.layers) {
+        if (layer.data.sa_isOnionLayer) {
+          storedOnionLayers.push(layer);
+        }
       }
-      return result;
-    };
-
-    // At this point the project hasn't even finished its constructor, so we can't access layers yet.
-    setTimeout(() => {
-      // https://github.com/LLK/scratch-paint/blob/cdf0afc217633e6cfb8ba90ea4ae38b79882cf6c/src/helper/layer.js#L114
-      // When background guide layer is removed, hide onion layers.
-      const backgroundGuideLayer = project.layers.find((i) => i.data.isBackgroundGuideLayer);
-      const originalRemove = backgroundGuideLayer.remove;
-      backgroundGuideLayer.remove = function () {
-        originalRemove.call(this);
-        for (const layer of project.layers) {
-          if (layer.data.sa_isOnionLayer) {
-            storedOnionLayers.push(layer);
-          }
-        }
-        for (const layer of storedOnionLayers) {
-          layer.remove();
-        }
-      };
-
-      if (PaperConstants.Layer === null) {
-        PaperConstants.Layer = project.activeLayer.constructor;
-
-        const rasterLayer = project.layers.find((i) => i.data.isRasterLayer);
-        PaperConstants.Raster = rasterLayer.children[0].constructor;
-        PaperConstants.Point = rasterLayer.position.constructor;
-        PaperConstants.Rectangle = rasterLayer.getBounds().constructor;
-
-        PaperConstants.CENTER = new PaperConstants.Point(480, 360);
+      for (const layer of storedOnionLayers) {
+        layer.remove();
       }
-    });
-  };
-
-  const foundPaperCanvas = (_paperCanvas) => {
-    if (paperCanvas === _paperCanvas) {
-      return;
-    }
-    paperCanvas = _paperCanvas;
-
-    // importImage is called to start loading an image.
-    // https://github.com/LLK/scratch-paint/blob/cdf0afc217633e6cfb8ba90ea4ae38b79882cf6c/src/containers/paper-canvas.jsx#L124
-    const originalImportImage = paperCanvas.importImage;
-    paperCanvas.importImage = function (...args) {
-      expectingImport = true;
-      removeOnionLayers();
-      return originalImportImage.call(this, ...args);
     };
 
-    // recalibrateSize is called when the canvas finishes loading an image.
-    // all paths of importImage will result in a call to this method.
-    // https://github.com/LLK/scratch-paint/blob/cdf0afc217633e6cfb8ba90ea4ae38b79882cf6c/src/containers/paper-canvas.jsx#L310-L327
-    // We use this to know when to add layers.
-    const originalRecalibrateSize = paperCanvas.recalibrateSize;
-    paperCanvas.recalibrateSize = function (callback) {
-      return originalRecalibrateSize.call(this, () => {
-        if (callback) callback();
-        if (expectingImport) {
-          expectingImport = false;
-          if (settings.enabled) {
-            updateOnionLayers();
-          }
-        }
-      });
-    };
+    PaperConstants.Layer = project.activeLayer.constructor;
+
+    const rasterLayer = project.layers.find((i) => i.data.isRasterLayer);
+    PaperConstants.Raster = rasterLayer.children[0].constructor;
+    PaperConstants.Point = rasterLayer.position.constructor;
+    PaperConstants.Rectangle = rasterLayer.getBounds().constructor;
+
+    PaperConstants.CENTER = new PaperConstants.Point(480, 360);
   };
 
   const createCanvas = (width, height) => {
@@ -472,13 +420,17 @@ export default async function ({ addon, global, console, msg }) {
     }
   };
 
-  const startTryingToAccessInternals = async () => {
-    const REACT_INTERNAL_PREFIX = "__reactInternalInstance$"; 
+  const accessScratchInternals = () => {
+    if (project) {
+      return;
+    }
+
+    const REACT_INTERNAL_PREFIX = "__reactInternalInstance$";
 
     // We can access paper through .tool on tools, for example:
     // https://github.com/LLK/scratch-paint/blob/develop/src/containers/bit-brush-mode.jsx#L60-L62
     // It happens that paper's Tool objects contain a reference to the project.
-    const modeSelector = await addon.tab.waitForElement("[class*='paint-editor_mode-selector']");
+    const modeSelector = document.querySelector("[class*='paint-editor_mode-selector']");
     const reactInternalKey = Object.keys(modeSelector).find((i) => i.startsWith(REACT_INTERNAL_PREFIX));
     const internalState = modeSelector[reactInternalKey].child;
 
@@ -489,15 +441,26 @@ export default async function ({ addon, global, console, msg }) {
       toolState = toolState.sibling;
     }
     const paperProject = tool._scope.project;
+    foundPaper(paperProject);
 
-    // Now try to access https://github.com/LLK/scratch-paint/blob/develop/src/containers/paper-canvas.jsx
-    const paintEditorCanvasContainer = document.querySelector("[class*='paint-editor_canvas-container']");
-    const paperCanvas = paintEditorCanvasContainer[reactInternalKey].child.child.child.stateNode;
-
-    if (paperProject && paperCanvas) {
-      foundPaper(paperProject);
-      foundPaperCanvas(paperCanvas);
-    }
+    let _oldTarget;
+    let _oldAsset;
+    const vm = addon.tab.traps.vm;
+    vm.on("targetsUpdate", ({ editingTarget }) => {
+      const target = vm.runtime.getTargetById(editingTarget);
+      if (!target) return;
+      const costume = target.getCostumes()[target.currentCostume];
+      if (!costume) return;
+      const asset = costume.asset;
+      if (!asset) return;
+      if (target !== _oldTarget || asset !== _oldAsset) {
+        _oldTarget = target;
+        _oldAsset = asset;
+        if (settings.enabled) {
+          updateOnionLayers();
+        }
+      }
+    });
   };
 
   const settingsChanged = (onlyRelayerNeeded) => {
@@ -722,11 +685,12 @@ export default async function ({ addon, global, console, msg }) {
   settingsPage.appendChild(settingsTip);
 
   const controlsLoop = async () => {
-    let fixedClassNames = false;
+    let hasRunOnce = false;
     while (true) {
       const canvasControls = await addon.tab.waitForElement("[class^='paint-editor_canvas-controls']", {
         markAsSeen: true,
       });
+      accessScratchInternals();
       const zoomControlsContainer = canvasControls.querySelector("[class^='paint-editor_zoom-controls']");
       const canvasContainer = document.querySelector("[class^='paint-editor_canvas-container']");
 
@@ -743,8 +707,8 @@ export default async function ({ addon, global, console, msg }) {
       canvasControls.appendChild(paintEditorControlsContainer);
       canvasContainer.appendChild(settingsPage);
 
-      if (!fixedClassNames) {
-        fixedClassNames = true;
+      if (!hasRunOnce) {
+        hasRunOnce = true;
         const groupClass = zoomControlsContainer.firstChild.className;
         const buttonClass = zoomControlsContainer.firstChild.firstChild.className;
         const imageClass = zoomControlsContainer.firstChild.firstChild.firstChild.className;
@@ -758,11 +722,13 @@ export default async function ({ addon, global, console, msg }) {
           el.className += " " + imageClass;
         }
       }
+
+      if (settings.enabled) {
+        updateOnionLayers();
+      }
     }
   };
 
-  // Order of these matters.
   await untilInEditor();
-  await startTryingToAccessInternals();
-  await controlsLoop();
+  controlsLoop();
 }
