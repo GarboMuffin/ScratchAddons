@@ -478,7 +478,7 @@ export default async function ({ addon, global, console, msg }) {
   };
 
   const startTryingToAccessInternals = async () => {
-    const REACT_INTERNAL_PREFIX = "__reactInternalInstance$"; 
+    const REACT_INTERNAL_PREFIX = "__reactInternalInstance$";
 
     // We can access paper through .tool on tools, for example:
     // https://github.com/LLK/scratch-paint/blob/develop/src/containers/bit-brush-mode.jsx#L60-L62
