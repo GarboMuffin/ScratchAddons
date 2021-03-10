@@ -78,7 +78,7 @@ export default async function ({ addon, global, console, msg }) {
   };
 
   const RESERVED_NAMES = ["_mouse_", "_stage_", "_edge_", "_myself_", "_random_"];
-  const ensureNotReserved = (name) => {
+  const ensureValidSpriteName = (name) => {
     if (RESERVED_NAMES.includes(name)) return `${name}2`;
     // Make empty names non-empty
     if (!name) return "Sprite1";
@@ -661,7 +661,7 @@ export default async function ({ addon, global, console, msg }) {
             for (const target of vm.runtime.targets) {
               if (target.isOriginal) {
                 if (getFolderFromName(target.getName()) === data.folder) {
-                  vm.renameSprite(target.id, ensureNotReserved(setFolderOfName(target.getName(), newName)));
+                  vm.renameSprite(target.id, ensureValidSpriteName(setFolderOfName(target.getName(), newName)));
                 }
               }
             }
@@ -715,7 +715,7 @@ export default async function ({ addon, global, console, msg }) {
         const setFolder = (folder) => {
           if (component.props.dragType === "SPRITE") {
             const target = vm.runtime.getTargetById(component.props.id);
-            vm.renameSprite(component.props.id, ensureNotReserved(setFolderOfName(target.getName(), folder)));
+            vm.renameSprite(component.props.id, ensureValidSpriteName(setFolderOfName(target.getName(), folder)));
             fixTargetOrder();
             vm.emitWorkspaceUpdate();
           } else if (component.props.dragType === "COSTUME") {
@@ -1056,7 +1056,7 @@ export default async function ({ addon, global, console, msg }) {
             this.emitTargetsUpdate();
           },
           rename: (item, name) => {
-            this.renameSprite(item.id, ensureNotReserved(name));
+            this.renameSprite(item.id, ensureValidSpriteName(name));
           },
           getVMItemFromGUIItem: (item, targets) => {
             return targets.find((i) => i.id === item.id);
