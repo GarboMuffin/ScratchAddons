@@ -25,7 +25,7 @@ export default async function ({ addon, global, console, msg }) {
 
   manager.appendChild(searchBox);
 
-  // begin feedback button stuff (remove when out of beta)
+  /* begin feedback button stuff (remove when out of beta)
 
   /*
   const feedbackWrapper = document.createElement("span");
@@ -47,7 +47,7 @@ export default async function ({ addon, global, console, msg }) {
   manager.appendChild(feedbackWrapper);
   */
 
-  // end feedback button stuff
+  // end feedback button stuff */
 
   const localVars = document.createElement("div");
   const localHeading = document.createElement("span");
