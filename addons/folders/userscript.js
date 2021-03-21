@@ -799,7 +799,7 @@ export default async function ({ addon, global, console, msg }) {
             const originalProps = this.props;
             this.props = {
               ...originalProps,
-              id: itemData.realIndex
+              id: itemData.realIndex,
             };
             const ret = original.call(this, ...args);
             this.props = originalProps;
