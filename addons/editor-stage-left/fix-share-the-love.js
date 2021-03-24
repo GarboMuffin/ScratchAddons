@@ -1,4 +1,6 @@
 export default function ({ addon, global, console }) {
+  window.dispatchEvent(new Event('resize'));
+
   let interval, injected;
 
   addon.self.addEventListener("disabled", () => {
