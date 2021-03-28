@@ -9,5 +9,5 @@
 .sa-dragged-over,
 .sa-dragged-over div[class*="stage-selector_header_"],
 .sa-dragged-over div[class*="sprite-info_sprite-info"] {
-  background-color: hsla(215, 100%, 77%, 1);
+  background-color: hsla(0, 100%, 77%, 1);
 }
