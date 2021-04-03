@@ -371,10 +371,6 @@ export default async function ({ addon, global, console, msg }) {
           realName: item.name,
           realIndex: i,
           inFolder: itemFolderName,
-          // toString() will be used as react key
-          toString() {
-            return `_${item.name}`;
-          },
         };
         const newItem = {
           ...item,
@@ -420,20 +416,12 @@ export default async function ({ addon, global, console, msg }) {
           const folderData = {
             folder: folderName,
             folderOpen: isOpen,
-            // toString() will be used as react key for costumes/sounds
-            toString() {
-              return `/${folderName}`;
-            },
           };
           const folderItems = [];
           const folderItem = {
             items: folderItems,
             name: folderData,
           };
-          // id is used as react key for sprites
-          if (type === TYPE_SPRITES) {
-            folderItem.id = `/${folderName}`;
-          }
           const folderAsset = isOpen
             ? openFolderAsset
             : {
@@ -802,13 +790,10 @@ export default async function ({ addon, global, console, msg }) {
         if (typeof this.props.id === "number") {
           const itemData = getItemData(this.props);
           if (itemData) {
-            const originalProps = this.props;
-            this.props = {
-              ...originalProps,
-              id: itemData.realIndex,
-            };
+            const originalId = this.props.id;
+            this.props.id = itemData.realIndex;
             const ret = original.call(this, ...args);
-            this.props = originalProps;
+            this.props.id = originalId;
             return ret;
           }
         }
