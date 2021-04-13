@@ -19,24 +19,24 @@ export default async function ({ addon, global, console }) {
   }
   function onmouseenter(speed = {}) {
     speed = typeof speed === "object" ? getSpeedValue() : speed;
-    flyOut.classList.remove("sa-flyoutClose");
     flyOut.style.transitionDuration = `${speed}s`;
-    scrollBar.classList.remove("sa-flyoutClose");
     scrollBar.style.transitionDuration = `${speed}s`;
-    lockDisplay.classList.remove("sa-flyoutClose");
     lockDisplay.style.transitionDuration = `${speed}s`;
+    flyOut.classList.remove("sa-flyoutClose");
+    scrollBar.classList.remove("sa-flyoutClose");
+    lockDisplay.classList.remove("sa-flyoutClose");
     setTimeout(() => Blockly.getMainWorkspace().recordCachedAreas(), speed * 1000);
   }
   function onmouseleave(e, speed = getSpeedValue()) {
     // If we go behind the flyout or the user has locked it, let's return
     if ((toggleSetting !== "cathover" && e && e.clientX <= scrollBar.getBoundingClientRect().left) || flyoutLock)
       return;
-    flyOut.classList.add("sa-flyoutClose");
     flyOut.style.transitionDuration = `${speed}s`;
-    scrollBar.classList.add("sa-flyoutClose");
     scrollBar.style.transitionDuration = `${speed}s`;
-    lockDisplay.classList.add("sa-flyoutClose");
     lockDisplay.style.transitionDuration = `${speed}s`;
+    flyOut.classList.add("sa-flyoutClose");
+    scrollBar.classList.add("sa-flyoutClose");
+    lockDisplay.classList.add("sa-flyoutClose");
     setTimeout(() => Blockly.getMainWorkspace().recordCachedAreas(), speed * 1000);
   }
 
