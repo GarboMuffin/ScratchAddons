@@ -76,13 +76,10 @@ export default async function ({ addon, global, console }) {
     flyOut = await addon.tab.waitForElement(".blocklyFlyout", { markAsSeen: true });
     let blocklySvg = await addon.tab.waitForElement(".blocklySvg", { markAsSeen: true });
     scrollBar = document.querySelector(".blocklyFlyoutScrollbar");
-    // The first tab panel will always be the code panel
-    const tabPanel = document.querySelector("[class*='react-tabs_react-tabs__tab-panel']");
 
     // Placeholder Div
     if (placeHolderDiv) placeHolderDiv.remove();
     placeHolderDiv = document.createElement("div");
-    if (toggleSetting === "hover") tabPanel.appendChild(placeHolderDiv);
     placeHolderDiv.className = "sa-flyout-placeHolder";
 
     // Lock Img
@@ -95,10 +92,11 @@ export default async function ({ addon, global, console }) {
       lockDisplay.src = addon.self.dir + `/${flyoutLock ? "" : "un"}lock.svg`;
     };
 
-    // Only append if we don't have "categoryclick" on
-    if (toggleSetting === "hover") tabPanel.appendChild(lockDisplay);
-
     if (toggleSetting === "hover") {
+      // The first tab panel will always be the code panel
+      const tabPanel = document.querySelector("[class*='react-tabs_react-tabs__tab-panel']");
+      tabPanel.appendChild(lockDisplay);
+      tabPanel.appendChild(placeHolderDiv);
       placeHolderDiv.onmouseenter = onmouseenter;
       blocklySvg.onmouseenter = onmouseleave;
     }
