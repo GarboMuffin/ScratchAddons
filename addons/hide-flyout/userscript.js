@@ -4,7 +4,6 @@ export default async function ({ addon, global, console }) {
   let flyOut = null;
   let scrollBar = null;
   let toggle = true;
-  let selectedCategory = null;
   let toggleSetting = addon.settings.get("toggle");
   let flyoutLock = false;
 
@@ -50,19 +49,20 @@ export default async function ({ addon, global, console }) {
       (async () => {
         while (true) {
           let category = await addon.tab.waitForElement(".scratchCategoryMenuItem", { markAsSeen: true });
-          category.onclick = () => {
-            if (toggle && selectedCategory === category && toggleSetting === "category") {
-              onmouseleave();
-              selectedCategory = category;
-            } else if (!toggle) {
-              onmouseenter();
-              selectedCategory = category;
-            } else {
-              selectedCategory = category;
-              return;
-            }
-            if (toggleSetting === "category") toggle = !toggle;
-          };
+          category.addEventListener(
+            "mouseup",
+            () => {
+              if (toggle && toggleSetting === "category" && category.classList.contains("categorySelected")) {
+                onmouseleave();
+              } else if (!toggle) {
+                onmouseenter();
+              } else {
+                return;
+              }
+              if (toggleSetting === "category") toggle = !toggle;
+            },
+            true
+          );
           if (toggleSetting === "cathover") {
             category.onmouseover = onmouseenter;
             flyOut.onmouseleave = onmouseleave;
