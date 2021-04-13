@@ -46,27 +46,6 @@ export default async function ({ addon, global, console }) {
       return;
     }
     didOneTimeSetup = true;
-    addon.tab.redux.initialize();
-    addon.tab.redux.addEventListener("statechanged", (e) => {
-      switch (e.detail.action.type) {
-        // Event casted when you switch between tabs
-        case "scratch-gui/navigation/ACTIVATE_TAB":
-          // always 0, 1, 2
-          lockDisplay.style.display = e.detail.action.activeTabIndex === 0 ? "block" : "none";
-          placeHolderDiv.style.display = e.detail.action.activeTabIndex === 0 ? "block" : "none";
-          if (e.detail.action.activeTabIndex === 0) {
-            onmouseenter(0);
-            toggle = true;
-          }
-          break;
-        // Event casted when you switch between tabs
-        case "scratch-gui/mode/SET_PLAYER":
-          // always true or false
-          lockDisplay.style.display = e.detail.action.isPlayerOnly ? "none" : "block";
-          placeHolderDiv.style.display = e.detail.action.activeTabIndex === 0 ? "block" : "none";
-          break;
-      }
-    });
     if (toggleSetting === "category" || toggleSetting === "cathover") {
       (async () => {
         while (true) {
@@ -97,12 +76,13 @@ export default async function ({ addon, global, console }) {
     flyOut = await addon.tab.waitForElement(".blocklyFlyout", { markAsSeen: true });
     let blocklySvg = await addon.tab.waitForElement(".blocklySvg", { markAsSeen: true });
     scrollBar = document.querySelector(".blocklyFlyoutScrollbar");
-    const tabs = document.querySelector('[class^="gui_tabs"]');
+    // The first tab panel will always be the code panel
+    const tabPanel = document.querySelector("[class*='react-tabs_react-tabs__tab-panel']");
 
     // Placeholder Div
     if (placeHolderDiv) placeHolderDiv.remove();
     placeHolderDiv = document.createElement("div");
-    if (toggleSetting === "hover") tabs.appendChild(placeHolderDiv);
+    if (toggleSetting === "hover") tabPanel.appendChild(placeHolderDiv);
     placeHolderDiv.className = "sa-flyout-placeHolder";
 
     // Lock Img
@@ -116,7 +96,7 @@ export default async function ({ addon, global, console }) {
     };
 
     // Only append if we don't have "categoryclick" on
-    if (toggleSetting === "hover") tabs.appendChild(lockDisplay);
+    if (toggleSetting === "hover") tabPanel.appendChild(lockDisplay);
 
     if (toggleSetting === "hover") {
       placeHolderDiv.onmouseenter = onmouseenter;
