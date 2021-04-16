@@ -1291,7 +1291,9 @@ export default async function ({ addon, global, console, msg }) {
   // Sprite list
   {
     const spriteSelectorItemElement = await addon.tab.waitForElement("[class*='sprite-selector_sprite-wrapper']", {
-      condition: () => !addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
+      condition: () =>
+        addon.tab.redux.state.scratchGui.editorTab.activeTabIndex === 0 &&
+        !addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
     });
     vm = addon.tab.traps.vm;
     reactInternalKey = Object.keys(spriteSelectorItemElement).find((i) => i.startsWith(REACT_INTERNAL_PREFIX));
@@ -1309,7 +1311,9 @@ export default async function ({ addon, global, console, msg }) {
   // Backpack
   (async () => {
     const backpackContainer = await addon.tab.waitForElement("[class*='backpack_backpack-list_']", {
-      condition: () => !addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
+      condition: () =>
+        addon.tab.redux.state.scratchGui.editorTab.activeTabIndex === 0 &&
+        !addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
     });
     const backpackInstance = getBackpackFromElement(backpackContainer);
     verifyBackpack(backpackInstance);
