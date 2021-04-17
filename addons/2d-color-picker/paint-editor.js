@@ -28,7 +28,7 @@ export default async ({ addon, console, msg }) => {
     if (color === null || color === "scratch-paint/style-path/mixed") return;
     // This value can be arbitrary - it can be HEX, RGB, etc.
     // Use tinycolor to convert them.
-    return tinycolor(color).toHex();
+    return tinycolor(color).toHex8();
   };
 
   // load the new color to scratch
@@ -187,7 +187,7 @@ export default async ({ addon, console, msg }) => {
         let color = tinycolor(getColor(element)).toHsv();
         let s = ox / 150;
         let v = 1 - oy / 150;
-        let newColor = tinycolor({ h: color.h, s: s, v: v }).toHex();
+        let newColor = tinycolor({ h: color.h, s: s, v: v, a: color.a }).toHex8();
         setColor(newColor, element);
         updateHandleFinal(s, v);
       });
