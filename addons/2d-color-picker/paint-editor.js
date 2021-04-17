@@ -241,11 +241,13 @@ export default async ({ addon, console, msg }) => {
     addon.tab.redux.addEventListener("statechanged", prevEventHandler);
     saColorPicker.appendChild(saColorPickerImage);
     saColorPicker.appendChild(saColorPickerHandle);
-    element.parentElement.insertBefore(saColorPicker, element.parentElement.children[4]);
-    element.parentElement.insertBefore(saColorLabel, element.parentElement.children[4]);
 
-    //hide sat and bright sliders
-    saColorPicker.parentElement.children[2].style.display = "none";
-    saColorPicker.parentElement.children[3].style.display = "none";
+    const [colorSlider, saturationSlider, brightnessSlider] = [
+      ...element.parentElement.querySelectorAll('[class^="color-picker_row-header"]'),
+    ].map((i) => i.parentElement);
+    saturationSlider.style.display = "none";
+    brightnessSlider.style.display = "none";
+    colorSlider.insertAdjacentElement("afterend", saColorPicker);
+    colorSlider.insertAdjacentElement("afterend", saColorLabel);
   }
 };
