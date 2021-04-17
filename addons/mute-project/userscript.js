@@ -9,10 +9,10 @@ export default async function ({ addon, global, console }) {
     if (e.ctrlKey) {
       e.cancelBubble = true;
       e.preventDefault();
-      muted = !muted;
       if (e.type === "contextmenu" && window.safari) {
         return;
       }
+      muted = !muted;
       if (muted) {
         vm.runtime.audioEngine.inputNode.gain.value = 0;
         icon.style.display = "block";
