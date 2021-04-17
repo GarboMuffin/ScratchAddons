@@ -10,7 +10,7 @@ export default async function ({ addon, global, console }) {
       e.cancelBubble = true;
       e.preventDefault();
       muted = !muted;
-      if (e.type === 'contextmenu' && window.safari) {
+      if (e.type === "contextmenu" && window.safari) {
         return;
       }
       if (muted) {
