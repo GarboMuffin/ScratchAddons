@@ -30,7 +30,7 @@ export default async function ({ addon, global, console }) {
       if (!imgSrc) return;
       let k = document.createElement("img");
       k.src = addon.self.dir + `/icons/${imgSrc}.svg`;
-      k.id = "#sa-category-icon";
+      k.id = "sa-category-icon";
       addon.tab.displayNoneWhileDisabled(k);
       item.appendChild(k);
     });
