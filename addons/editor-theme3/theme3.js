@@ -117,7 +117,7 @@ export default async function ({ addon, global, console }) {
   newStyle.setAttribute("data-addon-id", addon.self.id);
   newStyle.setAttribute("data-addon-index", otherStyle.getAttribute("data-addon-index"));
 
-  document.documentElement.insertBefore(newStyle, otherStyle.nextSibling);
+  otherStyle.parentElement.insertBefore(newStyle, otherStyle.nextSibling);
 
   // Look for reenable event to enable the style. cs.js cannot handle an appended style.
   addon.self.addEventListener("reenabled", () => (newStyle.disabled = false));
