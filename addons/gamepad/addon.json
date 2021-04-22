@@ -9,7 +9,7 @@
   "info": [
     {
       "type": "notice",
-      "text": "This addon is highly experimental and subject to change. It can be configured with the gamepad button by the green flag. Please give us feedback so that we can improve this addon.",
+      "text": "This addon is highly experimental and subject to change. It can be configured with the gamepad button by the green flag.",
       "id": "info"
     }
   ],
