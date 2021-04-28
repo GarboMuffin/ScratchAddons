@@ -5,7 +5,7 @@ export default async function ({ addon, global, console, msg }) {
     let nav = await addon.tab.waitForElement("[class^='menu-bar_main-menu']", {
       markAsSeen: true,
       reduxEvents: ["scratch-gui/mode/SET_PLAYER"],
-      condition: () => !addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
+      condition: "editor",
     });
     if (!document.querySelector("[class^='author-info_username-line']")) {
       let setthumb = document.createElement("div");

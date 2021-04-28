@@ -9,7 +9,7 @@ export default async ({ addon, console, msg }) => {
     const btn = await addon.tab.waitForElement('[class*="community-button_community-button_"]', {
       markAsSeen: true,
       reduxEvents: ["scratch-gui/mode/SET_PLAYER"],
-      condition: () => !addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
+      condition: "editor",
     });
     btn.addEventListener(
       "click",

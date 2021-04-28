@@ -34,7 +34,7 @@ export default async function ({ addon, global, console, msg }) {
     let nav = await addon.tab.waitForElement("[class^='menu-bar_account-info-group'] > [href^='/my']", {
       markAsSeen: true,
       reduxEvents: ["scratch-gui/mode/SET_PLAYER"],
-      condition: () => !addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
+      condition: "editor",
     });
     document.querySelector("[class^='menu-bar_account-info-group']").insertBefore(messages, nav);
   }

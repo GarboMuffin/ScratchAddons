@@ -22,7 +22,7 @@ export default async function ({ addon, console, msg }) {
         const topBar = await addon.tab.waitForElement("[class^='menu-bar_main-menu']", {
           markAsSeen: true,
           reduxEvents: ["scratch-gui/mode/SET_PLAYER"],
-          condition: () => !addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
+          condition: "editor",
         });
         let display = topBar.appendChild(document.createElement("span"));
         display.style.order = 1;

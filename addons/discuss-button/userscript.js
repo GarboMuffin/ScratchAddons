@@ -13,11 +13,7 @@ export default async function ({ addon, global, console }) {
     while (true) {
       const el = await addon.tab.waitForElement("div#navigation div.inner ul:not(.production)", {
         markAsSeen: true,
-        condition: () => {
-          if (!addon.tab.redux.state) return false;
-          if (!addon.tab.redux.state.scratchGui) return true;
-          return addon.tab.redux.state.scratchGui.mode.isPlayerOnly;
-        },
+        condition: "notEditor",
       });
       if (addon.settings.get("removeIdeasBtn")) el.getElementsByTagName("li")[3].remove();
       el.insertBefore(link, el.getElementsByTagName("li")[3]);

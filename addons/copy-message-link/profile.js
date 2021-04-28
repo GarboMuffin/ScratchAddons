@@ -2,7 +2,7 @@ export default async function ({ addon, global, console, msg }) {
   while (true) {
     const comment = await addon.tab.waitForElement("div.comment", {
       markAsSeen: true,
-      condition: () => addon.tab.redux.state && addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
+      condition: "notEditor",
     });
     const newElem = document.createElement("span");
     newElem.className = "actions report";

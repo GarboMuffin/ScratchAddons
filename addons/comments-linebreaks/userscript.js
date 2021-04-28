@@ -2,7 +2,7 @@ export default async function ({ addon, global, console }) {
   while (true) {
     let comment = await addon.tab.waitForElement(".comment .content, .comment-content", {
       markAsSeen: true,
-      condition: () => addon.tab.redux.state && addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
+      condition: "notEditor",
     });
     comment.style.whiteSpace = "break-spaces";
     if (!comment.classList.contains("comment-content")) {

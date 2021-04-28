@@ -84,7 +84,7 @@ export default async function ({ addon, global, console, msg }) {
     return name;
   };
 
-  const untilInEditor = () => {
+  const untileditor = () => {
     if (addon.tab.editorMode === "editor") return;
     return new Promise((resolve, reject) => {
       const handler = () => {
@@ -1286,7 +1286,7 @@ export default async function ({ addon, global, console, msg }) {
     backpackInstance.handleDrop = Backpack.prototype.handleDrop.bind(backpackInstance);
   };
 
-  await untilInEditor();
+  await untileditor();
 
   // Backpack
   {
@@ -1311,9 +1311,7 @@ export default async function ({ addon, global, console, msg }) {
   // Sprite list
   {
     const spriteSelectorItemElement = await addon.tab.waitForElement("[class^='sprite-selector_sprite-wrapper']", {
-      condition: () =>
-        // We can run before redux state is ready
-        addon.tab.redux.state && !addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
+      condition: "editor",
     });
     vm = addon.tab.traps.vm;
     reactInternalKey = Object.keys(spriteSelectorItemElement).find((i) => i.startsWith(REACT_INTERNAL_PREFIX));
