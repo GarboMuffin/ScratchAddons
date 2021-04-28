@@ -70,6 +70,7 @@ function updateSettings(addon, newStyle) {
     },
     TurboWarp: {
       color: "#ff4c4c",
+      tertiaryColor: "#e64444", // TODO fix
       alt: "tw",
       var: "tw",
     },
