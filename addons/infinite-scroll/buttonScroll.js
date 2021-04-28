@@ -1,7 +1,14 @@
 async function commentLoader(addon, heightControl, selector) {
   let func;
   while (true) {
-    const el = await addon.tab.waitForElement(selector, { markAsSeen: true });
+    const el = await addon.tab.waitForElement(selector, {
+      markAsSeen: true,
+      condition: () => {
+        if (!addon.tab.redux.state) return false;
+        if (!addon.tab.redux.state.scratchGui) return true;
+        return addon.tab.redux.state.scratchGui.mode.isPlayerOnly;
+      },
+    });
     if (func) window.removeEventListener("scroll", func, { passive: true });
     el.style.display = "none";
     func = () => {
