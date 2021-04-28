@@ -11,7 +11,10 @@ export default async function ({ addon, console }) {
     case "projects":
       (async () => {
         while (true) {
-          let element = await addon.tab.waitForElement(".project-description", { markAsSeen: true });
+          let element = await addon.tab.waitForElement(".project-description", {
+            markAsSeen: true,
+            condition: () => addon.tab.redux.state && addon.tab.redux.state.scratchGui.mode.isPlayerOnly,
+          });
           // Need to convert #[numbers] to solve conflict between tags and external Scratch player links.
           document.querySelectorAll(".project-description a").forEach((element) => {
             if (/^#\d+$/.test(element.textContent) && element.previousSibling instanceof Text) {
