@@ -6,6 +6,21 @@ import getWorkerScript from "./worker.js";
 
 const DATA_PNG = "data:image/png;base64,";
 
+const WELL_KNOWN_CONDITIONS = {
+  notEditor: ({ redux }) => () => {
+    // Running before redux is ready
+    if (!redux.state) return false;
+    // Redux is ready but scratchGui does not exist, so we are running on a non-project page
+    if (!redux.state.scratchGui) return true;
+    return redux.state.scratchGui.mode.isPlayerOnly;
+  },
+  editor: ({ redux }) => () => {
+    if (!redux.state) return false;
+    if (!redux.state.scratchGui) return false;
+    return !redux.state.scratchGui.mode.isPlayerOnly;
+  },
+};
+
 /**
  * APIs specific to userscripts.
  * @extends Listenable
@@ -50,7 +65,11 @@ export default class Tab extends Listenable {
    */
   waitForElement(selector, opts = {}) {
     const markAsSeen = !!opts.markAsSeen;
-    if (!opts.condition || opts.condition()) {
+    let { condition } = opts;
+    if (typeof condition === "string") {
+      condition = WELL_KNOWN_CONDITIONS[condition](this);
+    }
+    if (!condition || condition()) {
       const firstQuery = document.querySelectorAll(selector);
       for (const element of firstQuery) {
         if (this._waitForElementSet.has(element)) continue;
@@ -58,7 +77,6 @@ export default class Tab extends Listenable {
         return Promise.resolve(element);
       }
     }
-    let { condition } = opts;
     let listener;
     if (opts.reduxEvents) {
       if (this.clientVersion !== "scratch-www") throw new Error("reduxEvents require scratch-www");
