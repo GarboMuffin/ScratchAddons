@@ -58,7 +58,7 @@ async function hideInSmallStageMode({ addon }) {
   while (true) {
     await addon.tab.waitForElement("[class*='stage-header_stage-size-toggle-group']", {
       markAsSeen: true,
-      reduxEvents: ["scratch-gui/mode/SET_PLAYER", "scratch-gui/locales/SELECT_LOCALE"],
+      reduxEvents: "editorChanged",
       condition: "editor",
     });
 

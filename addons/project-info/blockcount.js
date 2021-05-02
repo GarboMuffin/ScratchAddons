@@ -21,7 +21,7 @@ export default async function ({ addon, console, msg }) {
       while (true) {
         const topBar = await addon.tab.waitForElement("[class^='menu-bar_main-menu']", {
           markAsSeen: true,
-          reduxEvents: ["scratch-gui/mode/SET_PLAYER", "scratch-gui/locales/SELECT_LOCALE"],
+          reduxEvents: "editorChanged",
           condition: "editor",
         });
         let display = topBar.appendChild(document.createElement("span"));

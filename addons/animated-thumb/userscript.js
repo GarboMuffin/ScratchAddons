@@ -4,7 +4,7 @@ export default async function ({ addon, global, console, msg }) {
   while (true) {
     let nav = await addon.tab.waitForElement("[class^='menu-bar_main-menu']", {
       markAsSeen: true,
-      reduxEvents: ["scratch-gui/mode/SET_PLAYER", "scratch-gui/locales/SELECT_LOCALE"],
+      reduxEvents: "editorChanged",
       condition: "editor",
     });
     if (!document.querySelector("[class^='author-info_username-line']")) {
