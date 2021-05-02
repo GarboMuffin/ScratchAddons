@@ -21,7 +21,7 @@ export default async function ({ addon, global, console }) {
   while (true) {
     let button = await addon.tab.waitForElement("[class^='green-flag_green-flag']", {
       markAsSeen: true,
-      reduxEvents: ["scratch-gui/mode/SET_PLAYER"],
+      reduxEvents: ["scratch-gui/mode/SET_PLAYER", "scratch-gui/locales/SELECT_LOCALE"],
     });
     let container = button.parentElement;
     container.appendChild(icon);
