@@ -84,7 +84,7 @@ export default async function ({ addon, global, console, msg }) {
     return name;
   };
 
-  const untileditor = () => {
+  const untilInEditor = () => {
     if (addon.tab.editorMode === "editor") return;
     return new Promise((resolve, reject) => {
       const handler = () => {
@@ -1286,7 +1286,7 @@ export default async function ({ addon, global, console, msg }) {
     backpackInstance.handleDrop = Backpack.prototype.handleDrop.bind(backpackInstance);
   };
 
-  await untileditor();
+  await untilInEditor();
 
   // Backpack
   {
