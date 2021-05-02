@@ -22,7 +22,7 @@ const WELL_KNOWN_CONDITIONS = {
 };
 
 const WELL_KNOWN_REDUX_EVENTS = {
-  editorChanged: ["scratch-gui/mode/SET_PLAYER", "scratch-gui/locales/SELECT_LOCALE"]
+  editorChanged: ["scratch-gui/mode/SET_PLAYER", "scratch-gui/locales/SELECT_LOCALE"],
 };
 
 /**
@@ -83,7 +83,7 @@ export default class Tab extends Listenable {
     }
     let listener;
     if (opts.reduxEvents) {
-      if (typeof opts.reduxEvents === 'string') {
+      if (typeof opts.reduxEvents === "string") {
         opts.reduxEvents = WELL_KNOWN_REDUX_EVENTS[opts.reduxEvents];
       }
       if (this.clientVersion !== "scratch-www") throw new Error("reduxEvents require scratch-www");
