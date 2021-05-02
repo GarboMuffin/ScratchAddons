@@ -24,7 +24,7 @@ export default async function ({ addon, global, console }) {
         fileInput.files = files;
         fileInput.dispatchEvent(new Event("change", { bubbles: true }));
       };
-    } else if (el = e.target.closest('div[class*="monitor_list-monitor"]')) {
+    } else if ((el = e.target.closest('div[class*="monitor_list-monitor"]'))) {
       callback = (files) => {
         const contextMenuBefore = document.querySelector("body > .react-contextmenu.react-contextmenu--visible");
         // Simulate a right click on the list monitor
