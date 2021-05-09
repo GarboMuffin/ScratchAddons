@@ -1,0 +1,94 @@
+.touchlib-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  pointer-events: none;
+  --button-size: 50px;
+}
+
+.touchlib-button-container {
+  position: absolute;
+  pointer-events: auto;
+  height: calc(var(--button-size) * 3);
+  width: calc(var(--button-size) * 3);
+}
+
+.touchlib-dpad {
+  left: 15px;
+  bottom: 15px;
+}
+
+.touchlib-actions {
+  right: 15px;
+  bottom: 15px;
+}
+
+.touchlib-button {
+  position: absolute;
+  width: var(--button-size);
+  height: var(--button-size);
+  background-size: 100%;
+  opacity: 0.4;
+}
+.touchlib-button[active] {
+  opacity: 0.75;
+}
+
+.touchlib-dpad-button[type="up"] {
+  background-image: url("./images/up.svg");
+  left: calc(100% / 3);
+}
+.touchlib-dpad-button[type="down"] {
+  background-image: url("./images/down.svg");
+  top: calc(100% / 3 * 2);
+  left: calc(100% / 3);
+}
+.touchlib-dpad-button[type="left"] {
+  background-image: url("./images/left.svg");
+  top: calc(100% / 3);
+}
+.touchlib-dpad-button[type="right"] {
+  background-image: url("./images/right.svg");
+  top: calc(100% / 3);
+  left: calc(100% / 3 * 2);
+}
+.touchlib-dpad-button[type="up right"] {
+  background-image: url("./images/up-right.svg");
+  left: calc(100% / 3 * 2);
+}
+.touchlib-dpad-button[type="down right"] {
+  background-image: url("./images/down-right.svg");
+  top: calc(100% / 3 * 2);
+  left: calc(100% / 3 * 2);
+}
+.touchlib-dpad-button[type="up left"] {
+  background-image: url("./images/up-left.svg");
+}
+.touchlib-dpad-button[type="down left"] {
+  background-image: url("./images/down-left.svg");
+  top: calc(100% / 3 * 2);
+}
+.touchlib-dpad-button[type="middle"] {
+  background-image: url("./images/middle.svg");
+  top: calc(100% / 3);
+  left: calc(100% / 3);
+}
+
+.touchlib-action-button {
+  background-image: url("./images/middle.svg");
+  top: calc(100% / 3);
+  left: calc(100% / 3);
+}
+
+.touchlib-dot {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  border-radius: 100%;
+  background-color: black;
+  opacity: 0.5;
+  will-change: transform;
+}

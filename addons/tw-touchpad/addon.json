@@ -1,0 +1,32 @@
+{
+  "name": "Arrow key input for mobile devices",
+  "description": "Adds on-screen arrow keys for mobile users to interact with projects.",
+  "credits": [
+    {
+      "name": "GarboMuffin"
+    }
+  ],
+  "info": [
+    {
+      "type": "notice",
+      "text": "This addon is honestly pretty broken and largely untested.",
+      "id": "info"
+    }
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["https://scratch.mit.edu/projects/*"]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "touchlib.css",
+      "matches": ["https://scratch.mit.edu/projects/*"]
+    }
+  ],
+  "tags": ["editor", "beta"],
+  "versionAdded": "1.14.0",
+  "enabledByDefault": false,
+  "l10n": true
+}
