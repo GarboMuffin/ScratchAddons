@@ -22,5 +22,6 @@
   ],
   "tags": ["editor", "editorMenuBar", "danger"],
   "enabledByDefault": false,
+  "dynamicEnable": true,
   "l10n": true
 }
