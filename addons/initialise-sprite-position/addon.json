@@ -39,5 +39,7 @@
   ],
   "tags": ["editor"],
   "enabledByDefault": false,
+  "dynamicEnable": true,
+  "dynamicDisable": true,
   "l10n": true
 }

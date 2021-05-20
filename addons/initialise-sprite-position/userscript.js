@@ -2,6 +2,9 @@ export default async function ({ addon }) {
   let vm = addon.tab.traps.vm;
   let oldAddSprite = vm.constructor.prototype.addSprite;
   vm.constructor.prototype.addSprite = function (input) {
+    if (addon.self.disabled) {
+      return oldAddSprite.call(this, input);
+    }
     let spriteObj,
       stringify = true;
     if (typeof input === "object") [spriteObj, stringify] = [input, false];
