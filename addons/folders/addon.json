@@ -33,5 +33,6 @@
   ],
   "tags": ["editor", "recommended"],
   "enabledByDefault": false,
+  "dynamicEnable": true,
   "l10n": true
 }
