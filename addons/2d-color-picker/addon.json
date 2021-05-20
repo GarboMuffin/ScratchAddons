@@ -22,5 +22,6 @@
   ],
   "libraries": ["tinycolor2"],
   "enabledByDefault": false,
+  "dynamicEnable": true,
   "l10n": true
 }
