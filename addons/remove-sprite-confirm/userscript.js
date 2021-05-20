@@ -4,17 +4,19 @@ export default async ({ addon, console, msg }) => {
   if (!vm) return;
   const oldDeleteSprite = vm.deleteSprite;
   vm.deleteSprite = function (...args) {
-    const canDelete = confirm(msg("confirm"));
-    if (canDelete) return oldDeleteSprite.apply(this, args);
-    const restoreDeletionState = Object.assign({}, addon.tab.redux.state.scratchGui.restoreDeletion);
-    setTimeout(
-      () =>
-        addon.tab.redux.dispatch({
-          type: "scratch-gui/restore-deletion/RESTORE_UPDATE",
-          state: restoreDeletionState,
-        }),
-      100
-    );
+    if (!addon.self.disabled) {
+      const canDelete = confirm(msg("confirm"));
+      if (canDelete) return oldDeleteSprite.apply(this, args);
+      const restoreDeletionState = Object.assign({}, addon.tab.redux.state.scratchGui.restoreDeletion);
+      setTimeout(
+        () =>
+          addon.tab.redux.dispatch({
+            type: "scratch-gui/restore-deletion/RESTORE_UPDATE",
+            state: restoreDeletionState,
+          }),
+        100
+      );
+    }
     return Promise.resolve();
   };
 };
