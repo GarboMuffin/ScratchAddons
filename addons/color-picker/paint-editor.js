@@ -93,6 +93,7 @@ export default async ({ addon, console, msg }) => {
     addon.tab.redux.addEventListener("statechanged", prevEventHandler);
     saColorPicker.appendChild(saColorPickerColor);
     saColorPicker.appendChild(saColorPickerText);
+    addon.tab.displayNoneWhileDisabled(saColorPicker, {display: "flex"});
     element.parentElement.insertBefore(saColorPicker, element);
   }
 };
