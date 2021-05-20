@@ -7,8 +7,23 @@ export default async function ({ addon, global, console }) {
   // Add sounds to all future workspaces
   const originalInit = ScratchBlocks.init_;
   ScratchBlocks.init_ = function (...args) {
-    const wksp = args[0];
-    wksp.options.hasSounds = true;
+    if (!addon.self.disabled) {
+      const wksp = args[0];
+      wksp.options.hasSounds = true;
+    }
     return originalInit.call(this, ...args);
   };
+  // Dynamic enable/disable
+  addon.self.addEventListener("disabled", () => {
+    const workspace = Blockly.getMainWorkspace();
+    if (workspace && workspace.audioManager_) {
+      workspace.audioManager_.SOUNDS_ = {};
+    }
+  });
+  addon.self.addEventListener("reenabled", () => {
+    const workspace = Blockly.getMainWorkspace();
+    if (workspace && workspace.audioManager_) {
+      ScratchBlocks.inject.loadSounds_(pathToMedia, workspace);    
+    }
+  });
 }
