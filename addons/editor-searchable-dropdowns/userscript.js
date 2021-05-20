@@ -7,6 +7,8 @@ export default async function ({ addon, global, console }) {
   let blocklyDropdownMenu = null;
 
   function createSearchBar(node) {
+    if (addon.self.disabled) return;
+
     blocklyDropdownMenu = node;
     blocklyDropdownMenu.focus = () => {}; // no-op focus() so it can't steal it from the search bar
 
