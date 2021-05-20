@@ -35,5 +35,6 @@
   "versionAdded": "1.14.0",
   "enabledByDefault": false,
   "libraries": ["scratch-blocks"],
+  "dynamicEnable": true,
   "l10n": true
 }
