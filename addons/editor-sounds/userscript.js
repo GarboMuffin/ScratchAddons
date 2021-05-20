@@ -23,7 +23,7 @@ export default async function ({ addon, global, console }) {
   addon.self.addEventListener("reenabled", () => {
     const workspace = Blockly.getMainWorkspace();
     if (workspace && workspace.audioManager_) {
-      ScratchBlocks.inject.loadSounds_(pathToMedia, workspace);    
+      ScratchBlocks.inject.loadSounds_(pathToMedia, workspace);
     }
   });
 }
