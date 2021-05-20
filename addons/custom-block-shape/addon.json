@@ -98,5 +98,6 @@
       }
     }
   ],
+  "dynamicEnable": true,
   "l10n": true
 }
