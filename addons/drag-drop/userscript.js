@@ -8,6 +8,10 @@ export default async function ({ addon, global, console }) {
   };
 
   const globalHandleDragOver = (e) => {
+    if (addon.self.disabled) {
+      return;
+    }
+
     if (!e.dataTransfer.types.includes("Files")) {
       return;
     }

@@ -19,6 +19,8 @@
     }
   ],
   "tags": ["editor", "recommended"],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
   "enabledByDefault": false,
   "l10n": true
 }
