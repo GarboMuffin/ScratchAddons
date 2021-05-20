@@ -47,5 +47,6 @@
   ],
   "tags": ["editor", "codeEditor", "costumeEditor", "recommended"],
   "enabledByDefault": true,
+  "dynamicEnable": true,
   "l10n": true
 }
