@@ -36,5 +36,6 @@
       "default": false
     }
   ],
+  "dynamicEnable": true,
   "l10n": true
 }
