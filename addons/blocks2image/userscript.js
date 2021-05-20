@@ -71,7 +71,7 @@ export default async function ({ addon, global, console, msg }) {
   document.addEventListener(
     "mousedown",
     (e) => {
-      if (e.target.closest("g.blocklyWorkspace")) {
+      if (!addon.self.disabled && e.target.closest("g.blocklyWorkspace")) {
         eventMouseDown(e);
       }
     },
