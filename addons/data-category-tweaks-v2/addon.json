@@ -35,5 +35,6 @@
   ],
   "tags": ["editor", "codeEditor", "recommended"],
   "enabledByDefault": false,
+  "dynamicEnable": true,
   "l10n": true
 }
