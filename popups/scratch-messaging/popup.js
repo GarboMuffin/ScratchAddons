@@ -96,8 +96,31 @@ import { escapeHTML } from "../../libraries/common/cs/autoescaper.js";
           (res) => {
             this.postingComment = false;
             dateNow = Date.now();
-            if (res.error) alert(l10n.get("scratch-messaging/send-error"));
-            else {
+            if (res.error) {
+              const errorCode =
+                {
+                  isEmpty: "scratch-messaging/comment-error-empty",
+                  // Two errors can be raised for rate limit;
+                  // isFlood is the actual error, 429 is the status code
+                  // ratelimit error will be unnecessary when #2505 is implemented
+                  isFlood: "scratch-messaging/comment-error-ratelimit",
+                  429: "scratch-messaging/comment-error-ratelimit",
+                  isBad: "scratch-messaging/comment-error-filterbot-generic",
+                  hasChatSite: "scratch-messaging/comment-error-filterbot-chat",
+                  isSpam: "scratch-messaging/comment-error-filterbot-spam",
+                  // isDisallowed, isIPMuted, isTooLong, isNotPermitted use default error
+                  500: "scratch-messaging/comment-error-down",
+                  503: "scratch-messaging/comment-error-down",
+                }[res.error] || "scratch-messaging/send-error";
+              let errorMsg = l10n.get(errorCode);
+              if (res.muteStatus) {
+                errorMsg = l10n.get("scratch-messaging/comment-mute") + " ";
+                errorMsg += l10n.get("scratch-messaging/comment-cannot-post-for", {
+                  mins: Math.max(Math.ceil((res.muteStatus.muteExpiresAt - Date.now() / 1000) / 60), 1),
+                });
+              }
+              alert(errorMsg);
+            } else {
               this.replying = false;
               const newCommentPseudoId = `${this.resourceType[0]}_${res.commentId}`;
               Vue.set(this.commentsObj, newCommentPseudoId, {
@@ -188,6 +211,7 @@ import { escapeHTML } from "../../libraries/common/cs/autoescaper.js";
     data: {
       mounted: true, // Always true
 
+      stMessages: [],
       messages: [],
       comments: {},
       error: null,
@@ -214,6 +238,7 @@ import { escapeHTML } from "../../libraries/common/cs/autoescaper.js";
 
       // For UI
       messageTypeExtended: {
+        stMessages: false,
         follows: false,
         studioInvites: false,
         studioPromotions: false,
@@ -223,6 +248,7 @@ import { escapeHTML } from "../../libraries/common/cs/autoescaper.js";
       },
 
       uiMessages: {
+        stMessagesMsg: l10n.get("scratch-messaging/stMessages"),
         followsMsg: l10n.get("scratch-messaging/follows"),
         studioInvitesMsg: l10n.get("scratch-messaging/studio-invites"),
         forumMsg: l10n.get("scratch-messaging/forum"),
@@ -233,6 +259,7 @@ import { escapeHTML } from "../../libraries/common/cs/autoescaper.js";
         loggedOutMsg: l10n.get("scratch-messaging/logged-out"),
         loadingCommentsMsg: l10n.get("scratch-messaging/loading-comments"),
         reloadMsg: l10n.get("scratch-messaging/reload"),
+        dismissMsg: l10n.get("scratch-messaging/dismiss"),
         noUnreadMsg: l10n.get("scratch-messaging/no-unread"),
         showMoreMsg: l10n.get("scratch-messaging/show-more"),
         markAsReadMsg: l10n.get("scratch-messaging/mark-as-read"),
@@ -300,13 +327,12 @@ import { escapeHTML } from "../../libraries/common/cs/autoescaper.js";
     methods: {
       getData() {
         return new Promise((resolve) => {
-          const timeout = setTimeout(() => {
-            this.error = "addonDisabled";
-            resolve(undefined);
-          }, 500);
           chrome.runtime.sendMessage({ scratchMessaging: "getData" }, (res) => {
             if (res) {
-              clearTimeout(timeout);
+              this.stMessages = (res.stMessages || []).map((alert) => ({
+                ...alert,
+                datetime_created: new Date(alert.datetime_created).toDateString(),
+              }));
               this.messages = res.messages;
               this.msgCount = res.lastMsgCount;
               this.username = res.username;
@@ -321,6 +347,18 @@ import { escapeHTML } from "../../libraries/common/cs/autoescaper.js";
       markAsRead() {
         chrome.runtime.sendMessage({ scratchMessaging: "markAsRead" });
         this.markedAsRead = true;
+      },
+      dismissAlert(id) {
+        const confirmation = confirm(l10n.get("scratch-messaging/stMessagesConfirm"));
+        if (!confirmation) return;
+        chrome.runtime.sendMessage({ scratchMessaging: { dismissAlert: id } }, (res) => {
+          if (res && !res.error) {
+            this.stMessages.splice(
+              this.stMessages.findIndex((alert) => alert.id === id),
+              1
+            );
+          }
+        });
       },
       reloadPage() {
         location.reload();
@@ -430,8 +468,9 @@ import { escapeHTML } from "../../libraries/common/cs/autoescaper.js";
           1: [], // Profiles
           2: [], // Studios
         };
+        let realMsgCount = this.msgCount - this.stMessages.length;
         const messagesToCheck =
-          this.msgCount > 40 ? this.messages.length : showAll ? this.messages.length : this.msgCount;
+          realMsgCount > 40 ? this.messages.length : showAll ? this.messages.length : realMsgCount;
         this.showingMessagesAmt = messagesToCheck;
         for (const message of this.messages.slice(0, messagesToCheck)) {
           if (message.type === "followuser") {
