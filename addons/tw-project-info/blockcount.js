@@ -24,6 +24,7 @@ export default async function ({ addon, console, msg }) {
           reduxEvents: ["scratch-gui/mode/SET_PLAYER"],
         });
         let display = topBar.appendChild(document.createElement("span"));
+        addon.tab.displayNoneWhileDisabled(display);
         display.style.order = 1;
         display.style.padding = "9px";
         display.innerText = msg("blocks", { num: getBlockCount().blockCount });
