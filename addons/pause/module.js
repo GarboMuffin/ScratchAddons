@@ -60,7 +60,7 @@ export const setPaused = (_paused) => {
         if (thread.timer) {
           const dt = now - pauseState.pauseTime;
           thread.timer.startTime += dt;
-        }        
+        }
         Object.defineProperty(thread, "status", {
           value: pauseState.status,
           configurable: true,
