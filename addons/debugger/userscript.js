@@ -25,7 +25,6 @@ export default async function ({ addon, global, console, msg }) {
     const pauseAddonButton = document.querySelector(".pause-btn");
     if (!pauseAddonButton || getComputedStyle(pauseAddonButton).display === "none") toggleConsole(true);
   };
-  addon.tab.addBlock("sa-pause", [], pause, true);
   addon.tab.addBlock("\u200B\u200Bbreakpoint\u200B\u200B", [], pause);
   addon.tab.addBlock("\u200B\u200Blog\u200B\u200B %s", ["content"], ({ content }, thread) => {
     workspace = Blockly.getMainWorkspace();
