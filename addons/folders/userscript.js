@@ -1013,6 +1013,21 @@ export default async function ({ addon, global, console, msg }) {
       });
     };
 
+    const originalDuplicateSprite = vm.duplicateSprite;
+    vm.duplicateSprite = function (...args) {
+      return originalDuplicateSprite.call(this, ...args).then((r) => {
+        fixTargetOrder();
+        return r;
+      });
+    };
+
+    const originalRenameSprite = vm.renameSprite;
+    vm.renameSprite = function (...args) {
+      const r = originalRenameSprite.call(this, ...args);
+      fixTargetOrder();
+      return r;
+    };
+
     const originalAddCostume = RenderedTarget.prototype.addCostume;
     RenderedTarget.prototype.addCostume = function (...args) {
       if (currentAssetFolder !== null) {
