@@ -1028,6 +1028,20 @@ export default async function ({ addon, global, console, msg }) {
       return r;
     };
 
+    const originalRenameCostume = vm.renameCostume;
+    vm.renameCostume = function (...args) {
+      const r = originalRenameCostume.call(this, ...args);
+      setTimeout(fixCostumeOrder);
+      return r;
+    };
+
+    const originalRenameSound = vm.renameSound;
+    vm.renameSound = function (...args) {
+      const r = originalRenameSound.call(this, ...args);
+      setTimeout(fixSoundOrder);
+      return r;
+    };
+
     const originalAddCostume = RenderedTarget.prototype.addCostume;
     RenderedTarget.prototype.addCostume = function (...args) {
       if (currentAssetFolder !== null) {
