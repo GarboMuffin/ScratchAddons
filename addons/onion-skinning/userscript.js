@@ -1,5 +1,11 @@
 export default async function ({ addon, global, console, msg }) {
-  let paper = null;
+  const paper = await addon.tab.traps.getPaper();
+
+  const paintEditorCanvasContainer = await addon.tab.waitForElement("[class^='paint-editor_canvas-container']");
+  const REACT_INTERNAL_PREFIX = "__reactInternalInstance$";
+  const reactInternalKey = Object.keys(paintEditorCanvasContainer).find((i) => i.startsWith(REACT_INTERNAL_PREFIX));
+  const paperCanvas = paintEditorCanvasContainer[reactInternalKey].child.child.child.stateNode;
+
   let paperCenter;
   const storedOnionLayers = [];
 
@@ -14,7 +20,7 @@ export default async function ({ addon, global, console, msg }) {
   };
 
   const settings = {
-    enabled: addon.settings.get("default"),
+    enabled: addon.settings.get("default") && !addon.self.disabled,
     previous: +addon.settings.get("previous"),
     next: +addon.settings.get("next"),
     opacity: +addon.settings.get("opacity"),
@@ -25,11 +31,7 @@ export default async function ({ addon, global, console, msg }) {
     afterTint: parseHexColor(addon.settings.get("afterTint")),
   };
 
-  const getProject = () => paper && paper.project;
-
-  const foundPaper = (_paper) => {
-    paper = _paper;
-
+  const injectPaper = () => {
     const backgroundGuideLayer = paper.project.layers.find((i) => i.data.isBackgroundGuideLayer);
     paperCenter = backgroundGuideLayer.children[0].position;
 
@@ -78,7 +80,7 @@ export default async function ({ addon, global, console, msg }) {
     };
   };
 
-  const foundPaperCanvas = (paperCanvas) => {
+  const injectPaperCanvas = () => {
     let expectingImport = false;
 
     const PaperCanvas = paperCanvas.constructor;
@@ -132,7 +134,7 @@ export default async function ({ addon, global, console, msg }) {
   };
 
   const removeOnionLayers = () => {
-    const project = getProject();
+    const project = paper.project;
     if (!project) {
       return;
     }
@@ -149,7 +151,7 @@ export default async function ({ addon, global, console, msg }) {
   };
 
   const relayerOnionLayers = () => {
-    const project = getProject();
+    const project = paper.project;
     if (!project) {
       return;
     }
@@ -248,7 +250,7 @@ export default async function ({ addon, global, console, msg }) {
         }
       }
 
-      getProject().importSVG(asset, {
+      paper.project.importSVG(asset, {
         expandShapes: true,
         onLoad: (root) => {
           if (!root) {
@@ -362,7 +364,7 @@ export default async function ({ addon, global, console, msg }) {
   };
 
   const updateOnionLayers = async () => {
-    const project = getProject();
+    const project = paper.project;
     if (!project) {
       return;
     }
@@ -446,50 +448,9 @@ export default async function ({ addon, global, console, msg }) {
     toggleButton.dataset.enabled = settings.enabled;
   };
 
-  const untilInEditor = () => {
-    if (addon.tab.editorMode !== "editor") {
-      return new Promise((resolve, reject) => {
-        const handler = () => {
-          if (addon.tab.editorMode === "editor") {
-            resolve();
-            addon.tab.removeEventListener("urlChange", handler);
-          }
-        };
-        addon.tab.addEventListener("urlChange", handler);
-      });
-    }
-  };
-
-  const accessScratchInternals = () => {
-    if (paper) {
-      return;
-    }
-
-    const REACT_INTERNAL_PREFIX = "__reactInternalInstance$";
-
-    // We can access paper through .tool on tools, for example:
-    // https://github.com/LLK/scratch-paint/blob/develop/src/containers/bit-brush-mode.jsx#L60-L62
-    // It happens that paper's Tool objects contain a reference to the entirety of paper's scope.
-    const modeSelector = document.querySelector("[class*='paint-editor_mode-selector']");
-    const reactInternalKey = Object.keys(modeSelector).find((i) => i.startsWith(REACT_INTERNAL_PREFIX));
-    const internalState = modeSelector[reactInternalKey].child;
-
-    // .tool only exists on the selected tool
-    let toolState = internalState;
-    let tool;
-    while (!(tool = toolState.child.stateNode.tool)) {
-      toolState = toolState.sibling;
-    }
-    const paperScope = tool._scope;
-
-    const paintEditorCanvasContainer = document.querySelector("[class^='paint-editor_canvas-container']");
-    const paperCanvas = paintEditorCanvasContainer[reactInternalKey].child.child.child.stateNode;
-
-    if (paperScope && paperCanvas) {
-      foundPaper(paperScope);
-      foundPaperCanvas(paperCanvas);
-    }
-  };
+  //
+  // Controls below editor
+  //
 
   const settingsChanged = (onlyRelayerNeeded) => {
     if ((settings.previous === 0 && settings.next === 0) || settings.opacity === 0) {
@@ -530,15 +491,12 @@ export default async function ({ addon, global, console, msg }) {
     return el;
   };
 
-  //
-  // Controls below editor
-  //
-
   const paintEditorControlsContainer = document.createElement("div");
   paintEditorControlsContainer.className = "sa-onion-controls-container";
   paintEditorControlsContainer.dir = "";
 
   const toggleControlsGroup = createGroup();
+  addon.tab.displayNoneWhileDisabled(toggleControlsGroup, { display: "flex" });
 
   const toggleButton = createButton();
   toggleButton.dataset.enabled = settings.enabled;
@@ -714,11 +672,22 @@ export default async function ({ addon, global, console, msg }) {
   settingsTip.appendChild(settingsTipShape);
   settingsPage.appendChild(settingsTip);
 
+  let oldEnabled = null;
+  addon.self.addEventListener("disabled", () => {
+    setSettingsOpen(false);
+    oldEnabled = settings.enabled;
+    setEnabled(false);
+  });
+  addon.self.addEventListener("reenabled", () => {
+    setEnabled(oldEnabled);
+  });
+
   const controlsLoop = async () => {
     let hasRunOnce = false;
     while (true) {
       const canvasControls = await addon.tab.waitForElement("[class^='paint-editor_canvas-controls']", {
         markAsSeen: true,
+        reduxEvents: ["scratch-gui/navigation/ACTIVATE_TAB", "scratch-gui/mode/SET_PLAYER"],
         reduxCondition: (state) =>
           state.scratchGui.editorTab.activeTabIndex === 1 && !state.scratchGui.mode.isPlayerOnly,
       });
@@ -761,6 +730,7 @@ export default async function ({ addon, global, console, msg }) {
     }
   };
 
-  await untilInEditor();
+  injectPaper();
+  injectPaperCanvas();
   controlsLoop();
 }
