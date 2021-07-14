@@ -691,7 +691,6 @@ export default async function ({ addon, global, console, msg }) {
         reduxCondition: (state) =>
           state.scratchGui.editorTab.activeTabIndex === 1 && !state.scratchGui.mode.isPlayerOnly,
       });
-      accessScratchInternals();
       const zoomControlsContainer = canvasControls.querySelector("[class^='paint-editor_zoom-controls']");
       const canvasContainer = document.querySelector("[class^='paint-editor_canvas-container']");
 
