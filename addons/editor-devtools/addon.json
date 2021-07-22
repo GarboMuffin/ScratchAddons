@@ -48,6 +48,7 @@
       "matches": ["https://scratch.mit.edu/projects/*"]
     }
   ],
+  "onlyInEditor": true,
   "versionAdded": "1.0.0",
   "tags": ["editor", "codeEditor", "costumeEditor", "recommended"],
   "enabledByDefault": true

@@ -21,6 +21,7 @@
       "matches": ["https://scratch.mit.edu/projects/*"]
     }
   ],
+  "onlyInEditor": true,
   "dynamicEnable": true,
   "dynamicDisable": true,
   "versionAdded": "1.11.0",

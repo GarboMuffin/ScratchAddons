@@ -43,6 +43,7 @@
       "default": 25
     }
   ],
+  "onlyInEditor": true,
   "userstyles": [
     {
       "url": "userstyle.css",

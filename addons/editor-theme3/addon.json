@@ -26,6 +26,7 @@
       "matches": ["https://scratch.mit.edu/projects/*"]
     }
   ],
+  "onlyInEditor": true,
   "settings": [
     {
       "name": "motion",

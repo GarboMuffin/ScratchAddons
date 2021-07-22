@@ -13,6 +13,7 @@
       "runAtComplete": false
     }
   ],
+  "onlyInEditor": true,
   "versionAdded": "1.7.0",
   "settings": [
     {

@@ -18,6 +18,7 @@
       "matches": ["https://scratch.mit.edu/projects/*"]
     }
   ],
+  "onlyInEditor": true,
   "settings": [
     {
       "id": "default",
