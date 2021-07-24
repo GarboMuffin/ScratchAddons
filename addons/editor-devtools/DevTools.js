@@ -35,11 +35,20 @@ export default class DevTools {
     this.mouseXY = { x: 0, y: 0 };
   }
 
-  async init() {
-    while (true) {
-      const root = await this.addon.tab.waitForElement("ul[class*=gui_tab-list_]", { markAsSeen: true });
-      this.initInner(root);
-    }
+  init() {
+    this.initInner();
+    // Observe lang= changes on <html>
+    const observer = new MutationObserver((changes) => {
+      for (const change of changes) {
+        if (change.attributeName === 'lang') {
+          this.initInner();
+          break;
+        }
+      }
+    });
+    observer.observe(document.documentElement, {
+      attributes: true
+    });
   }
 
   isScriptEditor() {
@@ -2217,7 +2226,12 @@ export default class DevTools {
     p.append(dd);
   }
 
-  initInner(root) {
+  initInner() {
+    const root = document.querySelector("ul[class*=gui_tab-list_]");
+    if (!root) {
+      return;
+    }
+
     let guiTabs = root.childNodes;
 
     if (this.codeTab && guiTabs[0] !== this.codeTab) {
