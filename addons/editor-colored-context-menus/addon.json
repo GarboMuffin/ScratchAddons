@@ -23,6 +23,7 @@
     }
   ],
   "onlyInEditor": true,
+  "noTranslations": true,
   "tags": ["editor", "codeEditor", "theme"],
   "enabledByDefault": false
 }

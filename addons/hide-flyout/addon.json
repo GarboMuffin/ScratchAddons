@@ -27,6 +27,7 @@
     }
   ],
   "onlyInEditor": true,
+  "noTranslations": true,
   "versionAdded": "1.8.0",
   "settings": [
     {

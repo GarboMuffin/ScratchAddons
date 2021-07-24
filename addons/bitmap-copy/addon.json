@@ -15,6 +15,7 @@
     }
   ],
   "onlyInEditor": true,
+  "noTranslations": true,
   "dynamicEnable": true,
   "dynamicDisable": true,
   "versionAdded": "1.0.0",

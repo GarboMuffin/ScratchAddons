@@ -27,6 +27,7 @@
     }
   ],
   "onlyInEditor": true,
+  "noTranslations": true,
   "settings": [
     {
       "name": "motion",
