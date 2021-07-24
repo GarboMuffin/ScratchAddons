@@ -40,14 +40,14 @@ export default class DevTools {
     // Observe lang= changes on <html>
     const observer = new MutationObserver((changes) => {
       for (const change of changes) {
-        if (change.attributeName === 'lang') {
+        if (change.attributeName === "lang") {
           this.initInner();
           break;
         }
       }
     });
     observer.observe(document.documentElement, {
-      attributes: true
+      attributes: true,
     });
   }
 
