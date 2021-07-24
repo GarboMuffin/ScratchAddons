@@ -24,9 +24,14 @@ export default async function ({ addon, console, safeMsg: m }) {
 
   while (true) {
     //Catch all upload menus as they are created
-    let menu = await addon.tab.waitForElement('[class*="action-menu_more-buttons_"]', { markAsSeen: true });
+    let menu = await addon.tab.waitForElement('[class*="action-menu_more-buttons_"]', {
+      markAsSeen: true,
+      reduxCondition: (state) => state.scratchGui.editorTab.activeTabIndex === 1 && !state.scratchGui.mode.isPlayerOnly,
+      reduxEvents: ["scratch-gui/navigation/ACTIVATE_TAB", "scratch-gui/mode/SET_PLAYER", "scratch-gui/locales/SELECT_LOCALE"]
+    });
     let button = menu.parentElement.previousElementSibling.previousElementSibling; //The base button that the popup menu is from
 
+    // TODO: we can probably remove these checks because of reduxCondition
     let id = button.getAttribute("aria-label").replace(/\s+/g, "_");
 
     if (id === "Choose_a_Sound") continue; //Don't want it in the sounds tab!
