@@ -349,33 +349,6 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     return s;
   };
 
-  // Feedback
-  if (localStorage.getItem("saDebuggerFeedbackRemove") !== "1") {
-    const wrapper = createLogWrapper("log");
-    const s = document.createElement("span");
-    s.innerHTML = safeMsg("feedback-log", {
-      logLink: Object.assign(document.createElement("a"), {
-        href: "https://scratchaddons.com/feedback?version=1.18-debugger",
-        className: "sa-debugger-feedback",
-        target: "_blank",
-        textContent: msg("feedback-log-link"),
-      }).outerHTML,
-    });
-    s.appendChild(document.createElement("br"));
-    s.appendChild(
-      Object.assign(document.createElement("a"), {
-        className: "sa-debugger-feedback",
-        textContent: msg("feedback-remove"),
-        onclick: () => {
-          localStorage.setItem("saDebuggerFeedbackRemove", "1");
-          wrapper.remove();
-        },
-      })
-    );
-    wrapper.appendChild(s);
-    consoleList.append(wrapper);
-  }
-
   const addLog = (content, thread, type) => {
     const wrapper = createLogWrapper(type);
 
