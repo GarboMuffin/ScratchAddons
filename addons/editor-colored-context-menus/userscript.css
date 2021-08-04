@@ -1,5 +1,5 @@
 .u-contextmenu-colored .blocklyContextMenu {
-  background-color: var(--u-contextmenu-bg);
+  background-color: var(--u-contextmenu-bg) !important;
   border-color: var(--u-contextmenu-border);
 }
 .u-contextmenu-colored .blocklyContextMenu .goog-menuitem-highlight,
