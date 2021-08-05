@@ -1,0 +1,20 @@
+{
+  "name": "Don't automatically show variables",
+  "description": "Makes Scratch not automatically show a watcher for each new variable created.",
+  "credits": [
+    {
+      "name": "GarboMuffin"
+    }
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "tags": ["editor", "codeEditor"],
+  "versionAdded": "1.19.0",
+  "enabledByDefault": false
+}
