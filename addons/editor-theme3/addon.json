@@ -126,7 +126,7 @@
       "reloadRequired": false
     },
     {
-      "name": "Scratch Addons blocks",
+      "name": "Addon blocks",
       "id": "sa-color",
       "type": "color",
       "default": "#29BEB8",
