@@ -25,7 +25,7 @@
     }
   ],
   "onlyInEditor": true,
-  "tags": ["editor"],
+  "tags": ["editor", "featured"],
   "enabledByDefault": false,
   "versionAdded": "1.16.0"
 }
