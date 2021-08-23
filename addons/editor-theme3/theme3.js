@@ -92,7 +92,7 @@ function updateSettings(addon, newStyle) {
     sa: {
       color: "#29beb8",
       tertiaryColor: "#3aa8a4",
-      alt: "a-b"
+      alt: "a-b",
     },
   };
 
