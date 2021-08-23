@@ -19,7 +19,7 @@ export default async function ({ addon, console, msg }) {
     const img = Object.assign(document.createElement("img"), {
       className: `${addon.tab.scratchClass("action-menu_more-icon")} sa-better-img-uploader`,
       draggable: "false",
-      src: `${addon.self.dir}/icon.svg`,
+      src: addon.self.dir + "/icon.svg",
       height: "10",
       width: "10",
     });
