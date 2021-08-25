@@ -731,13 +731,13 @@
       "name": "Highlight color",
       "id": "primary",
       "type": "color",
-      "default": "#4d97ff"
+      "default": "#ff4c4c"
     },
     {
       "name": "Text and icon highlight color",
       "id": "highlightText",
       "type": "color",
-      "default": "#4d97ff"
+      "default": "#ff4c4c"
     },
     {
       "name": "Menu bar background",
