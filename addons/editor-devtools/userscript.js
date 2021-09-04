@@ -7,6 +7,8 @@ export default async function ({ addon, global, console, msg, safeMsg: m }) {
     return;
   }
 
+  await addon.tab.scratchClassesReady();
+
   const guiDirection = addon.tab.direction;
   const helpHTML = `
 <div id="s3devHelpPop" class="${addon.tab.scratchClass("modal_modal-overlay")}" dir="${guiDirection}">

@@ -11,6 +11,35 @@ const contextMenuCallbacks = [];
 const CONTEXT_MENU_ORDER = ["editor-devtools", "block-switching", "blocks2image"];
 let createdAnyBlockContextMenus = false;
 
+class ScratchClasses {
+  constructor(scratchClasses, others) {
+    this._scratchClasses = scratchClasses;
+    this._suffix = others ? ` ${others.join(" ")}` : "";
+    this._cached = null;
+  }
+  _computeLoaded() {
+    return (
+      this._scratchClasses
+        .map((i) => scratchAddons.classNames.findClass(i) || "")
+        .filter((i) => i)
+        .join(" ") + this._suffix
+    );
+  }
+  _computePlaceholder() {
+    return this._scratchClasses.map((i) => `scratchAddonsScratchClass/${i}`).join(" ") + this._suffix;
+  }
+  toString() {
+    if (this._cached) {
+      return this._cached;
+    }
+    if (scratchAddons.classNames.loaded) {
+      this._cached = this._computeLoaded();
+      return this._cached;
+    }
+    return this._computePlaceholder();
+  }
+}
+
 /**
  * APIs specific to userscripts.
  * @extends Listenable
@@ -206,33 +235,29 @@ export default class Tab extends Listenable {
    * @param {...*} args Unhashed class names.
    * @param {object} opts - options.
    * @param {String[]|String} opts.others - Non-Scratch class or classes to merge.
-   * @returns {string} Hashed class names.
+   * @returns {string} An object that can be stringified into hashed class names.
    */
   scratchClass(...args) {
-    let res = "";
-    args
-      .filter((arg) => typeof arg === "string")
-      .forEach((classNameToFind) => {
-        if (scratchAddons.classNames.loaded) {
-          res +=
-            scratchAddons.classNames.arr.find(
-              (className) =>
-                className.startsWith(classNameToFind + "_") && className.length === classNameToFind.length + 6
-            ) || "";
-        } else {
-          res += `scratchAddonsScratchClass/${classNameToFind}`;
-        }
-        res += " ";
-      });
+    const scratchClasses = args.filter((arg) => typeof arg === "string");
+    let other;
     if (typeof args[args.length - 1] === "object") {
       const options = args[args.length - 1];
-      const classNames = Array.isArray(options.others) ? options.others : [options.others];
-      classNames.forEach((string) => (res += string + " "));
+      other = Array.isArray(options.others) ? options.others : [options.others];
     }
-    res = res.slice(0, -1);
-    // Sanitize just in case
-    res = res.replace(/"/g, "");
-    return res;
+    return new ScratchClasses(scratchClasses, other);
+  }
+
+  /**
+   * Returns a promise that resolves when scratch classes are ready to be used without placeholders
+   * @returns {Promise}
+   */
+  scratchClassesReady() {
+    if (scratchAddons.classNames.loaded) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      scratchAddons.classNames.loadedCallbacks.push(resolve);
+    });
   }
 
   /**

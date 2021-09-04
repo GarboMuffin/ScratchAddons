@@ -2,7 +2,10 @@ import runAddonUserscripts from "./run-userscript.js";
 import Localization from "./l10n.js";
 
 window.scratchAddons = {};
-scratchAddons.classNames = { loaded: false };
+scratchAddons.classNames = {
+  loaded: false,
+  loadedCallbacks: [],
+};
 scratchAddons.eventTargets = {
   auth: [],
   settings: [],
@@ -295,6 +298,12 @@ function loadClasses() {
     ),
   ];
   scratchAddons.classNames.loaded = true;
+  scratchAddons.classNames.findClass = (classNameToFind) =>
+    scratchAddons.classNames.arr.find(
+      (className) => className.startsWith(classNameToFind + "_") && className.length === classNameToFind.length + 6
+    );
+  scratchAddons.classNames.loadedCallbacks.forEach((i) => i());
+  scratchAddons.classNames.loadedCallbacks.length = [];
 
   const fixPlaceHolderClasses = () =>
     document.querySelectorAll("[class*='scratchAddonsScratchClass/']").forEach((el) => {
@@ -304,20 +313,12 @@ function loadClasses() {
         .forEach((classNameToFind) =>
           el.classList.replace(
             `scratchAddonsScratchClass/${classNameToFind}`,
-            scratchAddons.classNames.arr.find(
-              (className) =>
-                className.startsWith(classNameToFind + "_") && className.length === classNameToFind.length + 6
-            ) || `scratchAddonsScratchClass/${classNameToFind}`
+            scratchAddons.classNames.findClass(classNameToFind) || `scratchAddonsScratchClass/${classNameToFind}`
           )
         );
     });
 
   fixPlaceHolderClasses();
-  new MutationObserver(() => fixPlaceHolderClasses()).observe(document.documentElement, {
-    attributes: false,
-    childList: true,
-    subtree: true,
-  });
 }
 
 if (document.querySelector("title")) loadClasses();
