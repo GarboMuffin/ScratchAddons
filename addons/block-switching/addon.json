@@ -89,7 +89,7 @@
       "default": true
     },
     {
-      "name": "Scratch Addons blocks",
+      "name": "Addon blocks",
       "id": "sa",
       "type": "boolean",
       "default": true,
