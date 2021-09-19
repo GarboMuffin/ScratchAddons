@@ -38,6 +38,6 @@
   "noTranslations": true,
   "dynamicDisable": true,
   "dynamicEnable": true,
-  "enabledByDefault": false,
+  "enabledByDefault": true,
   "versionAdded": "1.20.0"
 }
