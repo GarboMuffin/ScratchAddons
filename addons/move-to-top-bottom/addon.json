@@ -8,6 +8,8 @@
       "matches": ["projects"]
     }
   ],
+  "enableByDefault": true,
+  "onlyInEditor": true,
   "dynamicEnable": true,
   "dynamicDisable": true,
   "versionAdded": "1.20.0"
