@@ -8,7 +8,7 @@
       "matches": ["projects"]
     }
   ],
-  "enableByDefault": true,
+  "enabledByDefault": true,
   "onlyInEditor": true,
   "dynamicEnable": true,
   "dynamicDisable": true,
