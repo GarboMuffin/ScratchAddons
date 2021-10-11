@@ -23,6 +23,8 @@
       "matches": ["projects"]
     }
   ],
+  "onlyInEditor": true,
+  "noTranslations": true,
   "tags": ["editor", "featured"],
   "enabledByDefault": false,
   "dynamicDisable": true,
