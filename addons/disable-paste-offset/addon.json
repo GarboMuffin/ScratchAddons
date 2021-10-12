@@ -16,5 +16,7 @@
     }
   ],
   "tags": ["editor", "costumeEditor"],
+  "onlyInEditor": true,
+  "noTranslations": true,
   "enabledByDefault": false
 }

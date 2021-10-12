@@ -19,9 +19,11 @@
       "matches": ["projects"]
     }
   ],
+  "onlyInEditor": true,
+  "noTranslations": true,
   "dynamicEnable": true,
   "dynamicDisable": true,
   "versionAdded": "1.21.0",
   "tags": ["editor", "codeEditor", "featured"],
-  "enabledByDefault": false
+  "enabledByDefault": true
 }
