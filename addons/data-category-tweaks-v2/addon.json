@@ -1,6 +1,6 @@
 {
-  "name": "Data category tweaks",
-  "description": "Provides tweaks for the Data (\"Variables\") block category.",
+  "name": "Variable category tweaks",
+  "description": "Provides tweaks for the variable block category. Previously called \"Data category tweaks\".",
   "credits": [
     {
       "name": "GarboMuffin"
