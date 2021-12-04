@@ -11,7 +11,8 @@ export default async function ({ addon, global, console, msg }) {
     // The check can technically fail when Redux isn't supported (rare cases)
     // Just ignore in this case
   }
-  const paperCanvas = paintEditorCanvasContainer[addon.tab.traps.getInternalKey(paintEditorCanvasContainer)].child.child.child.stateNode;
+  const paperCanvas =
+    paintEditorCanvasContainer[addon.tab.traps.getInternalKey(paintEditorCanvasContainer)].child.child.child.stateNode;
 
   let paperCenter;
   const storedOnionLayers = [];
@@ -390,12 +391,12 @@ export default async function ({ addon, global, console, msg }) {
         layersToCreate.push({
           index: i,
           isBefore,
-          opacity
+          opacity,
         });
       }
 
       const onions = await Promise.all(
-        layersToCreate.map(({index, isBefore, opacity}) => {
+        layersToCreate.map(({ index, isBefore, opacity }) => {
           const onionCostume = costumes[index];
           const onionAsset = vm.getCostume(index);
 
