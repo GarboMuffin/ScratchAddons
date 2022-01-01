@@ -265,7 +265,8 @@ export default async function ({ addon, global, console, msg }) {
       button.title = description;
     }
     const imageElement = Object.assign(document.createElement("img"), {
-      src: icon
+      src: icon,
+      draggable: false
     });
     const textElement = Object.assign(document.createElement("span"), {
       textContent: text
@@ -284,7 +285,8 @@ export default async function ({ addon, global, console, msg }) {
       className: addon.tab.scratchClass("react-tabs_react-tabs__tab", "gui_tab"),
     });
     const imageElement = Object.assign(document.createElement("img"), {
-      src: icon
+      src: icon,
+      draggable: false
     });
     const textElement = Object.assign(document.createElement("span"), {
       textContent: text
