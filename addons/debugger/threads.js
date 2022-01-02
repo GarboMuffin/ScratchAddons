@@ -1,5 +1,5 @@
 import { onPauseChanged, isPaused } from "./module.js";
-import LogView from './log-view.js';
+import LogView from "./log-view.js";
 
 const areArraysEqual = (a, b) => {
   if (a.length !== b.length) {
@@ -26,18 +26,18 @@ const STATUS_YIELD = 2;
 const STATUS_YIELD_TICK = 3;
 const STATUS_DONE = 4;
 
-export default async function createThreadsTab ({ debug, addon, console, msg }) {
+export default async function createThreadsTab({ debug, addon, console, msg }) {
   const vm = addon.tab.traps.vm;
   const ScratchBlocks = await addon.tab.traps.getBlockly();
 
   const tab = debug.createHeaderTab({
     text: msg("tab-threads"),
-    icon: addon.self.dir + "/icons/threads.svg"
+    icon: addon.self.dir + "/icons/threads.svg",
   });
 
   const logView = new LogView({ addon, msg });
   logView.canAutoScrollToEnd = false;
-  logView.outerElement.classList.add('sa-debugger-threads');
+  logView.outerElement.classList.add("sa-debugger-threads");
 
   const allThreadIds = new WeakMap();
   let nextThreadId = 1;
@@ -45,41 +45,41 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
   logView.buildDOM = (log) => {
     const INDENT = 16;
 
-    const element = document.createElement('div');
-    element.className = 'sa-debugger-log';
+    const element = document.createElement("div");
+    element.className = "sa-debugger-log";
 
-    if (log.type === 'thread-header') {
+    if (log.type === "thread-header") {
       if (log.depth > 0) {
-        const icon = document.createElement('div');
-        icon.className = 'sa-debugger-log-icon';
+        const icon = document.createElement("div");
+        icon.className = "sa-debugger-log-icon";
         icon.style.marginLeft = `${log.depth * INDENT}px`;
         element.appendChild(icon);
       }
 
-      const name = document.createElement('div');
+      const name = document.createElement("div");
       name.textContent = log.targetName;
-      name.className = 'sa-debugger-thread-target-name';
+      name.className = "sa-debugger-thread-target-name";
       element.appendChild(name);
 
-      const id = document.createElement('div');
-      id.className = 'sa-debugger-thread-id';
+      const id = document.createElement("div");
+      id.className = "sa-debugger-thread-id";
       id.textContent = msg("thread", {
-        id: log.id
+        id: log.id,
       });
       element.appendChild(id);
     }
 
-    if (log.type === 'thread-stack') {
-      const block = document.createElement('div');
+    if (log.type === "thread-stack") {
+      const block = document.createElement("div");
       block.textContent = log.name;
-      block.className = 'sa-debugger-stacked-block';
+      block.className = "sa-debugger-stacked-block";
       block.style.backgroundColor = log.color;
       block.style.marginLeft = `${(log.depth + 1) * INDENT}px`;
       element.appendChild(block);
     }
 
     if (log.running) {
-      element.classList.add('sa-debugger-thread-running');
+      element.classList.add("sa-debugger-thread-running");
     }
 
     if (log.targetId && log.blockId) {
@@ -87,7 +87,7 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
     }
 
     return element;
-  }
+  };
 
   let threadInfoCache = new WeakMap();
   let previousContent = [];
@@ -124,7 +124,7 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
             color = ScratchBlocks.Colours.pen;
           }
         } else {
-          color = { primary: "#979797" }
+          color = { primary: "#979797" };
         }
         if (color) color = color.primary;
 
@@ -142,7 +142,7 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
 
     return {
       name,
-      color
+      color,
     };
   };
 
@@ -172,12 +172,12 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
       if (!threadInfoCache.has(thread)) {
         threadInfoCache.set(thread, {
           headerItem: {
-            type: 'thread-header',
+            type: "thread-header",
             depth,
             targetName: target.getName(),
-            id
+            id,
           },
-          blockCache: new WeakMap()
+          blockCache: new WeakMap(),
         });
       }
       const cacheInfo = threadInfoCache.get(thread);
@@ -186,14 +186,14 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
       const createBlockInfo = (blockId, stackFrame) => {
         const block = thread.target.blocks.getBlock(blockId);
         if (!cacheInfo.blockCache.get(block)) {
-          const {name, color} = getBlockInfo(block);
+          const { name, color } = getBlockInfo(block);
           cacheInfo.blockCache.set(block, {
-            type: 'thread-stack',
+            type: "thread-stack",
             depth,
             name,
             color,
             targetId: target.id,
-            blockId
+            blockId,
           });
         }
 
@@ -249,7 +249,7 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
   const stepButton = debug.createHeaderButton({
     text: msg("step"),
     icon: addon.self.dir + "/icons/step.svg",
-    description: msg("step-desc")
+    description: msg("step-desc"),
   });
   stepButton.element.addEventListener("click", () => {
     singleStep();
@@ -257,12 +257,12 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
 
   let singleSteppingThread = null;
   const magicError = {
-    'used by Scratch Addons': 'used by Scratch Addons'
+    "used by Scratch Addons": "used by Scratch Addons",
   };
   const fakeProfiler = {
     idByName: () => {
       throw magicError;
-    }
+    },
   };
 
   const singleStepThread = (thread) => {
@@ -314,22 +314,22 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
     */
 
     let newBlockGlowInFrame = thread.blockGlowInFrame;
-    Object.defineProperty(thread, 'blockGlowInFrame', {
+    Object.defineProperty(thread, "blockGlowInFrame", {
       get: () => newBlockGlowInFrame,
       set: (value) => {
         newBlockGlowInFrame = value;
         vm.runtime.profiler = fakeProfiler;
       },
       configurable: true,
-      enumerable: true
+      enumerable: true,
     });
 
-    const oldStatus = Object.getOwnPropertyDescriptor(thread, 'status');
-    Object.defineProperty(thread, 'status', {
+    const oldStatus = Object.getOwnPropertyDescriptor(thread, "status");
+    Object.defineProperty(thread, "status", {
       value: 0,
       writable: true,
       enumerable: true,
-      configurable: true
+      configurable: true,
     });
 
     try {
@@ -337,13 +337,13 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
     } catch (e) {
       if (e !== magicError) throw e;
     } finally {
-      Object.defineProperty(thread, 'blockGlowInFrame', {
+      Object.defineProperty(thread, "blockGlowInFrame", {
         value: newBlockGlowInFrame,
         configurable: true,
         enumerable: true,
-        writable: true
+        writable: true,
       });
-      Object.defineProperty(thread, 'status', oldStatus);
+      Object.defineProperty(thread, "status", oldStatus);
       vm.runtime.profiler = null;
     }
   };
@@ -377,10 +377,10 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
     if (runningBlockIndex !== -1) {
       logView.scrollIntoView(runningBlockIndex);
     }
-  }
+  };
 
   const handlePauseChanged = (paused) => {
-    stepButton.element.style.display = paused ? "" : 'none';
+    stepButton.element.style.display = paused ? "" : "none";
     updateContent();
 
     if (paused) {
@@ -403,6 +403,6 @@ export default async function createThreadsTab ({ debug, addon, console, msg }) 
     content: logView.outerElement,
     buttons: [stepButton],
     show,
-    hide
+    hide,
   };
 }
