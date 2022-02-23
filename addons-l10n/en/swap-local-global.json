@@ -1,6 +1,8 @@
 {
   "swap-local-global/to-local": "Convert to \"For this sprite only\"",
   "swap-local-global/to-global": "Convert to \"For all sprites\"",
+  "swap-local-global/to-cloud": "Convert to cloud variable",
+  "swap-local-global/to-not-cloud": "Convert to non-cloud variable",
   "swap-local-global/cant-convert-to-local": "Can't convert because it's used by multiple sprites: {sprites}",
   "swap-local-global/cant-convert-cloud": "Cloud variables can't be converted to this sprite only.",
   "swap-local-global/cant-convert-stage": "The stage can't have variables for this sprite only.",

@@ -371,6 +371,10 @@ export default async function ({ addon, msg, console }) {
       if (!addon.self.disabled && (block.getCategory() === "data" || block.getCategory() === "data-lists")) {
         const variable = block.workspace.getVariableById(block.getVars()[0]);
         if (variable) {
+          const isLocal = variable.isLocal;
+          const isCloud = variable.isCloud;
+          const isVariable = variable.type === '';
+
           if (items.length > 0) {
             if (items[0].text === ScratchBlocks.ScratchMsgs.translate("RENAME_VARIABLE")) {
               items[0].text = msg("edit-variable-option");
@@ -378,12 +382,21 @@ export default async function ({ addon, msg, console }) {
               items[0].text = msg("edit-list-option");
             }
           }
+
           items.push({
             enabled: true,
             separator: true,
-            text: msg(`to-${variable.isLocal ? "global" : "local"}`),
-            callback: () => convertVariable(variable, !variable.isLocal, variable.isCloud),
+            text: msg(`to-${isLocal ? "global" : "local"}`),
+            callback: () => convertVariable(variable, !isLocal, isCloud),
           });
+
+          if (isVariable && canUserUseCloudVariables()) {
+            items.push({
+              enabled: isCloud || vm.runtime.canAddCloudVariable(),
+              text: msg(`to-${isCloud ? 'not-cloud' : 'cloud'}`),
+              callback: () => convertVariable(variable, isLocal, !isCloud)
+            });
+          }
         }
       }
       return items;
