@@ -221,7 +221,7 @@ export default async function ({ addon, msg, console }) {
   };
 
   const canUserUseCloudVariables = () => {
-    const blocksWrapper = document.querySelector('[class^="gui_blocks-wrapper_"]');
+    const blocksWrapper = document.querySelector('div[class^="gui_blocks-wrapper_"]');
     let internalNode = blocksWrapper[addon.tab.traps.getInternalKey(blocksWrapper)];
     while (true) {
       if (!internalNode) {
