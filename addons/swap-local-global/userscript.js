@@ -368,7 +368,8 @@ export default async function ({ addon, msg, console }) {
 
   addon.tab.createBlockContextMenu(
     (items, block) => {
-      let shouldShowMenu = !addon.self.disabled && (block.getCategory() === "data" || block.getCategory() === "data-lists");
+      let shouldShowMenu =
+        !addon.self.disabled && (block.getCategory() === "data" || block.getCategory() === "data-lists");
 
       if (shouldShowMenu) {
         const setting = addon.settings.get("context");
@@ -382,7 +383,7 @@ export default async function ({ addon, msg, console }) {
         if (variable) {
           const isLocal = variable.isLocal;
           const isCloud = variable.isCloud;
-          const isVariable = variable.type === '';
+          const isVariable = variable.type === "";
 
           if (items.length > 0) {
             if (items[0].text === ScratchBlocks.ScratchMsgs.translate("RENAME_VARIABLE")) {
@@ -402,8 +403,8 @@ export default async function ({ addon, msg, console }) {
           if (isVariable && canUserUseCloudVariables()) {
             items.push({
               enabled: isCloud || vm.runtime.canAddCloudVariable(),
-              text: msg(`to-${isCloud ? 'not-cloud' : 'cloud'}`),
-              callback: () => convertVariable(variable, isLocal, !isCloud)
+              text: msg(`to-${isCloud ? "not-cloud" : "cloud"}`),
+              callback: () => convertVariable(variable, isLocal, !isCloud),
             });
           }
         }
