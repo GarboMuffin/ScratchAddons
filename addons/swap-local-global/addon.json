@@ -18,6 +18,24 @@
       "matches": ["projects"]
     }
   ],
+  "settings": [
+    {
+      "name": "Add right click menu items",
+      "id": "context",
+      "type": "select",
+      "potentialValues": [
+        {
+          "id": "flyout",
+          "name": "Only in flyout"
+        },
+        {
+          "id": "everywhere",
+          "name": "Everywhere"
+        }
+      ],
+      "default": "everywhere"
+    }
+  ],
   "tags": ["editor", "codeEditor", "featured"],
   "versionAdded": "1.22.0",
   "dynamicEnable": true,

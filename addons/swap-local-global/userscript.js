@@ -368,7 +368,16 @@ export default async function ({ addon, msg, console }) {
 
   addon.tab.createBlockContextMenu(
     (items, block) => {
-      if (!addon.self.disabled && (block.getCategory() === "data" || block.getCategory() === "data-lists")) {
+      let shouldShowMenu = !addon.self.disabled && (block.getCategory() === "data" || block.getCategory() === "data-lists");
+
+      if (shouldShowMenu) {
+        const setting = addon.settings.get("context");
+        if (setting === "flyout" && !block.isInFlyout) {
+          shouldShowMenu = false;
+        }
+      }
+
+      if (shouldShowMenu) {
         const variable = block.workspace.getVariableById(block.getVars()[0]);
         if (variable) {
           const isLocal = variable.isLocal;
