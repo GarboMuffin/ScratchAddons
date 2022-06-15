@@ -5,6 +5,9 @@ export default async function ({ addon, global, console, msg }) {
   let globalVariables = [];
   let preventUpdate = false;
 
+  // Browsers universally perform very poorly or crash entirely when dealing with values this large.
+  const MAX_SAFE_VARIABLE_LENGTH = 1000000;
+
   const manager = document.createElement("div");
   manager.classList.add(addon.tab.scratchClass("asset-panel_wrapper"), "sa-var-manager");
 
@@ -85,17 +88,48 @@ export default async function ({ addon, global, console, msg }) {
       this.scratchVariable = scratchVariable;
       this.target = target;
       this.visible = false;
+      this.tooLarge = false;
+      this.ignoreTooLarge = false;
       this.buildDOM();
     }
 
     updateValue(force) {
       if (!this.visible && !force) return;
+      if (this.tooLarge && !this.ignoreTooLarge) return;
+
       let newValue;
       if (this.scratchVariable.type === "list") {
         newValue = this.scratchVariable.value.join("\n");
       } else {
         newValue = this.scratchVariable.value;
       }
+
+      if (!this.ignoreTooLarge && newValue.length > MAX_SAFE_VARIABLE_LENGTH) {
+        this.tooLarge = true;
+
+        // The value already in the input is probably also very large, so make sure to clear it out so we aren't
+        // wasting memory.
+        this.input.value = "";
+        this.input.remove();
+
+        const tooLargePlaceholder = document.createElement("a");
+        tooLargePlaceholder.className = "sa-var-manager-too-large";
+        tooLargePlaceholder.textContent = msg("too-large", {
+          number: newValue.length
+        });
+        tooLargePlaceholder.addEventListener("click", () => {
+          tooLargePlaceholder.remove();
+          this.valueCell.appendChild(this.input);
+          this.ignoreTooLarge = true;
+          this.updateValue(true);
+          this.resizeInputIfList();
+        });
+        this.tooLargePlaceholder = tooLargePlaceholder;
+        this.valueCell.appendChild(tooLargePlaceholder);
+
+        return;
+      }
+
       if (newValue !== this.input.value) {
         this.input.value = newValue;
       }
@@ -172,6 +206,7 @@ export default async function ({ addon, global, console, msg }) {
       observer.observe(row);
 
       const valueCell = document.createElement("td");
+      this.valueCell = valueCell;
       valueCell.className = "sa-var-manager-value";
 
       let input;
@@ -182,6 +217,10 @@ export default async function ({ addon, global, console, msg }) {
       }
       input.id = id;
       this.input = input;
+
+      valueCell.appendChild(input);
+      row.appendChild(labelCell);
+      row.appendChild(valueCell);
 
       this.updateValue(true);
       if (this.scratchVariable.type === "list") {
@@ -213,9 +252,7 @@ export default async function ({ addon, global, console, msg }) {
         manager.classList.remove("freeze");
       });
 
-      valueCell.appendChild(input);
-      row.appendChild(labelCell);
-      row.appendChild(valueCell);
+      this.tooLargePlaceholder = null;
 
       this.handleSearch(searchBox.value);
     }
