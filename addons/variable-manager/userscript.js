@@ -245,7 +245,7 @@ export default async function ({ addon, global, console, msg }) {
       const tooLargePlaceholder = document.createElement("a");
       tooLargePlaceholder.className = "sa-var-manager-too-large";
       tooLargePlaceholder.textContent = msg("too-large", {
-        length
+        length,
       });
       tooLargePlaceholder.addEventListener("click", (e) => {
         e.preventDefault();
