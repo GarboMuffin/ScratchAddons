@@ -165,8 +165,6 @@ export default async function ({ addon, global, console, msg }) {
     }
 
     buildDOM() {
-      const id = `sa-variable-manager-${this.scratchVariable.id}`;
-
       const row = document.createElement("tr");
       this.row = row;
       const labelCell = document.createElement("td");
@@ -174,7 +172,6 @@ export default async function ({ addon, global, console, msg }) {
 
       const label = document.createElement("input");
       label.value = this.scratchVariable.name;
-      label.htmlFor = id;
       const onLabelOut = (e) => {
         e.preventDefault();
         const workspace = Blockly.getMainWorkspace();
@@ -215,7 +212,6 @@ export default async function ({ addon, global, console, msg }) {
       } else {
         input = document.createElement("input");
       }
-      input.id = id;
       this.input = input;
 
       valueCell.appendChild(input);
