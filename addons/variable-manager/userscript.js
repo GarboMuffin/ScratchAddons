@@ -112,20 +112,8 @@ export default async function ({ addon, global, console, msg }) {
         this.input.value = "";
         this.input.remove();
 
-        const tooLargePlaceholder = document.createElement("a");
-        tooLargePlaceholder.className = "sa-var-manager-too-large";
-        tooLargePlaceholder.textContent = msg("too-large", {
-          number: newValue.length
-        });
-        tooLargePlaceholder.addEventListener("click", () => {
-          tooLargePlaceholder.remove();
-          this.valueCell.appendChild(this.input);
-          this.ignoreTooLarge = true;
-          this.updateValue(true);
-          this.resizeInputIfList();
-        });
-        this.tooLargePlaceholder = tooLargePlaceholder;
-        this.valueCell.appendChild(tooLargePlaceholder);
+        this.tooLargePlaceholder = this.createTooLargePlaceholder(newValue.length);
+        this.valueCell.appendChild(this.tooLargePlaceholder);
 
         return;
       }
@@ -251,6 +239,23 @@ export default async function ({ addon, global, console, msg }) {
       this.tooLargePlaceholder = null;
 
       this.handleSearch(searchBox.value);
+    }
+
+    createTooLargePlaceholder(length) {
+      const tooLargePlaceholder = document.createElement("a");
+      tooLargePlaceholder.className = "sa-var-manager-too-large";
+      tooLargePlaceholder.textContent = msg("too-large", {
+        length
+      });
+      tooLargePlaceholder.addEventListener("click", (e) => {
+        e.preventDefault();
+        tooLargePlaceholder.remove();
+        this.valueCell.appendChild(this.input);
+        this.ignoreTooLarge = true;
+        this.updateValue(true);
+        this.resizeInputIfList();
+      });
+      return tooLargePlaceholder;
     }
   }
 
