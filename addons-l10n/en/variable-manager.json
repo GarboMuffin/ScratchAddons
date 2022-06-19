@@ -3,5 +3,5 @@
   "variable-manager/for-all-sprites": "Variables for all sprites",
   "variable-manager/variables": "Variables",
   "variable-manager/search": "Search",
-  "variable-manager/too-large": "Value is {length} characters long which may be too large for your computer to handle. Click to view anyways."
+  "variable-manager/too-large": "Value is {length} characters long which may be too large for your computer to display without crashing. Click to view anyways."
 }
