@@ -84,7 +84,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     ctx.fillText(`Render sprites: ${renderTime}ms`, 0, 0);
   };
 
-  const argsToBlockIdCache = new WeakMap();
+  const blockIdCacheSymbol = Symbol('profiler arg to block ID cache')
   /**
    * @param {Thread} thread
    * @param {*} args argument value passed to a block
@@ -96,19 +96,24 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     // To figure that out, we can look around in the cache. The argument object passed to the
     // block is also stored by reference in the cache, so we can just search for it.
     // I hate this so much.
-    if (argsToBlockIdCache.has(args)) {
-      return argsToBlockIdCache.get(args);
+
+    // We've found that storing the cached block ID on args using a symbol is faster than a WeakMap.
+    const cached = args[blockIdCacheSymbol];
+    if (cached) {
+      return cached;
     }
+
     // TODO: look into ways to optimize this loop if needed
+    // TODO: probably also have to check flyout blocks
     const executeCache = thread.blockContainer._cache._executeCached;
     for (const blockId of Object.keys(executeCache)) {
       const value = executeCache[blockId];
       if (value._argValues === args) {
-        argsToBlockIdCache.set(args, blockId);
+        args[blockIdCacheSymbol] = blockId;
         return blockId;
       }
     }
-    return thread.peekStack();
+    return null;
   };
 
   const getBlockFromUnknownSprite = (id) => {
