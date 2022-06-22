@@ -339,6 +339,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         target.blocks.resetCache();
       }
     }
+    vm.runtime.flyoutBlocks.resetCache();
   };
 
   let isProfilerEnabled = false;
