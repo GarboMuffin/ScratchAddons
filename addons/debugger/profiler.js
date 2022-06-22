@@ -226,23 +226,13 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       this.isBlockBeingExecuted = false;
 
       /**
-       * The object returned by frame().
-       * We use this to know when Scratch finishes executing a block as it will increment the count parameter.
+       * The object returned by frame()
+       * We don't use this for anything, but Scratch needs *something*.
        */
-      this.fakeFrame = {};
-      Object.defineProperty(this.fakeFrame, "count", {
-        get: () => {
-          // Doesn't matter what we return here.
-          return 0;
-        },
-        set: (newCount) => {
-          // Scratch will increment count when it finishes executing a block.
-          if (this.isBlockBeingExecuted) {
-            this.isBlockBeingExecuted = false;
-            this.stop();
-          }
-        },
-      });
+      this.fakeFrame = {
+        // Scratch will try to increment the count parameter.
+        count: 0
+      };
     }
 
     /**
@@ -257,6 +247,25 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       }
       this.depth++;
       this.records.push(START, id, arg, now());
+    }
+
+    startBlock(thread, args) {
+      // Scratch will tell us which "move ( ) steps" block we're running, for example, but it won't
+      // tell us which input inside the block is being run.
+      // To figure that out, we can look around in the cache. The argument object passed to the
+      // block is also stored in the cache, so we can just brute force find it.
+      // I hate this so much.
+      // TODO: cache
+      let blockId = thread.peekStack();
+      const executeCache = thread.blockContainer._cache._executeCached;
+      for (const key of Object.keys(executeCache)) {
+        const value = executeCache[key];
+        if (value._argValues === args) {
+          blockId = key;
+          break;
+        }
+      }
+      this.start(EXECUTE_ID, blockId);
     }
 
     /**
@@ -275,11 +284,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
      * @param {number} id ID from idByName.
      */
     increment(id) {
-      if (id === EXECUTE_ID) {
-        this.isBlockBeingExecuted = true;
-        const currentThread = vm.runtime.sequencer.activeThread;
-        this.start(id, currentThread.peekStack());
-      }
+
     }
 
     /**
@@ -575,14 +580,49 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
   };
 
-  const setProfilerEnabled = (enabled) => {
-    if (enabled) {
-      finalFrame = null;
+  const resetAllBlockCaches = () => {
+    for (const target of vm.runtime.targets) {
+      if (target.isOriginal) {
+        target.blocks.resetCache();
+      }
     }
+  };
+
+  const originalGetOpcodeFunction = vm.runtime.getOpcodeFunction;
+  const cachedProfilerOpcodeFunctions = new Map();
+  const profilerGetOpcodeFunction = function (opcode) {
+    if (!cachedProfilerOpcodeFunctions.has(opcode)) {
+      const originalFunction = originalGetOpcodeFunction.call(this, opcode);
+      let newFunction;
+      if (originalFunction) {
+        // Wrap the function with profiling logic.
+        newFunction = function wrappedProfilerFunction (args, util) {
+          util.runtime.profiler.startBlock(util.thread, args);
+          const result = originalFunction(args, util);
+          util.runtime.profiler.stop();
+          return result;
+        };    
+      } else {
+        // Opcode doesn't exist. Keep returning null.
+        newFunction = originalFunction;
+      }
+      cachedProfilerOpcodeFunctions.set(opcode, newFunction);
+    }
+    return cachedProfilerOpcodeFunctions.get(opcode);
+  };
+
+  const setProfilerEnabled = (enabled) => {
+    resetAllBlockCaches();
 
     startProfilingButton.element.style.display = enabled ? 'none' : '';
     stopProfilingButton.element.style.display = enabled ? '' : 'none';
+
     vm.runtime.profiler = enabled ? new ScratchAddonsProfiler(onProfilerUpdate) : null;
+    vm.runtime.getOpcodeFunction = enabled ? profilerGetOpcodeFunction : originalGetOpcodeFunction;
+
+    if (enabled) {
+      finalFrame = null;
+    }
   };
 
   const startProfilingButton = debug.createHeaderButton({
