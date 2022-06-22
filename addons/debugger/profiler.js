@@ -25,9 +25,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       return b[1] - a[1];
     });
 
-  /**
-   * @param {ProcessedResults} results
-   */
+  /** @param {ProcessedResults} results */
   const render = (results) => {
     const canvasWidth = canvas.offsetWidth;
     const canvasHeight = canvas.offsetHeight;
@@ -130,14 +128,16 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   // TODO: use bitwise operators to more efficiently pack.
   const records = [];
 
-  /**
-   * @param {number} type See constants above
-   */
+  /** @param {number} type See constants above */
   const recordEvent = (type) => {
     records.push(type);
     records.push(now());
   };
 
+  /**
+   * @param {Thread} thread
+   * @param {*} args
+   */
   const recordStartBlock = (thread, args) => {
     const blockId = getBlockIdFromThreadAndArgs(thread, args);
     records.push(START_BLOCK);
@@ -162,6 +162,26 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       this.startTime = 0;
     }
   }
+
+  // We use a LOT of frames while processing profiler data, so create a pool and reuse these to create less garbage.
+
+  /** @type {ReuseableProfilerFrame[]} */
+  const reuseableFrames = [];
+
+  /** @returns {ReuseableProfilerFrame} */
+  const getReuseableFrame = () => {
+    if (reuseableFrames.length) {
+      const frame = reuseableFrames.pop();
+      frame.reset();
+      return frame;
+    }
+    return new ReuseableProfilerFrame();
+  };
+
+  /** @param {ReuseableProfilerFrame} frame */
+  const releaseReuseableFrame = (frame) => {
+    reuseableFrames.push(frame);
+  };
 
   class ProcessedResults {
     constructor() {
@@ -207,9 +227,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         const blockId = records[i + 2];
         i += 3;
 
-        // TODO: actually reuse these
-        const newFrame = new ReuseableProfilerFrame();
-        newFrame.reset();
+        const newFrame = getReuseableFrame();
         newFrame.blockId = blockId;
         newFrame.startTime = startTime;
         newFrame.type = type;
@@ -224,8 +242,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         const startTime = records[i + 1];
         i += 2;
 
-        const newFrame = new ReuseableProfilerFrame();
-        newFrame.reset();
+        const newFrame = getReuseableFrame();
         newFrame.type = type;
         newFrame.startTime = startTime;
 
@@ -252,6 +269,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
             result.addBlockIdTime(blockId, totalTime);
           }
         }
+
+        releaseReuseableFrame(finishedFrame);
       } else {
         // Should never happen.
         throw new Error(`Profiler processing found unexpected type: ${type}`);
@@ -323,6 +342,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
   };
 
+  /** @param {boolean} enabled */
   const setProfilerEnabled = (enabled) => {
     startProfilingButton.element.style.display = enabled ? "none" : "";
     stopProfilingButton.element.style.display = enabled ? "" : "none";
