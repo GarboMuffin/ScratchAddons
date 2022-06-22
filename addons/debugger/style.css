@@ -238,3 +238,9 @@
 .sa-debugger-block-preview[data-shape="stacked"] {
   border-radius: 3px;
 }
+
+.sa-profiler-tab-content, .sa-profiler-tab-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

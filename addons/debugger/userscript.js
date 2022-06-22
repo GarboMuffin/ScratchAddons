@@ -3,6 +3,7 @@ import createLogsTab from "./logs.js";
 import createThreadsTab from "./threads.js";
 import createPerformanceTab from "./performance.js";
 import DevtoolsUtils from "../editor-devtools/blockly/Utils.js";
+import createProfilerTab from "./profiler.js";
 
 const removeAllChildren = (element) => {
   while (element.firstChild) {
@@ -503,7 +504,8 @@ export default async function ({ addon, global, console, msg }) {
   logsTab = await createLogsTab(api);
   const threadsTab = await createThreadsTab(api);
   const performanceTab = await createPerformanceTab(api);
-  const allTabs = [logsTab, threadsTab, performanceTab];
+  const profilerTab = await createProfilerTab(api);
+  const allTabs = [logsTab, threadsTab, performanceTab, profilerTab];
 
   for (const message of messagesLoggedBeforeLogsTabLoaded) {
     logsTab.addLog(...message);
