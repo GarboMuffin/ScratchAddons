@@ -167,6 +167,10 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     constructor() {
       /** @type {Map<number, number>} */
       this.timeByType = new Map();
+      // For timeByType, all the fields must already exist
+      this.timeByType.set(START_BLOCK, 0);
+      this.timeByType.set(SEQUENCER_STEP_THREADS_EVENT, 0);
+      this.timeByType.set(RENDERER_DRAW_EVENT, 0);
 
       /** @type {Map<string, number>} */
       this.timeByOpcode = new Map();
@@ -176,7 +180,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
 
     addTypeTime(type, time) {
-      this.timeByType.set(type, (this.timeByType.get(type) || 0) + time);
+      this.timeByType.set(type, this.timeByType.get(type) + time);
     }
 
     addOpcodeTime(opcode, time) {
@@ -186,32 +190,13 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     addBlockIdTime(blockId, time) {
       this.timeByBlockId.set(blockId, (this.timeByBlockId.get(blockId) || 0) + time);
     }
-
-    /**
-     * @param {ProcessedResults} otherResults
-     * @returns {void} This class is modified in-place.
-     */
-    mergeInPlace(otherResults) {
-      /**
-       * @param {Map<*, number>} mapA
-       * @param {Map<*, number>} mapB
-       */
-      const mergeMaps = (mapA, mapB) => {
-        for (const entry of mapB.entries()) {
-          const key = entry[0];
-          const value = entry[1];
-          mapA.set(key, (mapA.get(key) || 0) + value);
-        }
-      };
-
-      mergeMaps(this.timeByType, otherResults.timeByType);
-      mergeMaps(this.timeByOpcode, otherResults.timeByOpcode);
-      mergeMaps(this.timeByBlockId, otherResults.timeByBlockId);
-    }
   }
 
-  const processRecords = (records) => {
-    const result = new ProcessedResults();
+  /**
+   * @param {ProcessedResults} result
+   * @returns {void} The result is stored in the result parameter.
+   */
+  const processRecords = (result) => {
     const stack = [];
 
     let i = 0;
@@ -252,25 +237,26 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         const finishedFrame = stack.pop();
         const totalTime = endTime - finishedFrame.startTime;
 
-        const type = finishedFrame.type;
-        result.addTypeTime(type, totalTime);
+        // Optimization: If no time passed (very common), don't bother with map lookups.
+        if (totalTime !== 0) {
+          const type = finishedFrame.type;
+          result.addTypeTime(type, totalTime);
 
-        const opcode = finishedFrame.opcode;
-        if (opcode) {
-          result.addOpcodeTime(opcode, totalTime);
-        }
+          const opcode = finishedFrame.opcode;
+          if (opcode) {
+            result.addOpcodeTime(opcode, totalTime);
+          }
 
-        const blockId = finishedFrame.blockId;
-        if (blockId) {
-          result.addBlockIdTime(blockId, totalTime);
+          const blockId = finishedFrame.blockId;
+          if (blockId) {
+            result.addBlockIdTime(blockId, totalTime);
+          }
         }
       } else {
         // Should never happen.
         throw new Error(`Profiler processing found unexpected type: ${type}`);
       }
     }
-
-    return result;
   };
 
   /** @type {ProcessedResults|null} */
@@ -281,12 +267,10 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       return;
     }
 
-    const newResults = processRecords(records);
-    if (previousResults) {
-      previousResults.mergeInPlace(newResults);
-    } else {
-      previousResults = newResults;
+    if (!previousResults) {
+      previousResults = new ProcessedResults();
     }
+    processRecords(previousResults);
     render(previousResults);
 
     records.length = 0;
