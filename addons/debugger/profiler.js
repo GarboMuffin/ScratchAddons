@@ -10,24 +10,25 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     className: "sa-profiler-tab-content",
   });
 
-  const canvas = Object.assign(document.createElement('canvas'), {
-    className: "sa-profiler-tab-canvas"
+  const canvas = Object.assign(document.createElement("canvas"), {
+    className: "sa-profiler-tab-canvas",
   });
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   content.appendChild(canvas);
 
   /**
    * @param {Map<*, number>} map
    * @returns {Array<*, number>}
    */
-  const sortMapByValue = (map) => Array.from(map.entries()).sort((a, b) => {
-    return b[1] - a[1];
-  });
+  const sortMapByValue = (map) =>
+    Array.from(map.entries()).sort((a, b) => {
+      return b[1] - a[1];
+    });
 
   /**
-   * @param {ProcessedResults} processed
+   * @param {ProcessedResults} results
    */
-  const render = (processed) => {
+  const render = (results) => {
     const canvasWidth = canvas.offsetWidth;
     const canvasHeight = canvas.offsetHeight;
 
@@ -38,33 +39,43 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     // Same font families as the rest of the Scratch interface
     ctx.font = '18px "Helvetica Neue", Helvetica, Arial, sans-serif';
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = "#000000";
 
     const HEIGHT = 20;
 
-    const sortedOpcodes = sortMapByValue(processed.timeByOpcode);
-    const sortedBlockIds = sortMapByValue(processed.timeByBlockId);
+    const sortedOpcodes = sortMapByValue(results.timeByOpcode);
+    const sortedBlockIds = sortMapByValue(results.timeByBlockId);
 
     ctx.save();
-
     ctx.translate(0, 0);
-    for (let i = 0; i < sortedOpcodes.length && i < 15; i++) {
+    let totalBlockTime = 0;
+    for (let i = 0; i < sortedOpcodes.length && i < 13; i++) {
       const entry = sortedOpcodes[i];
       const opcode = entry[0];
       const time = entry[1];
+      totalBlockTime += time;
       ctx.translate(0, HEIGHT);
       ctx.fillText(`${opcode} - ${Math.round(time)}ms`, 0, 0);
     }
-
     ctx.restore();
+
+    ctx.save();
     ctx.translate(250, 0);
-    for (let i = 0; i < sortedBlockIds.length && i < 15; i++) {
+    for (let i = 0; i < sortedBlockIds.length && i < 13; i++) {
       const entry = sortedBlockIds[i];
       const opcode = entry[0];
       const time = entry[1];
       ctx.translate(0, HEIGHT);
       ctx.fillText(`${opcode} - ${Math.round(time)}ms`, 0, 0);
     }
+    ctx.restore();
+
+    const sequencerTime = results.timeByType.get(SEQUENCER_STEP_THREADS_EVENT) - totalBlockTime;
+    const renderTime = results.timeByType.get(RENDERER_DRAW_EVENT);
+    ctx.translate(0, 200);
+    ctx.fillText(`VM overhead: ${sequencerTime}ms`, 0, 0);
+    ctx.translate(0, 20);
+    ctx.fillText(`Render sprites: ${renderTime}ms`, 0, 0);
   };
 
   const argsToBlockIdCache = new WeakMap();
@@ -92,7 +103,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       }
     }
     return thread.peekStack();
-  }
+  };
 
   const getBlockFromUnknownSprite = (id) => {
     // TODO this is horrible
@@ -106,45 +117,66 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     return null;
   };
 
-  const START_RECORD = 0;
-  const END_RECORD = 1;
-  const records = [];
-
   // TODO: now() is called a LOT and typically there will be no difference in time between calls
   // we should consider caching this for a few calls, which may improve performacne
   const now = () => performance.now();
 
+  const START_BLOCK = 0;
+  const SEQUENCER_STEP_THREADS_EVENT = 1;
+  const RENDERER_DRAW_EVENT = 2;
+  const END_RECORD = 3;
+
+  // TODO: convert to something like an Int32Array.
+  // TODO: use bitwise operators to more efficiently pack.
+  const records = [];
+
+  /**
+   * @param {number} type See constants above
+   */
+  const recordEvent = (type) => {
+    records.push(type);
+    records.push(now());
+  };
+
   const recordStartBlock = (thread, args) => {
     const blockId = getBlockIdFromThreadAndArgs(thread, args);
-    records.push(START_RECORD);
+    records.push(START_BLOCK);
     records.push(now());
     records.push(blockId);
   };
 
-  const recordEndBlock = () => {
+  const recordEnd = () => {
     records.push(END_RECORD);
     records.push(now());
   };
 
   class ReuseableProfilerFrame {
-    constructor () {
+    constructor() {
       this.reset();
     }
 
     reset() {
-      this.blockId = 'unknown';
-      this.opcode = 'unknown';
+      this.blockId = "";
+      this.opcode = "";
+      this.type = 0;
       this.startTime = 0;
     }
   }
 
   class ProcessedResults {
     constructor() {
+      /** @type {Map<number, number>} */
+      this.timeByType = new Map();
+
       /** @type {Map<string, number>} */
       this.timeByOpcode = new Map();
 
       /** @type {Map<string, number>} */
       this.timeByBlockId = new Map();
+    }
+
+    addTypeTime(type, time) {
+      this.timeByType.set(type, (this.timeByType.get(type) || 0) + time);
     }
 
     addOpcodeTime(opcode, time) {
@@ -156,17 +188,25 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
 
     /**
-     * @param {ProcessedResults} otherResults 
+     * @param {ProcessedResults} otherResults
      * @returns {void} This class is modified in-place.
      */
     mergeInPlace(otherResults) {
-      for (const [opcode, time] of otherResults.timeByOpcode.entries()) {
-        this.addOpcodeTime(opcode, time);
-      }
+      /**
+       * @param {Map<*, number>} mapA
+       * @param {Map<*, number>} mapB
+       */
+      const mergeMaps = (mapA, mapB) => {
+        for (const entry of mapB.entries()) {
+          const key = entry[0];
+          const value = entry[1];
+          mapA.set(key, (mapA.get(key) || 0) + value);
+        }
+      };
 
-      for (const [blockId, time] of otherResults.timeByBlockId.entries()) {
-        this.addBlockIdTime(blockId, time);
-      }
+      mergeMaps(this.timeByType, otherResults.timeByType);
+      mergeMaps(this.timeByOpcode, otherResults.timeByOpcode);
+      mergeMaps(this.timeByBlockId, otherResults.timeByBlockId);
     }
   }
 
@@ -177,7 +217,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     let i = 0;
     while (i < records.length) {
       const type = records[i];
-      if (type === START_RECORD) {
+      if (type === START_BLOCK) {
         const startTime = records[i + 1];
         const blockId = records[i + 2];
         i += 3;
@@ -187,11 +227,22 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         newFrame.reset();
         newFrame.blockId = blockId;
         newFrame.startTime = startTime;
+        newFrame.type = type;
 
         const block = getBlockFromUnknownSprite(blockId);
         if (block) {
           newFrame.opcode = block.opcode;
         }
+
+        stack.push(newFrame);
+      } else if (type === SEQUENCER_STEP_THREADS_EVENT || type === RENDERER_DRAW_EVENT) {
+        const startTime = records[i + 1];
+        i += 2;
+
+        const newFrame = new ReuseableProfilerFrame();
+        newFrame.reset();
+        newFrame.type = type;
+        newFrame.startTime = startTime;
 
         stack.push(newFrame);
       } else if (type === END_RECORD) {
@@ -201,11 +252,21 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         const finishedFrame = stack.pop();
         const totalTime = endTime - finishedFrame.startTime;
 
+        const type = finishedFrame.type;
+        result.addTypeTime(type, totalTime);
+
         const opcode = finishedFrame.opcode;
-        result.addOpcodeTime(opcode, totalTime);
+        if (opcode) {
+          result.addOpcodeTime(opcode, totalTime);
+        }
 
         const blockId = finishedFrame.blockId;
-        result.addBlockIdTime(blockId, totalTime);
+        if (blockId) {
+          result.addBlockIdTime(blockId, totalTime);
+        }
+      } else {
+        // Should never happen.
+        throw new Error(`Profiler processing found unexpected type: ${type}`);
       }
     }
 
@@ -231,6 +292,24 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     records.length = 0;
   });
 
+  const createProfiledFunction = (targetObject, methodName, eventType) => {
+    const originalFunction = targetObject[methodName];
+    targetObject[methodName] = function profiledFunction(...args) {
+      recordEvent(eventType);
+      const ret = originalFunction.apply(this, args);
+      recordEnd();
+      return ret;
+    };
+  };
+
+  const createProfiledBlockFunction = (originalFunction) =>
+    function profiledBlockFunction(args, util) {
+      recordStartBlock(util.thread, args);
+      const result = originalFunction(args, util);
+      recordEnd();
+      return result;
+    };
+
   const originalGetOpcodeFunction = vm.runtime.getOpcodeFunction;
   const cachedProfilerOpcodeFunctions = new Map();
   const profiledGetOpcodeFunction = function (opcode) {
@@ -239,12 +318,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       let newFunction;
       if (originalFunction) {
         // Wrap the function with profiling logic.
-        newFunction = function profiledOpcodeFunction (args, util) {
-          recordStartBlock(util.thread, args);
-          const result = originalFunction(args, util);
-          recordEndBlock();
-          return result;
-        };
+        newFunction = createProfiledBlockFunction(originalFunction);
       } else {
         // Opcode doesn't exist. Keep returning null.
         newFunction = originalFunction;
@@ -253,6 +327,9 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
     return cachedProfilerOpcodeFunctions.get(opcode);
   };
+
+  createProfiledFunction(vm.runtime.sequencer, "stepThreads", SEQUENCER_STEP_THREADS_EVENT);
+  createProfiledFunction(vm.runtime.renderer, "draw", RENDERER_DRAW_EVENT);
 
   const resetAllBlockCaches = () => {
     for (const target of vm.runtime.targets) {
@@ -263,8 +340,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   };
 
   const setProfilerEnabled = (enabled) => {
-    startProfilingButton.element.style.display = enabled ? 'none' : '';
-    stopProfilingButton.element.style.display = enabled ? '' : 'none';
+    startProfilingButton.element.style.display = enabled ? "none" : "";
+    stopProfilingButton.element.style.display = enabled ? "" : "none";
 
     // This trap is installed dynamically because getOpcodeFunction is very hot.
     // We don't want to be adding any overhead when we don't need to.
