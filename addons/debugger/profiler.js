@@ -78,7 +78,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     const sequencerTime = results.timeByType.get(SEQUENCER_STEP_THREADS_EVENT) - totalBlockTime;
     const renderTime = results.timeByType.get(RENDERER_DRAW_EVENT);
-    ctx.translate(0, 200);
+    ctx.translate(0, 300);
     ctx.fillText(`VM overhead: ${sequencerTime}ms`, 0, 0);
     ctx.translate(0, 20);
     ctx.fillText(`Render sprites: ${renderTime}ms`, 0, 0);
