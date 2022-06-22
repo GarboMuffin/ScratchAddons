@@ -282,15 +282,14 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   let previousResults = null;
 
   debug.addAfterStepCallback(() => {
-    if (records.length === 0) {
-      return;
+    if (isProfilerEnabled) {
+      // TODO: would it be better to not track events in the first place when profiler is disabled?
+      if (!previousResults) {
+        previousResults = new ProcessedResults();
+      }
+      processRecords(previousResults);
+      render(previousResults);
     }
-
-    if (!previousResults) {
-      previousResults = new ProcessedResults();
-    }
-    processRecords(previousResults);
-    render(previousResults);
 
     records.length = 0;
   });
@@ -342,19 +341,22 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
   };
 
-  /** @param {boolean} enabled */
-  const setProfilerEnabled = (enabled) => {
-    startProfilingButton.element.style.display = enabled ? "none" : "";
-    stopProfilingButton.element.style.display = enabled ? "" : "none";
+  let isProfilerEnabled = false;
+  /** @param {boolean} _enabled */
+  const setProfilerEnabled = (_enabled) => {
+    isProfilerEnabled = _enabled;
+
+    startProfilingButton.element.style.display = isProfilerEnabled ? "none" : "";
+    stopProfilingButton.element.style.display = isProfilerEnabled ? "" : "none";
 
     // This trap is installed dynamically because getOpcodeFunction is very hot.
     // We don't want to be adding any overhead when we don't need to.
-    vm.runtime.getOpcodeFunction = enabled ? profiledGetOpcodeFunction : originalGetOpcodeFunction;
+    vm.runtime.getOpcodeFunction = isProfilerEnabled ? profiledGetOpcodeFunction : originalGetOpcodeFunction;
 
     // Must reset scratch-vm's caches so that our modified getOpcodeFunction is used.
     resetAllBlockCaches();
 
-    if (enabled) {
+    if (isProfilerEnabled) {
       previousResults = null;
     }
   };
