@@ -193,6 +193,32 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
   }
 
+  const argsToBlockIdCache = new WeakMap();
+  /**
+   * @param {Thread} thread
+   * @param {*} args argument value passed to a block
+   * @returns {string|null} ID of block
+   */
+  const getBlockIdFromThreadAndArgs = (thread, args) => {
+    // Scratch will tell us which "move ( ) steps" block we're running, for example, but it won't
+    // tell us which input inside the block is being run.
+    // To figure that out, we can look around in the cache. The argument object passed to the
+    // block is also stored in the cache, so we can just brute force find it.
+    // I hate this so much.
+    if (argsToBlockIdCache.has(args)) {
+      return argsToBlockIdCache.get(args);
+    }
+    const executeCache = thread.blockContainer._cache._executeCached;
+    for (const blockId of Object.keys(executeCache)) {
+      const value = executeCache[blockId];
+      if (value._argValues === args) {
+        argsToBlockIdCache.set(args, blockId);
+        return blockId;
+      }
+    }
+    return thread.peekStack();
+  }
+
   class ScratchAddonsProfiler {
     constructor(onUpdate) {
       /**
@@ -250,22 +276,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
 
     startBlock(thread, args) {
-      // Scratch will tell us which "move ( ) steps" block we're running, for example, but it won't
-      // tell us which input inside the block is being run.
-      // To figure that out, we can look around in the cache. The argument object passed to the
-      // block is also stored in the cache, so we can just brute force find it.
-      // I hate this so much.
-      // TODO: cache
-      let blockId = thread.peekStack();
-      const executeCache = thread.blockContainer._cache._executeCached;
-      for (const key of Object.keys(executeCache)) {
-        const value = executeCache[key];
-        if (value._argValues === args) {
-          blockId = key;
-          break;
-        }
-      }
-      this.start(EXECUTE_ID, blockId);
+      this.start(EXECUTE_ID, getBlockIdFromThreadAndArgs(thread, args));
     }
 
     /**
