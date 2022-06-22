@@ -98,16 +98,14 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     return id;
   };
   
+  const INTERNAL_ROOT_ID = setupNativeFrame("(root)", "#888888");
   const RUNTIME_STEP_ID = setupNativeFrame("Runtime._step", "#abcdef");
-  const SEQUENCER_STEP_THREADS_ID = setupNativeFrame("Sequencer.stepThreads", "#123456");
+  const SEQUENCER_STEP_THREADS_ID = setupNativeFrame("Sequencer.stepThreads", "#ff3456");
   const SEQUENCER_STEP_THREADS_INNER_ID = setupNativeFrame("Sequencer.stepThreads#inner", "#00ff00");
   const SEQUENCER_STEP_SINGLE_THREAD_ID = setupNativeFrame("Sequencer.stepThread", "#00ffff");
   const EXECUTE_ID = setupNativeFrame("execute", "#ff00ff");
   const BLOCK_FUNCTION_ID = setupNativeFrame("blockFunction", "#ffff00");
   const RENDER_WEBGL_ID = setupNativeFrame("RenderWebGL.draw", "#888800");
-
-  const INTERNAL_ROOT_ID = -1;
-  frameIdToColor.set(INTERNAL_ROOT_ID, "#888888");
 
   /**
    * The START event identifier in Profiler records.
@@ -239,10 +237,10 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         },
         set: (newCount) => {
           // Scratch will increment count when it finishes executing a block.
-          // if (this.isBlockBeingExecuted) {
-          //   this.isBlockBeingExecuted = false;
-          //   this.stop();
-          // }
+          if (this.isBlockBeingExecuted) {
+            this.isBlockBeingExecuted = false;
+            this.stop();
+          }
         },
       });
     }
@@ -277,17 +275,11 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
      * @param {number} id ID from idByName.
      */
     increment(id) {
-      // TODO
-      // if (id === EXECUTE_ID) {
-      //   this.isBlockBeingExecuted = true;
-      //   const currentThread = vm.runtime.sequencer.activeThread;
-      //   this.start(id, currentThread.peekStack());
-      // }
-      // if (!this.increments[id]) {
-      //   this.increments[id] = new ProfilerFrame(-1);
-      //   this.increments[id].id = id;
-      // }
-      // this.increments[id].count += 1;
+      if (id === EXECUTE_ID) {
+        this.isBlockBeingExecuted = true;
+        const currentThread = vm.runtime.sequencer.activeThread;
+        this.start(id, currentThread.peekStack());
+      }
     }
 
     /**
@@ -473,7 +465,12 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
    * @returns {string}
    */
   const getFrameText = (frame) => {
-    return getFrameNameById(frame.id);
+    const arg = frame.arg;
+    if (arg) {
+      return arg;
+    }
+    const text = getFrameNameById(frame.id);
+    return text;
   };
 
   /** @type {Frame|null} */
@@ -483,13 +480,25 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
    * @param {Frame} newFrame
    */
   const onProfilerUpdate = (newFrame) => {
-    convertCallsToFlameGraph(newFrame);
+    // convertCallsToFlameGraph(newFrame);
     finalFrame = newFrame;
     // if (finalFrame) {
     //   mergeFlameGraphs(finalFrame, newFrame)
     // } else {
     // }
     render();
+  };
+
+  const getBlock = (id) => {
+    // TODO this is horrible
+    for (const target of vm.runtime.targets) {
+      const block = target.blocks.getBlock(id);
+      if (block) {
+        return block;
+      }
+    }
+    // TODO check flyout
+    return null;
   };
 
   const render = () => {
@@ -509,8 +518,9 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     ctx.font = '18px "Helvetica Neue", Helvetica, Arial, sans-serif';
 
     const FRAME_HEIGHT = 20;
+    const TEXT_BASELINE = 0.8 * 20;
 
-    const scaleTimeToWidth = (time) => time / totalTime * canvasWidth;
+    const scaleHorizontalCoordinate = (time) => time / 16 * canvasWidth;
 
     // Do not use recursion.
     // Scratch blocks can recurse far deeper than normal JS functions can handle without a stack overflow.
@@ -519,18 +529,50 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       const totalTime = frame.totalTime;
       const depth = frame.depth;
 
-      const x = scaleTimeToWidth(relativeStartTime);
+      const x = scaleHorizontalCoordinate(relativeStartTime);
       const y = depth * FRAME_HEIGHT;
-      const width = scaleTimeToWidth(totalTime);
+      const width = scaleHorizontalCoordinate(totalTime);
       const height = FRAME_HEIGHT;
       // TODO: cull
 
       ctx.fillStyle = getFrameColor(frame);
       ctx.fillRect(x, y, width, height);
 
-      ctx.fillStyle = 'black';
-      ctx.fillText(getFrameText(frame), x, y);
+      if (width > 10) {
+        ctx.fillStyle = 'black';
+        ctx.fillText(getFrameText(frame), x, y + TEXT_BASELINE);
+      }
     });
+
+    /** @type {Map<string, number>} */
+    const timeByOpcode = new Map();
+    recurseFrame(finalFrame, (frame) => {
+      const blockId = frame.arg;
+      if (!blockId) {
+        return;
+      }
+
+      const block = getBlock(blockId);
+      if (!block) {
+        return;
+      }
+
+      const opcode = block.opcode;
+      const selfTime = frame.selfTime;
+      timeByOpcode.set(opcode, (timeByOpcode.get(opcode) || 0) + selfTime);
+    });
+    const sortedOpcodes = Array.from(timeByOpcode.entries()).sort((a, b) => {
+      return b[1] - a[1];
+    });
+
+    ctx.translate(0, 150);
+    ctx.fillStyle = '#000000';
+    for (let i = 0; i < sortedOpcodes.length && i < 10; i++) {
+      const entry = sortedOpcodes[i];
+      const opcode = entry[0];
+      const time = entry[1];
+      ctx.fillText(`${opcode} - ${Math.round(time)}ms`, 0, i * FRAME_HEIGHT);
+    }
   };
 
   const setProfilerEnabled = (enabled) => {
