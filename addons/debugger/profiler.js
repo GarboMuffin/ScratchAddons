@@ -1,4 +1,8 @@
 export default async function createProfilerTab({ debug, addon, console, msg }) {
+  /**
+   * @typedef {Object} Thread
+   */
+
   const vm = addon.tab.traps.vm;
 
   const tab = debug.createHeaderTab({
@@ -10,10 +14,14 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     className: "sa-profiler-tab-content",
   });
 
+  // TODO: do this lazily, when the tab is first visible
   const canvas = Object.assign(document.createElement("canvas"), {
     className: "sa-profiler-tab-canvas",
   });
   const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    throw new Error('Cannot get 2d rendering context');
+  }
   content.appendChild(canvas);
 
   /**
@@ -156,9 +164,16 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
 
     reset() {
+      /** @type {string} */
       this.blockId = "";
+
+      /** @type {string} */
       this.opcode = "";
+
+      /** @type {number} See type constants */
       this.type = 0;
+
+      /** @type {number} */
       this.startTime = 0;
     }
   }
@@ -251,7 +266,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         const endTime = records[i + 1];
         i += 2;
 
-        const finishedFrame = stack.pop();
+        const finishedFrame = /** @type {ReuseableProfilerFrame} */ (stack.pop());
         const totalTime = endTime - finishedFrame.startTime;
 
         // Optimization: If no time passed (very common), don't bother with map lookups.
@@ -278,8 +293,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
   };
 
-  /** @type {ProcessedResults|null} */
-  let previousResults = null;
+  /** @type {ProcessedResults} */
+  let previousResults = new ProcessedResults();
 
   debug.addAfterStepCallback(() => {
     if (isProfilerEnabled) {
@@ -358,7 +373,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     resetAllBlockCaches();
 
     if (isProfilerEnabled) {
-      previousResults = null;
+      // Reset results
+      previousResults = new ProcessedResults();
     }
   };
 
