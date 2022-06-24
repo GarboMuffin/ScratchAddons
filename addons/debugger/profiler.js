@@ -42,8 +42,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       return b[1] - a[1];
     });
 
-  /** @param {ProcessedResults} results */
-  const render = (results) => {
+  const render = () => {
     if (!isVisible) {
       return;
     }
@@ -62,8 +61,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     const HEIGHT = 20;
 
-    const sortedOpcodes = sortMapByValue(results.timeByOpcode);
-    const sortedBlockIds = sortMapByValue(results.timeByBlockId);
+    const sortedOpcodes = sortMapByValue(timeByOpcode);
+    const sortedBlockIds = sortMapByValue(timeByBlockId);
 
     ctx.save();
     ctx.translate(0, 0);
@@ -89,8 +88,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
     ctx.restore();
 
-    const sequencerTime = results.timeByType.get(SEQUENCER_STEP_THREADS_EVENT) - totalBlockTime;
-    const renderTime = results.timeByType.get(RENDERER_DRAW_EVENT);
+    const sequencerTime = (timeByEvent.get(SEQUENCER_STEP_THREADS_EVENT) || 0) - totalBlockTime;
+    const renderTime = timeByEvent.get(RENDERER_DRAW_EVENT) || 0;
     ctx.translate(0, 300);
     ctx.fillText(`VM overhead: ${sequencerTime}ms`, 0, 0);
     ctx.translate(0, 20);
@@ -158,65 +157,60 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   const SEQUENCER_STEP_THREADS_EVENT = 1;
   const RENDERER_DRAW_EVENT = 2;
 
-  class ProcessedResults {
-    constructor() {
-      /** @type {Map<number, number>} */
-      this.timeByType = new Map();
-      // For timeByType, all the fields must already exist
-      // Total time spent in block execution is tracked implicitly in the other maps
-      this.timeByType.set(SEQUENCER_STEP_THREADS_EVENT, 0);
-      this.timeByType.set(RENDERER_DRAW_EVENT, 0);
+  /** @type {Map<number, number>} */
+  const timeByEvent = new Map();
 
-      /** @type {Map<string, number>} */
-      this.timeByOpcode = new Map();
+  /** @type {Map<string, number>} */
+  const timeByOpcode = new Map();
 
-      /** @type {Map<string, number>} */
-      this.timeByBlockId = new Map();
+  /** @type {Map<string, number>} */
+  const timeByBlockId = new Map();
+
+  /**
+   * @param {*} args scratch-vm args value
+   * @param {{thread: Thread, target: Target}} util scratch-vm block utility
+   * @param {number} time
+   */
+  const recordBlock = (args, util, time) => {
+    // We don't need to check isProfilerEnabled here because the block execution trap doesn't do anything
+    // when the profiler is disabled.
+    if (time === 0) {
+      return;
     }
-
-    /**
-     * @param {*} args scratch-vm args value
-     * @param {{thread: Thread, target: Target}} util scratch-vm block utility
-     * @param {number} time
-     */
-    recordBlock (args, util, time) {
-      // We don't need to check isProfilerEnabled here because the block execution trap doesn't do anything
-      // when the profiler is disabled.
-      if (time === 0) {
-        return;
-      }
-      const blockId = getBlockIdFromThreadAndArgs(util.thread, args);
-      if (!blockId) {
-        return;
-      }
-      const block = debug.getBlock(util.target, blockId);
-      if (!block) {
-        return;
-      }
-      const opcode = block.opcode;
-      this.timeByOpcode.set(opcode, (this.timeByOpcode.get(opcode) || 0) + time);
-      this.timeByBlockId.set(blockId, (this.timeByBlockId.get(blockId) || 0) + time);
+    const blockId = getBlockIdFromThreadAndArgs(util.thread, args);
+    if (!blockId) {
+      return;
     }
-
-    /**
-     * @param {number} type Any event constant above.
-     * @param {number} time
-     */
-    recordEvent(type, time) {
-      if (!isProfilerEnabled) {
-        return;
-      }
-      // All values in this map must already exist.
-      this.timeByType.set(type, this.timeByType.get(type) + time);
+    const block = debug.getBlock(util.target, blockId);
+    if (!block) {
+      return;
     }
-  }
+    const opcode = block.opcode;
+    timeByOpcode.set(opcode, (timeByOpcode.get(opcode) || 0) + time);
+    timeByBlockId.set(blockId, (timeByBlockId.get(blockId) || 0) + time);
+  };
 
-  /** @type {ProcessedResults} */
-  let profilerResults = new ProcessedResults();
+  /**
+   * @param {number} type Any event constant above.
+   * @param {number} time
+   */
+  const recordEvent = (type, time) => {
+    if (!isProfilerEnabled) {
+      return;
+    }
+    // All values in this map must already exist.
+    timeByEvent.set(type, (timeByEvent.get(type) || 0) + time);
+  };
+
+  const resetData = () => {
+    timeByEvent.clear();
+    timeByOpcode.clear();
+    timeByBlockId.clear();
+  };
 
   debug.addAfterStepCallback(() => {
     if (isProfilerEnabled) {
-      render(profilerResults);
+      render();
     }
   });
 
@@ -225,7 +219,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     targetObject[methodName] = function profiledFunction(...args) {
       const start = now();
       const ret = originalFunction.apply(this, args);
-      profilerResults.recordEvent(eventType, now() - start);
+      recordEvent(eventType, now() - start);
       return ret;
     };
   };
@@ -234,7 +228,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     function profiledBlockFunction(args, util) {
       const start = now();
       const result = originalFunction(args, util);
-      profilerResults.recordBlock(args, util, now() - start);
+      recordBlock(args, util, now() - start);
       return result;
     };
 
@@ -284,8 +278,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     resetAllBlockCaches();
 
     if (isProfilerEnabled) {
-      // Reset results
-      profilerResults = new ProcessedResults();
+      resetData();
     }
   };
 
