@@ -180,6 +180,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
      * @param {number} time
      */
     recordBlock (args, util, time) {
+      // We don't need to check isProfilerEnabled here because the block execution trap doesn't do anything
+      // when the profiler is disabled.
       if (time === 0) {
         return;
       }
@@ -201,6 +203,9 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
      * @param {number} time
      */
     recordEvent(type, time) {
+      if (!isProfilerEnabled) {
+        return;
+      }
       // All values in this map must already exist.
       this.timeByType.set(type, this.timeByType.get(type) + time);
     }
@@ -210,7 +215,6 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   let profilerResults = new ProcessedResults();
 
   debug.addAfterStepCallback(() => {
-    // TODO: would it be better to not track events in the first place when profiler is disabled?
     if (isProfilerEnabled) {
       render(profilerResults);
     }
