@@ -35,6 +35,10 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
   /** @param {ProcessedResults} results */
   const render = (results) => {
+    if (!isVisible) {
+      return;
+    }
+
     const canvasWidth = canvas.offsetWidth;
     const canvasHeight = canvas.offsetHeight;
 
