@@ -14,90 +14,6 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
   const vm = addon.tab.traps.vm;
 
-  const tab = debug.createHeaderTab({
-    text: "Profiler", // TODO
-    icon: addon.self.dir + "/icons/performance.svg", // TODO
-  });
-
-  const content = Object.assign(document.createElement("div"), {
-    className: "sa-profiler-tab-content",
-  });
-
-  // TODO: do this lazily, when the tab is first visible
-  const canvas = Object.assign(document.createElement("canvas"), {
-    className: "sa-profiler-tab-canvas",
-  });
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    throw new Error('Cannot get 2d rendering context');
-  }
-  content.appendChild(canvas);
-
-  /**
-   * @param {Map<*, number>} map
-   * @returns {Array<*, number>}
-   */
-  const sortMapByValue = (map) =>
-    Array.from(map.entries()).sort((a, b) => {
-      return b[1] - a[1];
-    });
-
-  const render = () => {
-    if (!isVisible) {
-      return;
-    }
-
-    const canvasWidth = canvas.offsetWidth;
-    const canvasHeight = canvas.offsetHeight;
-
-    const scale = window.devicePixelRatio;
-    canvas.width = canvasWidth * scale;
-    canvas.height = canvasHeight * scale;
-    ctx.scale(scale, scale);
-
-    // Same font families as the rest of the Scratch interface
-    ctx.font = '18px "Helvetica Neue", Helvetica, Arial, sans-serif';
-    ctx.fillStyle = "#000000";
-
-    const HEIGHT = 20;
-
-    const sortedOpcodes = sortMapByValue(timeByOpcode);
-    const sortedBlockIds = sortMapByValue(timeByBlockId);
-
-    ctx.save();
-    ctx.translate(0, 0);
-    let totalBlockTime = 0;
-    for (let i = 0; i < sortedOpcodes.length && i < 13; i++) {
-      const entry = sortedOpcodes[i];
-      const opcode = entry[0];
-      const time = entry[1];
-      totalBlockTime += time;
-      ctx.translate(0, HEIGHT);
-      ctx.fillText(`${opcode} - ${Math.round(time)}ms`, 0, 0);
-    }
-    ctx.restore();
-
-    ctx.save();
-    ctx.translate(250, 0);
-    for (let i = 0; i < sortedBlockIds.length && i < 13; i++) {
-      const entry = sortedBlockIds[i];
-      const opcode = entry[0];
-      const time = entry[1];
-      ctx.translate(0, HEIGHT);
-      ctx.fillText(`${opcode} - ${Math.round(time)}ms`, 0, 0);
-    }
-    ctx.restore();
-
-    const sequencerTime = (timeByEvent.get(SEQUENCER_STEP_THREADS_EVENT) || 0) - totalBlockTime;
-    const renderTime = timeByEvent.get(RENDERER_DRAW_EVENT) || 0;
-    ctx.translate(0, 300);
-    ctx.fillText(`VM overhead: ${sequencerTime}ms`, 0, 0);
-    ctx.translate(0, 20);
-    ctx.fillText(`Render sprites: ${renderTime}ms`, 0, 0);
-  };
-
-  const blockIdCacheSymbol = Symbol('profiler arg to block ID cache')
-
   /**
    * @param {{_cache: {_executeCached: Record<string, *>}}} blockContainer
    * @param {*} args
@@ -116,6 +32,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     return null;
   };
 
+  const blockIdCacheSymbol = Symbol("used for profiler block ID cache");
+
   /**
    * @param {Thread} thread
    * @param {*} args argument value passed to a block
@@ -130,7 +48,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     // We've found that storing the cached block ID on args using a symbol is faster than a WeakMap.
     const cached = args[blockIdCacheSymbol];
-    if (typeof cached !== 'undefined') {
+    if (typeof cached !== "undefined") {
       return cached;
     }
 
@@ -207,12 +125,6 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     timeByOpcode.clear();
     timeByBlockId.clear();
   };
-
-  debug.addAfterStepCallback(() => {
-    if (isProfilerEnabled) {
-      render();
-    }
-  });
 
   const createProfiledFunction = (targetObject, methodName, eventType) => {
     const originalFunction = targetObject[methodName];
@@ -300,6 +212,96 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     setProfilerEnabled(false);
   });
 
+  setProfilerEnabled(false);
+
+  /**
+   * @param {Map<*, number>} map
+   * @returns {Array<*, number>}
+   */
+  const sortMapByValue = (map) =>
+    Array.from(map.entries()).sort((a, b) => {
+      return b[1] - a[1];
+    });
+
+  const tab = debug.createHeaderTab({
+    text: "Profiler", // TODO
+    icon: addon.self.dir + "/icons/performance.svg", // TODO
+  });
+
+  const content = Object.assign(document.createElement("div"), {
+    className: "sa-profiler-tab-content",
+  });  
+
+  // TODO: do this lazily, when the tab is first visible
+  const canvas = Object.assign(document.createElement("canvas"), {
+    className: "sa-profiler-tab-canvas",
+  });
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    throw new Error("Cannot get 2d rendering context");
+  }
+  content.appendChild(canvas);
+
+  const render = () => {
+    if (!isVisible) {
+      return;
+    }
+
+    const canvasWidth = canvas.offsetWidth;
+    const canvasHeight = canvas.offsetHeight;
+
+    const scale = window.devicePixelRatio;
+    canvas.width = canvasWidth * scale;
+    canvas.height = canvasHeight * scale;
+    ctx.scale(scale, scale);
+
+    // Same font families as the rest of the Scratch interface
+    ctx.font = '18px "Helvetica Neue", Helvetica, Arial, sans-serif';
+    ctx.fillStyle = "#000000";
+
+    const HEIGHT = 20;
+
+    const sortedOpcodes = sortMapByValue(timeByOpcode);
+    const sortedBlockIds = sortMapByValue(timeByBlockId);
+
+    ctx.save();
+    ctx.translate(0, 0);
+    let totalBlockTime = 0;
+    for (let i = 0; i < sortedOpcodes.length && i < 13; i++) {
+      const entry = sortedOpcodes[i];
+      const opcode = entry[0];
+      const time = entry[1];
+      totalBlockTime += time;
+      ctx.translate(0, HEIGHT);
+      ctx.fillText(`${opcode} - ${Math.round(time)}ms`, 0, 0);
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(250, 0);
+    for (let i = 0; i < sortedBlockIds.length && i < 13; i++) {
+      const entry = sortedBlockIds[i];
+      const opcode = entry[0];
+      const time = entry[1];
+      ctx.translate(0, HEIGHT);
+      ctx.fillText(`${opcode} - ${Math.round(time)}ms`, 0, 0);
+    }
+    ctx.restore();
+
+    const sequencerTime = (timeByEvent.get(SEQUENCER_STEP_THREADS_EVENT) || 0) - totalBlockTime;
+    const renderTime = timeByEvent.get(RENDERER_DRAW_EVENT) || 0;
+    ctx.translate(0, 300);
+    ctx.fillText(`VM overhead: ${sequencerTime}ms`, 0, 0);
+    ctx.translate(0, 20);
+    ctx.fillText(`Render sprites: ${renderTime}ms`, 0, 0);
+  };
+
+  debug.addAfterStepCallback(() => {
+    if (isProfilerEnabled) {
+      render();
+    }
+  });
+
   let isVisible = false;
   const show = () => {
     isVisible = true;
@@ -308,8 +310,6 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     isVisible = false;
     setProfilerEnabled(false);
   };
-
-  setProfilerEnabled(false);
 
   return {
     tab,
