@@ -88,9 +88,9 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   /**
    * @param {Thread} thread
    * @param {*} args argument value passed to a block
-   * @returns {string|null} ID of block
+   * @returns {{opcode: string}|null} scratch-vm block
    */
-  const getBlockIdFromThreadAndArgs = (thread, args) => {
+  const getBlockFromThreadAndArgs = (thread, args) => {
     // Scratch will tell us which "move ( ) steps" block we're running, for example, but it won't
     // tell us which input inside the block is being run.
     // To figure that out, we can look around in the cache. The argument object passed to the
@@ -99,7 +99,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     // We've found that storing the cached block ID on args using a symbol is faster than a WeakMap.
     const cached = args[blockIdCacheSymbol];
-    if (cached) {
+    if (typeof cached !== 'undefined') {
       return cached;
     }
 
@@ -113,18 +113,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         return blockId;
       }
     }
-    return null;
-  };
 
-  const getBlockFromUnknownSprite = (id) => {
-    // TODO this is horrible
-    for (const target of vm.runtime.targets) {
-      const block = target.blocks.getBlock(id);
-      if (block) {
-        return block;
-      }
-    }
-    // TODO check flyout
+    args[blockIdCacheSymbol] = null;
     return null;
   };
 
@@ -132,83 +122,15 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   // we should consider caching this for a few calls, which may improve performacne
   const now = () => performance.now();
 
-  const START_BLOCK = 0;
   const SEQUENCER_STEP_THREADS_EVENT = 1;
   const RENDERER_DRAW_EVENT = 2;
-  const END_RECORD = 3;
-
-  // TODO: convert to something like an Int32Array.
-  // TODO: use bitwise operators to more efficiently pack.
-  const records = [];
-
-  /** @param {number} type See constants above */
-  const recordEvent = (type) => {
-    records.push(type);
-    records.push(now());
-  };
-
-  /**
-   * @param {Thread} thread
-   * @param {*} args
-   */
-  const recordStartBlock = (thread, args) => {
-    const blockId = getBlockIdFromThreadAndArgs(thread, args);
-    records.push(START_BLOCK);
-    records.push(now());
-    records.push(blockId);
-  };
-
-  const recordEnd = () => {
-    records.push(END_RECORD);
-    records.push(now());
-  };
-
-  class ReuseableProfilerFrame {
-    constructor() {
-      this.reset();
-    }
-
-    reset() {
-      /** @type {string} */
-      this.blockId = "";
-
-      /** @type {string} */
-      this.opcode = "";
-
-      /** @type {number} See type constants */
-      this.type = 0;
-
-      /** @type {number} */
-      this.startTime = 0;
-    }
-  }
-
-  // We use a LOT of frames while processing profiler data, so create a pool and reuse these to create less garbage.
-
-  /** @type {ReuseableProfilerFrame[]} */
-  const reuseableFrames = [];
-
-  /** @returns {ReuseableProfilerFrame} */
-  const getReuseableFrame = () => {
-    if (reuseableFrames.length) {
-      const frame = reuseableFrames.pop();
-      frame.reset();
-      return frame;
-    }
-    return new ReuseableProfilerFrame();
-  };
-
-  /** @param {ReuseableProfilerFrame} frame */
-  const releaseReuseableFrame = (frame) => {
-    reuseableFrames.push(frame);
-  };
 
   class ProcessedResults {
     constructor() {
       /** @type {Map<number, number>} */
       this.timeByType = new Map();
       // For timeByType, all the fields must already exist
-      this.timeByType.set(START_BLOCK, 0);
+      // Total time spent in block execution is tracked implicitly in the other maps
       this.timeByType.set(SEQUENCER_STEP_THREADS_EVENT, 0);
       this.timeByType.set(RENDERER_DRAW_EVENT, 0);
 
@@ -219,116 +141,63 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       this.timeByBlockId = new Map();
     }
 
-    addTypeTime(type, time) {
-      this.timeByType.set(type, this.timeByType.get(type) + time);
-    }
-
-    addOpcodeTime(opcode, time) {
+    /**
+     * @param {*} args scratch-vm args value
+     * @param {{thread: Thread}} util scratch-vm block utility
+     * @param {number} time
+     */
+    recordBlock (args, util, time) {
+      if (time === 0) {
+        return;
+      }
+      const blockId = getBlockFromThreadAndArgs(util.thread, args);
+      if (!blockId) {
+        return;
+      }
+      const block = debug.getBlock(util.target, blockId);
+      if (!block) {
+        return;
+      }
+      const opcode = block.opcode;
       this.timeByOpcode.set(opcode, (this.timeByOpcode.get(opcode) || 0) + time);
+      this.timeByBlockId.set(blockId, (this.timeByBlockId.get(blockId) || 0) + time);
     }
 
-    addBlockIdTime(blockId, time) {
-      this.timeByBlockId.set(blockId, (this.timeByBlockId.get(blockId) || 0) + time);
+    /**
+     * @param {number} type Any event constant above.
+     * @param {number} time
+     */
+    recordEvent(type, time) {
+      // All values in this map must already exist.
+      this.timeByType.set(type, this.timeByType.get(type) + time);
     }
   }
 
-  /**
-   * @param {ProcessedResults} result
-   * @returns {void} The result is stored in the result parameter.
-   */
-  const processRecords = (result) => {
-    const stack = [];
-
-    let i = 0;
-    while (i < records.length) {
-      const type = records[i];
-      if (type === START_BLOCK) {
-        const startTime = records[i + 1];
-        const blockId = records[i + 2];
-        i += 3;
-
-        const newFrame = getReuseableFrame();
-        newFrame.blockId = blockId;
-        newFrame.startTime = startTime;
-        newFrame.type = type;
-
-        const block = getBlockFromUnknownSprite(blockId);
-        if (block) {
-          newFrame.opcode = block.opcode;
-        }
-
-        stack.push(newFrame);
-      } else if (type === SEQUENCER_STEP_THREADS_EVENT || type === RENDERER_DRAW_EVENT) {
-        const startTime = records[i + 1];
-        i += 2;
-
-        const newFrame = getReuseableFrame();
-        newFrame.type = type;
-        newFrame.startTime = startTime;
-
-        stack.push(newFrame);
-      } else if (type === END_RECORD) {
-        const endTime = records[i + 1];
-        i += 2;
-
-        const finishedFrame = /** @type {ReuseableProfilerFrame} */ (stack.pop());
-        const totalTime = endTime - finishedFrame.startTime;
-
-        // Optimization: If no time passed (very common), don't bother with map lookups.
-        if (totalTime !== 0) {
-          const type = finishedFrame.type;
-          result.addTypeTime(type, totalTime);
-
-          const opcode = finishedFrame.opcode;
-          if (opcode) {
-            result.addOpcodeTime(opcode, totalTime);
-          }
-
-          const blockId = finishedFrame.blockId;
-          if (blockId) {
-            result.addBlockIdTime(blockId, totalTime);
-          }
-        }
-
-        releaseReuseableFrame(finishedFrame);
-      } else {
-        // Should never happen.
-        throw new Error(`Profiler processing found unexpected type: ${type}`);
-      }
-    }
-  };
-
   /** @type {ProcessedResults} */
-  let previousResults = new ProcessedResults();
+  let profilerResults = new ProcessedResults();
 
   debug.addAfterStepCallback(() => {
+    // TODO: would it be better to not track events in the first place when profiler is disabled?
     if (isProfilerEnabled) {
-      // TODO: would it be better to not track events in the first place when profiler is disabled?
-      if (!previousResults) {
-        previousResults = new ProcessedResults();
-      }
-      processRecords(previousResults);
-      render(previousResults);
+      render(profilerResults);
     }
-
-    records.length = 0;
   });
 
   const createProfiledFunction = (targetObject, methodName, eventType) => {
     const originalFunction = targetObject[methodName];
     targetObject[methodName] = function profiledFunction(...args) {
-      recordEvent(eventType);
+      const start = now();
       const ret = originalFunction.apply(this, args);
-      recordEnd();
+      profilerResults.recordEvent(eventType, now() - start);
       return ret;
     };
   };
 
   const createProfiledBlockFunction = (originalFunction) =>
     function profiledBlockFunction(args, util) {
-      recordStartBlock(util.thread, args);
+      const start = now();
       const result = originalFunction(args, util);
-      recordEnd();
+      profilerResults.recordBlock(args, util, now() - start);
       return result;
     };
 
@@ -379,7 +248,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     if (isProfilerEnabled) {
       // Reset results
-      previousResults = new ProcessedResults();
+      profilerResults = new ProcessedResults();
     }
   };
 
