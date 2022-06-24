@@ -1,6 +1,15 @@
 export default async function createProfilerTab({ debug, addon, console, msg }) {
   /**
+   * scratch-vm Thread
+   * https://github.com/LLK/scratch-vm/blob/develop/src/engine/thread.js
    * @typedef {Object} Thread
+   */
+
+  /**
+   * scratch-vm RenderedTarget
+   * https://github.com/LLK/scratch-vm/blob/develop/src/engine/target.js
+   * https://github.com/LLK/scratch-vm/blob/develop/src/sprites/rendered-target.js
+   * @typedef {Object} Target
    */
 
   const vm = addon.tab.traps.vm;
@@ -111,9 +120,9 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   /**
    * @param {Thread} thread
    * @param {*} args argument value passed to a block
-   * @returns {{opcode: string}|null} scratch-vm block
+   * @returns {string|null} block ID if it can be found
    */
-  const getBlockFromThreadAndArgs = (thread, args) => {
+  const getBlockIdFromThreadAndArgs = (thread, args) => {
     // Scratch will tell us which "move ( ) steps" block we're running, for example, but it won't
     // tell us which input inside the block is being run.
     // To figure that out, we can look around in the cache. The argument object passed to the
@@ -167,14 +176,14 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     /**
      * @param {*} args scratch-vm args value
-     * @param {{thread: Thread}} util scratch-vm block utility
+     * @param {{thread: Thread, target: Target}} util scratch-vm block utility
      * @param {number} time
      */
     recordBlock (args, util, time) {
       if (time === 0) {
         return;
       }
-      const blockId = getBlockFromThreadAndArgs(util.thread, args);
+      const blockId = getBlockIdFromThreadAndArgs(util.thread, args);
       if (!blockId) {
         return;
       }
