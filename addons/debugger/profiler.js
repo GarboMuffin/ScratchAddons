@@ -152,7 +152,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   };
 
   // TODO: now() is called a LOT and typically there will be no difference in time between calls
-  // we should consider caching this for a few calls, which may improve performacne
+  // we should consider caching this for a few calls, which may improve performance
   const now = () => performance.now();
 
   const SEQUENCER_STEP_THREADS_EVENT = 1;
