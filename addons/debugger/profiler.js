@@ -85,6 +85,25 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   };
 
   const blockIdCacheSymbol = Symbol('profiler arg to block ID cache')
+
+  /**
+   * @param {{_cache: {_executeCached: Record<string, *>}}} blockContainer
+   * @param {*} args
+   * @returns {string|null}
+   */
+  const searchForArgsInBlocks = (blockContainer, args) => {
+    // TODO: this loop could probably be optimized by recursively searching from the known "statement" block ID
+    // to find the input.
+    const executeCache = blockContainer._cache._executeCached;
+    for (const blockId of Object.keys(executeCache)) {
+      const value = executeCache[blockId];
+      if (value._argValues === args) {
+        return blockId;
+      }
+    }
+    return null;
+  };
+
   /**
    * @param {Thread} thread
    * @param {*} args argument value passed to a block
@@ -103,15 +122,16 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       return cached;
     }
 
-    // TODO: look into ways to optimize this loop if needed
-    // TODO: probably also have to check flyout blocks
-    const executeCache = thread.blockContainer._cache._executeCached;
-    for (const blockId of Object.keys(executeCache)) {
-      const value = executeCache[blockId];
-      if (value._argValues === args) {
-        args[blockIdCacheSymbol] = blockId;
-        return blockId;
-      }
+    const selfBlockId = searchForArgsInBlocks(thread.blockContainer, args);
+    if (selfBlockId) {
+      args[blockIdCacheSymbol] = selfBlockId;
+      return selfBlockId;
+    }
+
+    const flyoutBlockId = searchForArgsInBlocks(vm.runtime.flyoutBlocks, args);
+    if (flyoutBlockId) {
+      args[blockIdCacheSymbol] = flyoutBlockId;
+      return flyoutBlockId;
     }
 
     args[blockIdCacheSymbol] = null;
