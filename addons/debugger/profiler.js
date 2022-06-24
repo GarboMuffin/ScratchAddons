@@ -68,9 +68,18 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     return null;
   };
 
-  // TODO: now() is called a LOT and typically there will be no difference in time between calls
-  // we should consider caching this for a few calls, which may improve performance
-  const now = () => performance.now();
+  /**
+   * Millisecond precise time.
+   */
+  const lowPrecisionNow = () => Date.now();
+
+  /**
+   * Might return sub-millisecond precision. Depends on browser.
+   */
+  const highPrecisionNow = () => performance.now();
+
+  /** @returns {number} time from an arbitrary point in the past in milliseconds */
+  let now = lowPrecisionNow;
 
   const SEQUENCER_STEP_THREADS_EVENT = 1;
   const RENDERER_DRAW_EVENT = 2;
@@ -179,40 +188,13 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   const setProfilerEnabled = (_enabled) => {
     isProfilerEnabled = _enabled;
 
-    startProfilingButton.element.style.display = isProfilerEnabled ? "none" : "";
-    stopProfilingButton.element.style.display = isProfilerEnabled ? "" : "none";
-
     // This trap is installed dynamically because getOpcodeFunction is very hot.
     // We don't want to be adding any overhead when we don't need to.
     vm.runtime.getOpcodeFunction = isProfilerEnabled ? profiledGetOpcodeFunction : originalGetOpcodeFunction;
 
     // Must reset scratch-vm's caches so that our modified getOpcodeFunction is used.
     resetAllBlockCaches();
-
-    if (isProfilerEnabled) {
-      resetData();
-    }
   };
-
-  const startProfilingButton = debug.createHeaderButton({
-    text: "Start", // TODO
-    icon: addon.self.dir + "/icons/step.svg", // TODO
-    description: "Placeholder", // TODO
-  });
-  startProfilingButton.element.addEventListener("click", () => {
-    setProfilerEnabled(true);
-  });
-
-  const stopProfilingButton = debug.createHeaderButton({
-    text: "Stop", // TODO
-    icon: addon.self.dir + "/icons/step.svg", // TODO
-    description: "Placeholder", // TODO
-  });
-  stopProfilingButton.element.addEventListener("click", () => {
-    setProfilerEnabled(false);
-  });
-
-  setProfilerEnabled(false);
 
   /**
    * @param {Map<*, number>} map
@@ -230,17 +212,72 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
   const content = Object.assign(document.createElement("div"), {
     className: "sa-profiler-tab-content",
-  });  
+  });
+
+  const profilingSettingsContainer = document.createElement("div");
+  profilingSettingsContainer.className = "sa-profiler-tab-content-inner";
+  content.appendChild(profilingSettingsContainer);
+
+  const startProfilingButton = document.createElement("button");
+  startProfilingButton.textContent = "Start Profiling";
+  startProfilingButton.addEventListener("click", () => {
+    startProfiling();
+  });
+  profilingSettingsContainer.appendChild(startProfilingButton);
+
+  const createPrecisionOption = (value, label) => {
+    const inputEl = document.createElement("input");
+    inputEl.type = "radio";
+    inputEl.value = value;
+    inputEl.name = "sa-debugger-profiler-precision";
+
+    const labelEl = document.createElement("label");
+    labelEl.appendChild(inputEl);
+    labelEl.appendChild(document.createTextNode(label));
+
+    return {
+      container: labelEl,
+      input: inputEl,
+    };
+  };
+
+  const lowPrecisionOption = createPrecisionOption("low-precision", "Millisecond precision (~1.5x slower)");
+  lowPrecisionOption.input.checked = true;
+  profilingSettingsContainer.appendChild(lowPrecisionOption.container);
+
+  const highPrecisionOption = createPrecisionOption(
+    "high-precision",
+    "Sub-millisecond precision (up to 4x slower; depends on browser)"
+  );
+  profilingSettingsContainer.appendChild(highPrecisionOption.container);
+
+  const profilingResultsContainer = document.createElement("div");
+  profilingResultsContainer.className = "sa-profiler-tab-content-inner";
+  content.appendChild(profilingResultsContainer);
+
+  const stopProfilingButton = document.createElement("button");
+  stopProfilingButton.textContent = "Toggle Profiling";
+  stopProfilingButton.addEventListener("click", () => {
+    toggleProfiling();
+  });
+  profilingResultsContainer.appendChild(stopProfilingButton);
+
+  const goBackButton = document.createElement("button");
+  goBackButton.textContent = "Go Back";
+  goBackButton.addEventListener("click", () => {
+    goToProfilerSettingsScreen();
+  });
+  profilingResultsContainer.appendChild(goBackButton);
 
   // TODO: do this lazily, when the tab is first visible
   const canvas = Object.assign(document.createElement("canvas"), {
     className: "sa-profiler-tab-canvas",
   });
+  profilingResultsContainer.appendChild(canvas);
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     throw new Error("Cannot get 2d rendering context");
   }
-  content.appendChild(canvas);
 
   const render = () => {
     if (!isVisible) {
@@ -267,7 +304,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     ctx.save();
     ctx.translate(0, 0);
     let totalBlockTime = 0;
-    for (let i = 0; i < sortedOpcodes.length && i < 13; i++) {
+    for (let i = 0; i < sortedOpcodes.length && i < 11; i++) {
       const entry = sortedOpcodes[i];
       const opcode = entry[0];
       const time = entry[1];
@@ -279,7 +316,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     ctx.save();
     ctx.translate(250, 0);
-    for (let i = 0; i < sortedBlockIds.length && i < 13; i++) {
+    for (let i = 0; i < sortedBlockIds.length && i < 11; i++) {
       const entry = sortedBlockIds[i];
       const opcode = entry[0];
       const time = entry[1];
@@ -290,10 +327,10 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     const sequencerTime = (timeByEvent.get(SEQUENCER_STEP_THREADS_EVENT) || 0) - totalBlockTime;
     const renderTime = timeByEvent.get(RENDERER_DRAW_EVENT) || 0;
-    ctx.translate(0, 300);
-    ctx.fillText(`VM overhead: ${sequencerTime}ms`, 0, 0);
+    ctx.translate(0, 260);
+    ctx.fillText(`VM+Profiler overhead: ${Math.round(sequencerTime)}ms`, 0, 0);
     ctx.translate(0, 20);
-    ctx.fillText(`Render sprites: ${renderTime}ms`, 0, 0);
+    ctx.fillText(`Rendering sprites: ${Math.round(renderTime)}ms`, 0, 0);
   };
 
   debug.addAfterStepCallback(() => {
@@ -301,6 +338,33 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       render();
     }
   });
+
+  const startProfiling = () => {
+    profilingSettingsContainer.style.display = "none";
+    profilingResultsContainer.style.display = "";
+
+    if (lowPrecisionOption.input.checked) {
+      now = lowPrecisionNow;
+    } else {
+      now = highPrecisionNow;
+    }
+
+    resetData();
+    setProfilerEnabled(true);
+  };
+
+  const toggleProfiling = () => {
+    setProfilerEnabled(!isProfilerEnabled);
+  };
+
+  const goToProfilerSettingsScreen = () => {
+    profilingSettingsContainer.style.display = "";
+    profilingResultsContainer.style.display = "none";
+
+    setProfilerEnabled(false);
+  };
+
+  goToProfilerSettingsScreen();
 
   let isVisible = false;
   const show = () => {
@@ -314,7 +378,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   return {
     tab,
     content,
-    buttons: [startProfilingButton, stopProfilingButton],
+    buttons: [],
     show,
     hide,
   };

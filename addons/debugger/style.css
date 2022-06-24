@@ -239,8 +239,18 @@
   border-radius: 3px;
 }
 
-.sa-profiler-tab-content, .sa-profiler-tab-canvas {
+.sa-profiler-tab-content {
   display: block;
   width: 100%;
   height: 100%;
+}
+.sa-profiler-tab-canvas {
+  width: 100%;
+  flex-grow: 1;
+}
+.sa-profiler-tab-content-inner {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
 }
