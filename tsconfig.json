@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "target": "ES2022",
+    "module": "ES6",
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true
+  },
+  "include": ["addon-api/**/*", "addons/**/*", "libraries/thirdparty/types/**/*"]
+}
