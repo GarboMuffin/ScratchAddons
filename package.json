@@ -1,0 +1,11 @@
+{
+  "name": "scratchaddons",
+  "version": "1.0.0-this-version-is-not-used-anywhere",
+  "description": "",
+  "license": "GPL-3.0",
+  "dependencies": {},
+  "private": true,
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
+}
