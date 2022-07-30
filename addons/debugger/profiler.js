@@ -138,6 +138,14 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         callback(section);
       }
     }
+
+    getTotalTime() {
+      let total = this.selfTime;
+      this.forEachChild((section) => {
+        total += section.selfTime;
+      });
+      return total;
+    }
   }
 
   const rootSection = new ProfilerSection('(root)');
@@ -160,10 +168,12 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       throw new Error(`Not a function: ${methodName}`);
     }
     targetObject[methodName] = function profiledFunction(...args) {
-      const start = now();
+      const startTrueTime = now();
+      const startRecordedTime = section.getTotalTime();
       const ret = originalFunction.apply(this, args);
-      // TODO: incrementing self time is not the correct thing to do for stepThreadSections
-      section.selfTime += now() - start;
+      const trueDeltaTime = now() - startTrueTime;
+      const deltaRecordedTime = section.getTotalTime() - startRecordedTime;
+      section.selfTime += trueDeltaTime - deltaRecordedTime;
       return ret;
     };
   };
@@ -409,8 +419,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
     ctx.restore();
 
-    const sequencerTime = stepThreadSection.selfTime - totalBlockTime;
-    const renderTime = renderSection.selfTime || 0;
+    const sequencerTime = stepThreadSection.selfTime;
+    const renderTime = renderSection.selfTime;
     ctx.translate(0, 260);
     ctx.fillText(`VM+Profiler overhead: ${Math.round(sequencerTime)}ms`, 0, 0);
     ctx.translate(0, 20);
