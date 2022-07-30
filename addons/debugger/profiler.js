@@ -148,9 +148,9 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
   }
 
-  const rootSection = new ProfilerSection('(root)');
-  const stepThreadSection = rootSection.getOrCreateChild('Sequencer#stepThreads');
-  const renderSection = rootSection.getOrCreateChild('RenderWebGL#render');
+  const rootSection = new ProfilerSection("(root)");
+  const stepThreadSection = rootSection.getOrCreateChild("Sequencer#stepThreads");
+  const renderSection = rootSection.getOrCreateChild("RenderWebGL#render");
 
   const resetData = () => {
     stepThreadSection.reset();
