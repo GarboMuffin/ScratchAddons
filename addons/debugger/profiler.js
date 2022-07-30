@@ -98,7 +98,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       this.children = [];
     }
 
-    clear() {
+    reset() {
+      this.selfTime = 0;
       this.children = [];
     }
 
@@ -144,7 +145,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   const renderSection = rootSection.getOrCreateChild('RenderWebGL#render');
 
   const resetData = () => {
-    rootSection.clear();
+    stepThreadSection.reset();
+    renderSection.reset();
   };
 
   /**
