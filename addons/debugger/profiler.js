@@ -168,13 +168,16 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       throw new Error(`Not a function: ${methodName}`);
     }
     targetObject[methodName] = function profiledFunction(...args) {
-      const startTrueTime = now();
-      const startRecordedTime = section.getTotalTime();
-      const ret = originalFunction.apply(this, args);
-      const deltaRecordedTime = section.getTotalTime() - startRecordedTime;
-      const trueDeltaTime = now() - startTrueTime;
-      section.selfTime += trueDeltaTime - deltaRecordedTime;
-      return ret;
+      if (isProfilerEnabled) {
+        const startTrueTime = now();
+        const startRecordedTime = section.getTotalTime();
+        const ret = originalFunction.apply(this, args);
+        const deltaRecordedTime = section.getTotalTime() - startRecordedTime;
+        const trueDeltaTime = now() - startTrueTime;
+        section.selfTime += trueDeltaTime - deltaRecordedTime;
+        return ret;
+      }
+      return originalFunction.apply(this, args);
     };
   };
 
