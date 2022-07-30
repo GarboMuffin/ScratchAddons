@@ -397,12 +397,10 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     ctx.save();
     ctx.translate(0, 0);
-    let totalBlockTime = 0;
     for (let i = 0; i < sortedOpcodes.length && i < 11; i++) {
       const entry = sortedOpcodes[i];
       const opcode = entry[0];
       const time = entry[1];
-      totalBlockTime += time;
       ctx.translate(0, HEIGHT);
       ctx.fillText(`${opcode} - ${Math.round(time)}ms`, 0, 0);
     }
