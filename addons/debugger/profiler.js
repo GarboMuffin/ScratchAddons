@@ -309,13 +309,13 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     };
   };
 
-  const lowPrecisionOption = createPrecisionOption("low-precision", "Millisecond precision (~1.5x slower)");
+  const lowPrecisionOption = createPrecisionOption("low-precision", "Millisecond precision (~2x slower)");
   lowPrecisionOption.input.checked = true;
   profilingSettingsContainer.appendChild(lowPrecisionOption.container);
 
   const highPrecisionOption = createPrecisionOption(
     "high-precision",
-    "Sub-millisecond precision (up to 4x slower; depends on browser)"
+    "Sub-millisecond precision (MUCH slower; depends on browser; will probably be removed)"
   );
   profilingSettingsContainer.appendChild(highPrecisionOption.container);
 
