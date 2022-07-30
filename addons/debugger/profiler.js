@@ -77,12 +77,6 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   /** @returns {number} time in milliseconds from an arbitrary time in the past */
   let now = lowPrecisionNow;
 
-  const SEQUENCER_STEP_THREADS_EVENT = 1;
-  const RENDERER_DRAW_EVENT = 2;
-
-  /** @type {Map<number, number>} */
-  const timeByEvent = new Map();
-
   class FlameGraph {
     /**
      * @param {string} id Internal name for this graph.
@@ -115,6 +109,10 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       return flameGraph;
     }
 
+    addChild(child) {
+      this.children.push(child);
+    }
+
     /** @param {(graph: FlameGraph) => void} callback */
     forEachChild(callback) {
       // Do not use recursion to avoid stack overflow.
@@ -130,6 +128,25 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   }
 
   const rootGraph = new FlameGraph('(root)');
+  const stepThreadsGraph = rootGraph.getOrCreateChild('Sequencer#stepThreads');
+  const renderDrawGraph = rootGraph.getOrCreateChild('RenderWebGL#render');
+
+  const resetData = () => {
+    rootGraph.clear();
+  };
+
+  const convertToProfiledFunction = (targetObject, methodName, graphObject) => {
+    const originalFunction = targetObject[methodName];
+    targetObject[methodName] = function profiledFunction(...args) {
+      const start = now();
+      const ret = originalFunction.apply(this, args);
+      graphObject.selfTime += now() - start;
+      return ret;
+    };
+  };
+
+  convertToProfiledFunction(vm.runtime.sequencer, "stepThreads", stepThreadsGraph);
+  convertToProfiledFunction(vm.runtime.renderer, "draw", renderDrawGraph);
 
   /**
    * @param {unknown} args scratch-vm args value
@@ -148,49 +165,26 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       return;
     }
 
-    let graph = rootGraph;
+    let graph = stepThreadsGraph;
     const target = util.target;
     const threadStack = util.thread.stack;
+    let blockWasFoundInStack = false;
     for (let i = 0; i < threadStack.length; i++) {
-      const blockId = threadStack[i];
-      if (blockId) {
-        graph = graph.getOrCreateChild(blockId, target);
+      const stackBlockId = threadStack[i];
+      if (stackBlockId) {
+        if (stackBlockId === blockId) {
+          blockWasFoundInStack = true;
+          break;
+        } else {
+          graph = graph.getOrCreateChild(stackBlockId, target);
+        }
       }
     }
-    if (graph.id !== blockId) {
+    if (!blockWasFoundInStack) {
       graph = graph.getOrCreateChild(blockId, target);
     }
     graph.selfTime += time;
   };
-
-  /**
-   * @param {number} type Any event constant above.
-   * @param {number} time
-   */
-  const recordEvent = (type, time) => {
-    if (!isProfilerEnabled) {
-      return;
-    }
-    timeByEvent.set(type, (timeByEvent.get(type) || 0) + time);
-  };
-
-  const resetData = () => {
-    timeByEvent.clear();
-    rootGraph.clear();
-  };
-
-  const convertToProfiledFunction = (targetObject, methodName, eventType) => {
-    const originalFunction = targetObject[methodName];
-    targetObject[methodName] = function profiledFunction(...args) {
-      const start = now();
-      const ret = originalFunction.apply(this, args);
-      recordEvent(eventType, now() - start);
-      return ret;
-    };
-  };
-
-  convertToProfiledFunction(vm.runtime.sequencer, "stepThreads", SEQUENCER_STEP_THREADS_EVENT);
-  convertToProfiledFunction(vm.runtime.renderer, "draw", RENDERER_DRAW_EVENT);
 
   const createProfiledBlockFunction = (originalFunction) =>
     function profiledBlockFunction(args, util) {
@@ -346,7 +340,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     const timeByBlockId = new Map();
     const timeByOpcode = new Map();
 
-    rootGraph.forEachChild((node) => {
+    stepThreadsGraph.forEachChild((node) => {
       const blockId = node.id;
       timeByBlockId.set(blockId, (timeByBlockId.get(blockId) || 0) + node.selfTime);
 
@@ -384,8 +378,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
     ctx.restore();
 
-    const sequencerTime = (timeByEvent.get(SEQUENCER_STEP_THREADS_EVENT) || 0) - totalBlockTime;
-    const renderTime = timeByEvent.get(RENDERER_DRAW_EVENT) || 0;
+    const sequencerTime = stepThreadsGraph.selfTime - totalBlockTime;
+    const renderTime = renderDrawGraph.selfTime || 0;
     ctx.translate(0, 260);
     ctx.fillText(`VM+Profiler overhead: ${Math.round(sequencerTime)}ms`, 0, 0);
     ctx.translate(0, 20);
