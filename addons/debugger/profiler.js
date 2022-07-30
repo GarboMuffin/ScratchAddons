@@ -104,7 +104,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
         }
       }
       const flameGraph = new FlameGraph(id);
-      flameGraph.target = target;
+      flameGraph.target = target || null;
       this.children.push(flameGraph);
       return flameGraph;
     }
@@ -151,46 +151,50 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   /**
    * @param {unknown} args scratch-vm args value
    * @param {{thread: Thread, target: Target}} util scratch-vm block utility
+   * @param {number} stackLength The length of the scratch-vm thread stack before the block was executed
    * @param {number} time
    */
-  const recordBlock = (args, util, time) => {
+  const recordBlock = (args, util, stackLength, time) => {
     // We don't need to check isProfilerEnabled here because our trapped block function trap should never be used
     // when the profiler isn't enabled.
+
     if (time === 0) {
+      // Optimization: Ignore this block entirely.
       return;
     }
 
-    const blockId = getBlockIdFromThreadAndArgs(util.thread, args);
-    if (!blockId) {
+    const realBlockId = getBlockIdFromThreadAndArgs(util.thread, args);
+    if (!realBlockId) {
       return;
     }
 
     let graph = stepThreadsGraph;
     const target = util.target;
     const threadStack = util.thread.stack;
-    let blockWasFoundInStack = false;
-    for (let i = 0; i < threadStack.length; i++) {
+    // We need to use the length of the stack before the block was executed. Stepping into a branch or procedure
+    // will add extra entries to the stack that we don't want to count -- we aren't executing them yet.
+    for (let i = 0; i < stackLength; i++) {
       const stackBlockId = threadStack[i];
+      // Stack may contain null.
       if (stackBlockId) {
-        if (stackBlockId === blockId) {
-          blockWasFoundInStack = true;
-          break;
-        } else {
-          graph = graph.getOrCreateChild(stackBlockId, target);
-        }
+        graph = graph.getOrCreateChild(stackBlockId, target);
       }
     }
-    if (!blockWasFoundInStack) {
-      graph = graph.getOrCreateChild(blockId, target);
+
+    // Scratch's VM thread stack doesn't include most input blocks.
+    if (graph.id !== realBlockId) {
+      graph = graph.getOrCreateChild(realBlockId, target);
     }
+
     graph.selfTime += time;
   };
 
   const createProfiledBlockFunction = (originalFunction) =>
     function profiledBlockFunction(args, util) {
       const start = now();
+      const stackLength = util.thread.stack.length;
       const result = originalFunction(args, util);
-      recordBlock(args, util, now() - start);
+      recordBlock(args, util, stackLength, now() - start);
       return result;
     };
 
