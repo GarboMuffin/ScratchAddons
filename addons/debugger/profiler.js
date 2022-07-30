@@ -171,8 +171,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       const startTrueTime = now();
       const startRecordedTime = section.getTotalTime();
       const ret = originalFunction.apply(this, args);
-      const trueDeltaTime = now() - startTrueTime;
       const deltaRecordedTime = section.getTotalTime() - startRecordedTime;
+      const trueDeltaTime = now() - startTrueTime;
       section.selfTime += trueDeltaTime - deltaRecordedTime;
       return ret;
     };
