@@ -130,7 +130,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     timeByBlockId.clear();
   };
 
-  const createProfiledFunction = (targetObject, methodName, eventType) => {
+  const convertToProfiledFunction = (targetObject, methodName, eventType) => {
     const originalFunction = targetObject[methodName];
     targetObject[methodName] = function profiledFunction(...args) {
       const start = now();
@@ -140,8 +140,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     };
   };
 
-  createProfiledFunction(vm.runtime.sequencer, "stepThreads", SEQUENCER_STEP_THREADS_EVENT);
-  createProfiledFunction(vm.runtime.renderer, "draw", RENDERER_DRAW_EVENT);
+  convertToProfiledFunction(vm.runtime.sequencer, "stepThreads", SEQUENCER_STEP_THREADS_EVENT);
+  convertToProfiledFunction(vm.runtime.renderer, "draw", RENDERER_DRAW_EVENT);
 
   const createProfiledBlockFunction = (originalFunction) =>
     function profiledBlockFunction(args, util) {
