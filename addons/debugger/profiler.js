@@ -15,8 +15,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   const vm = addon.tab.traps.vm;
 
   /**
-   * @param {{_cache: {_executeCached: Record<string, *>}}} blockContainer
-   * @param {*} args
+   * @param {{_cache: {_executeCached: Record<string, unknown>}}} blockContainer
+   * @param {unknown} args
    * @returns {string|null}
    */
   const searchForArgsInBlocks = (blockContainer, args) => {
@@ -36,7 +36,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
   /**
    * @param {Thread} thread
-   * @param {*} args argument value passed to a block
+   * @param {unknown} args argument value passed to a block
    * @returns {string|null} block ID if it can be found
    */
   const getBlockIdFromThreadAndArgs = (thread, args) => {
@@ -68,17 +68,13 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     return null;
   };
 
-  /**
-   * Millisecond precise time.
-   */
+  /** Millisecond precise time. */
   const lowPrecisionNow = () => Date.now();
 
-  /**
-   * Might return sub-millisecond precision. Depends on browser.
-   */
+  /** Might return sub-millisecond precision depending on the browser. */
   const highPrecisionNow = () => performance.now();
 
-  /** @returns {number} time from an arbitrary point in the past in milliseconds */
+  /** @returns {number} time in milliseconds from an arbitrary time in the past */
   let now = lowPrecisionNow;
 
   const SEQUENCER_STEP_THREADS_EVENT = 1;
@@ -94,7 +90,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   const timeByBlockId = new Map();
 
   /**
-   * @param {*} args scratch-vm args value
+   * @param {unknown} args scratch-vm args value
    * @param {{thread: Thread, target: Target}} util scratch-vm block utility
    * @param {number} time
    */
@@ -125,7 +121,6 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     if (!isProfilerEnabled) {
       return;
     }
-    // All values in this map must already exist.
     timeByEvent.set(type, (timeByEvent.get(type) || 0) + time);
   };
 
@@ -192,13 +187,14 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     // We don't want to be adding any overhead when we don't need to.
     vm.runtime.getOpcodeFunction = isProfilerEnabled ? profiledGetOpcodeFunction : originalGetOpcodeFunction;
 
-    // Must reset scratch-vm's caches so that our modified getOpcodeFunction is used.
+    // Must reset scratch-vm's caches so that the new getOpcodeFunction is used.
     resetAllBlockCaches();
   };
 
   /**
-   * @param {Map<*, number>} map
-   * @returns {Array<*, number>}
+   * @template T
+   * @param {Map<T, number>} map
+   * @returns {[T, number][]}
    */
   const sortMapByValue = (map) =>
     Array.from(map.entries()).sort((a, b) => {
