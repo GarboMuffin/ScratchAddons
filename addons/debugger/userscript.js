@@ -254,6 +254,7 @@ export default async function ({ addon, global, console, msg }) {
       }
       return {
         exists: true,
+        original: original,
         originalId: original.id,
         name,
       };
@@ -261,6 +262,7 @@ export default async function ({ addon, global, console, msg }) {
     return {
       exists: false,
       original: null,
+      originalId: null,
       name: msg("unknown-sprite"),
     };
   };

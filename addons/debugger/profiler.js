@@ -83,11 +83,53 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   /** @type {Map<number, number>} */
   const timeByEvent = new Map();
 
-  /** @type {Map<string, number>} */
-  const timeByOpcode = new Map();
+  class FlameGraph {
+    /**
+     * @param {string} id Internal name for this graph.
+     */
+    constructor(id) {
+      this.id = id;
+      this.target = null;
+      this.selfTime = 0;
+      /** @type {FlameGraph[]} */
+      this.children = [];
+    }
 
-  /** @type {Map<string, number>} */
-  const timeByBlockId = new Map();
+    clear() {
+      this.children = [];
+    }
+
+    /**
+     * @param {string} id
+     * @returns {FlameGraph}
+     */
+    getOrCreateChild(id, target) {
+      for (const child of this.children) {
+        if (child.id === id) {
+          return child;
+        }
+      }
+      const flameGraph = new FlameGraph(id);
+      flameGraph.target = target;
+      this.children.push(flameGraph);
+      return flameGraph;
+    }
+
+    /** @param {(graph: FlameGraph) => void} callback */
+    forEachChild(callback) {
+      // Do not use recursion to avoid stack overflow.
+      const toVisit = this.children.slice();
+      while (toVisit.length) {
+        const node = toVisit.pop();
+        for (const child of node.children) {
+          toVisit.push(child);
+        }
+        callback(node);
+      }
+    }
+  }
+
+  const rootGraph = new FlameGraph('(root)');
 
   /**
    * @param {unknown} args scratch-vm args value
@@ -95,22 +137,30 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
    * @param {number} time
    */
   const recordBlock = (args, util, time) => {
-    // We don't need to check isProfilerEnabled here because the block execution trap doesn't do anything
-    // when the profiler is disabled.
+    // We don't need to check isProfilerEnabled here because our trapped block function trap should never be used
+    // when the profiler isn't enabled.
     if (time === 0) {
       return;
     }
+
     const blockId = getBlockIdFromThreadAndArgs(util.thread, args);
     if (!blockId) {
       return;
     }
-    const block = debug.getBlock(util.target, blockId);
-    if (!block) {
-      return;
+
+    let graph = rootGraph;
+    const target = util.target;
+    const threadStack = util.thread.stack;
+    for (let i = 0; i < threadStack.length; i++) {
+      const blockId = threadStack[i];
+      if (blockId) {
+        graph = graph.getOrCreateChild(blockId, target);
+      }
     }
-    const opcode = block.opcode;
-    timeByOpcode.set(opcode, (timeByOpcode.get(opcode) || 0) + time);
-    timeByBlockId.set(blockId, (timeByBlockId.get(blockId) || 0) + time);
+    if (graph.id !== blockId) {
+      graph = graph.getOrCreateChild(blockId, target);
+    }
+    graph.selfTime += time;
   };
 
   /**
@@ -126,8 +176,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
   const resetData = () => {
     timeByEvent.clear();
-    timeByOpcode.clear();
-    timeByBlockId.clear();
+    rootGraph.clear();
   };
 
   const convertToProfiledFunction = (targetObject, methodName, eventType) => {
@@ -293,6 +342,20 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     ctx.fillStyle = "#000000";
 
     const HEIGHT = 20;
+
+    const timeByBlockId = new Map();
+    const timeByOpcode = new Map();
+
+    rootGraph.forEachChild((node) => {
+      const blockId = node.id;
+      timeByBlockId.set(blockId, (timeByBlockId.get(blockId) || 0) + node.selfTime);
+
+      const block = debug.getBlock(node.target, blockId);
+      if (block) {
+        const opcode = block.opcode;
+        timeByOpcode.set(opcode, (timeByOpcode.get(opcode) || 0) + node.selfTime);
+      }
+    });
 
     const sortedOpcodes = sortMapByValue(timeByOpcode);
     const sortedBlockIds = sortMapByValue(timeByBlockId);
