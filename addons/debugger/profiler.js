@@ -3,6 +3,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
    * scratch-vm Thread
    * https://github.com/LLK/scratch-vm/blob/develop/src/engine/thread.js
    * @typedef {Object} Thread
+   * @property {Array<string | null>} stack
    */
 
   /**
@@ -10,6 +11,14 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
    * https://github.com/LLK/scratch-vm/blob/develop/src/engine/target.js
    * https://github.com/LLK/scratch-vm/blob/develop/src/sprites/rendered-target.js
    * @typedef {Object} Target
+   */
+
+  /**
+   * scratch-vm utility object passed to block functions.
+   * https://github.com/LLK/scratch-vm/blob/develop/src/engine/block-utility.js
+   * @typedef {Object} BlockUtility
+   * @property {Target} target
+   * @property {Thread} thread
    */
 
   const vm = addon.tab.traps.vm;
@@ -77,15 +86,15 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
   /** @returns {number} time in milliseconds from an arbitrary time in the past */
   let now = lowPrecisionNow;
 
-  class FlameGraph {
+  class ProfilerSection {
     /**
-     * @param {string} id Internal name for this graph.
+     * @param {string} id Internal name for this section. Meaning will vary depending on where in the tree this is.
      */
     constructor(id) {
       this.id = id;
       this.target = null;
       this.selfTime = 0;
-      /** @type {FlameGraph[]} */
+      /** @type {ProfilerSection[]} */
       this.children = [];
     }
 
@@ -95,7 +104,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
 
     /**
      * @param {string} id
-     * @returns {FlameGraph}
+     * @returns {ProfilerSection}
      */
     getOrCreateChild(id, target) {
       for (const child of this.children) {
@@ -103,54 +112,66 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
           return child;
         }
       }
-      const flameGraph = new FlameGraph(id);
-      flameGraph.target = target || null;
-      this.children.push(flameGraph);
-      return flameGraph;
+      const section = new ProfilerSection(id);
+      section.target = target || null;
+      this.children.push(section);
+      return section;
     }
 
+    /**
+     * @param {ProfilerSection} child
+     */
     addChild(child) {
       this.children.push(child);
     }
 
-    /** @param {(graph: FlameGraph) => void} callback */
+    /** @param {(section: ProfilerSection) => void} callback */
     forEachChild(callback) {
       // Do not use recursion to avoid stack overflow.
       const toVisit = this.children.slice();
       while (toVisit.length) {
-        const node = toVisit.pop();
-        for (const child of node.children) {
+        const section = toVisit.pop();
+        for (const child of section.children) {
           toVisit.push(child);
         }
-        callback(node);
+        callback(section);
       }
     }
   }
 
-  const rootGraph = new FlameGraph('(root)');
-  const stepThreadsGraph = rootGraph.getOrCreateChild('Sequencer#stepThreads');
-  const renderDrawGraph = rootGraph.getOrCreateChild('RenderWebGL#render');
+  const rootSection = new ProfilerSection('(root)');
+  const stepThreadSection = rootSection.getOrCreateChild('Sequencer#stepThreads');
+  const renderSection = rootSection.getOrCreateChild('RenderWebGL#render');
 
   const resetData = () => {
-    rootGraph.clear();
+    rootSection.clear();
   };
 
-  const convertToProfiledFunction = (targetObject, methodName, graphObject) => {
+  /**
+   * @param {unknown} targetObject
+   * @param {string} methodName
+   * @param {ProfilerSection} section
+   */
+  const convertToProfiledFunction = (targetObject, methodName, section) => {
     const originalFunction = targetObject[methodName];
+    if (typeof originalFunction !== "function") {
+      throw new Error(`Not a function: ${methodName}`);
+    }
     targetObject[methodName] = function profiledFunction(...args) {
       const start = now();
       const ret = originalFunction.apply(this, args);
-      graphObject.selfTime += now() - start;
+      // TODO: incrementing self time is not the correct thing to do for stepThreadSections
+      section.selfTime += now() - start;
       return ret;
     };
   };
 
-  convertToProfiledFunction(vm.runtime.sequencer, "stepThreads", stepThreadsGraph);
-  convertToProfiledFunction(vm.runtime.renderer, "draw", renderDrawGraph);
+  convertToProfiledFunction(vm.runtime.sequencer, "stepThreads", stepThreadSection);
+  convertToProfiledFunction(vm.runtime.renderer, "draw", renderSection);
 
   /**
    * @param {unknown} args scratch-vm args value
-   * @param {{thread: Thread, target: Target}} util scratch-vm block utility
+   * @param {BlockUtility} util scratch-vm block utility
    * @param {number} stackLength The length of the scratch-vm thread stack before the block was executed
    * @param {number} time
    */
@@ -168,7 +189,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       return;
     }
 
-    let graph = stepThreadsGraph;
+    let section = stepThreadSection;
     const target = util.target;
     const threadStack = util.thread.stack;
     // We need to use the length of the stack before the block was executed. Stepping into a branch or procedure
@@ -177,19 +198,23 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
       const stackBlockId = threadStack[i];
       // Stack may contain null.
       if (stackBlockId) {
-        graph = graph.getOrCreateChild(stackBlockId, target);
+        section = section.getOrCreateChild(stackBlockId, target);
       }
     }
 
     // Scratch's VM thread stack doesn't include most input blocks.
-    if (graph.id !== realBlockId) {
-      graph = graph.getOrCreateChild(realBlockId, target);
+    if (section.id !== realBlockId) {
+      section = section.getOrCreateChild(realBlockId, target);
     }
 
-    graph.selfTime += time;
+    section.selfTime += time;
   };
 
   const createProfiledBlockFunction = (originalFunction) =>
+    /**
+     * @param {unknown} args
+     * @param {BlockUtility} util
+     */
     function profiledBlockFunction(args, util) {
       const start = now();
       const stackLength = util.thread.stack.length;
@@ -344,7 +369,7 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     const timeByBlockId = new Map();
     const timeByOpcode = new Map();
 
-    stepThreadsGraph.forEachChild((node) => {
+    stepThreadSection.forEachChild((node) => {
       const blockId = node.id;
       timeByBlockId.set(blockId, (timeByBlockId.get(blockId) || 0) + node.selfTime);
 
@@ -382,8 +407,8 @@ export default async function createProfilerTab({ debug, addon, console, msg }) 
     }
     ctx.restore();
 
-    const sequencerTime = stepThreadsGraph.selfTime - totalBlockTime;
-    const renderTime = renderDrawGraph.selfTime || 0;
+    const sequencerTime = stepThreadSection.selfTime - totalBlockTime;
+    const renderTime = renderSection.selfTime || 0;
     ctx.translate(0, 260);
     ctx.fillText(`VM+Profiler overhead: ${Math.round(sequencerTime)}ms`, 0, 0);
     ctx.translate(0, 20);
