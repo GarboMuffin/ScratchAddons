@@ -32,7 +32,7 @@ export default class ReduxHandler extends Listenable {
 
   /**
    * Redux state.
-   * @type {object}
+   * @type {ScratchGUI.ReduxState}
    */
   get state() {
     return __scratchAddonsRedux.state;
@@ -40,7 +40,7 @@ export default class ReduxHandler extends Listenable {
 
   /**
    * Dispatches redux state change.
-   * @param {object} payload - payload to pass to redux.
+   * @param {ScratchGUI.ReduxEvent} payload - payload to pass to redux.
    * @throws when Redux is unavailable.
    */
   dispatch(payload) {
@@ -50,7 +50,7 @@ export default class ReduxHandler extends Listenable {
 
   /**
    * Waits until a state meets the condition.
-   * @param {function} condition - a function that takes redux state and returns whether to keep waiting or not.
+   * @param {(state: ScratchGUI.ReduxState) => boolean} condition - a function that takes redux state and returns whether to keep waiting or not.
    * @param {object=} opts - options.
    * @param {string=|string[]=} actions - the action(s) to check for.
    * @returns {Promise} a Promise resolved when the state meets the condition.

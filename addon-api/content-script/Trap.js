@@ -17,7 +17,7 @@ export default class Trap extends Listenable {
   /**
    * scratch-vm instance.
    * @throws when on non-project page.
-   * @type {object}
+   * @type {VM}
    */
   get vm() {
     if (!this._getEditorMode()) throw new Error("Cannot access vm on non-project page");
@@ -36,7 +36,7 @@ export default class Trap extends Listenable {
    * This is different from window.Blockly.
    * @async
    * @throws when on non-project page.
-   * @returns {Promise<object>}
+   * @returns {Promise<ScratchBlocks.RealBlockly>}
    */
   async getBlockly() {
     if (this._cache.Blockly) return this._cache.Blockly;
