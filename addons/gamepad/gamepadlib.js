@@ -66,6 +66,22 @@ const defaultAxesMappings = {
       deadZone: 0.2,
     },
   ],
+  fixedCursor: [
+    {
+      type: 'virtual_cursor',
+      high: '=+x',
+      low: '=-x',
+      sensitivity: 80,
+      deadZone: 0
+    },
+    {
+      type: 'virtual_cursor',
+      high: '=-y',
+      low: '=+y',
+      sensitivity: 80,
+      deadZone: 0
+    }
+  ]
 };
 
 const emptyMapping = () => ({
@@ -550,17 +566,36 @@ class GamepadLib extends EventTarget {
       if (action) {
         // an axis value just beyond the deadzone should have a multiplier near 0, a high value should have a multiplier of 1
         const multiplier = (Math.abs(value) - deadZone) / (1 - deadZone);
-        const speed = multiplier * multiplier * mapping.sensitivity * this.deltaTime;
-        if (action === "+x") {
-          this.virtualCursor.x += speed;
-        } else if (action === "-x") {
-          this.virtualCursor.x -= speed;
-        } else if (action === "+y") {
-          this.virtualCursor.y += speed;
-        } else if (action === "-y") {
-          this.virtualCursor.y -= speed;
+        const isAbsolute = action.startsWith('=');
+        if (isAbsolute) {
+          const isX = action.includes('x');
+          const isPositive = action.includes('+');
+          const magnitude = multiplier * mapping.sensitivity;
+          const oldValue = isX ? this.virtualCursor.x : this.virtualCursor.y;
+          const newValue = isPositive ? magnitude : -magnitude;
+          if (Math.abs(newValue) > 10 || Math.abs(oldValue - newValue) > 1) {
+            if (isX) {
+              this.virtualCursor.x = newValue;
+            } else {
+              this.virtualCursor.y = newValue;
+            }
+            this.virtualCursor.modified = true;
+          }
+        } else {
+          // Relative movement
+          // Squaring multiplier seems to result in a greater amount of precision
+          const magnitude = multiplier * multiplier * mapping.sensitivity * this.deltaTime;
+          if (action === "+x") {
+            this.virtualCursor.x += magnitude * this.deltaTime;
+          } else if (action === "-x") {
+            this.virtualCursor.x -= magnitude * this.deltaTime;
+          } else if (action === "+y") {
+            this.virtualCursor.y += magnitude * this.deltaTime;
+          } else if (action === "-y") {
+            this.virtualCursor.y -= magnitude * this.deltaTime;
+          }
+          this.virtualCursor.modified = true;
         }
-        this.virtualCursor.modified = true;
       }
     }
   }
@@ -866,6 +901,12 @@ class GamepadEditor extends EventTarget {
     );
     selector.appendChild(
       Object.assign(document.createElement("option"), {
+        textContent: this.msg("axis-fixed"),
+        value: "fixed-cursor",
+      })
+    );
+    selector.appendChild(
+      Object.assign(document.createElement("option"), {
         // doesn't really make sense to translate
         textContent: "WASD",
         value: "wasd",
@@ -884,34 +925,40 @@ class GamepadEditor extends EventTarget {
       })
     );
 
+    const mappingIsEmpty = () => (
+      mappingList[index].high === null &&
+      mappingList[index].low === null &&
+      mappingList[index + 1].high === null &&
+      mappingList[index + 1].low === null
+    );
+
+    const mappingMatches = (other) => (
+      mappingList[index].high === other[0].high &&
+      mappingList[index].low === other[0].low &&
+      mappingList[index + 1].high === other[1].high &&
+      mappingList[index + 1].low === other[1].low
+    );
+
     const updateDropdownValue = () => {
+      if (mappingIsEmpty()) {
+        selector.value = "none";
+        return;
+      }
+
       if (mappingList[index].type === "key" || mappingList[index].type === "mousedown") {
-        if (
-          mappingList[index].high === null &&
-          mappingList[index].low === null &&
-          mappingList[index + 1].high === null &&
-          mappingList[index + 1].low === null
-        ) {
-          selector.value = "none";
-        } else if (
-          mappingList[index].high === defaultAxesMappings.wasd[0].high &&
-          mappingList[index].low === defaultAxesMappings.wasd[0].low &&
-          mappingList[index + 1].high === defaultAxesMappings.wasd[1].high &&
-          mappingList[index + 1].low === defaultAxesMappings.wasd[1].low
-        ) {
+        if (mappingMatches(defaultAxesMappings.wasd)) {
           selector.value = "wasd";
-        } else if (
-          mappingList[index].high === defaultAxesMappings.arrows[0].high &&
-          mappingList[index].low === defaultAxesMappings.arrows[0].low &&
-          mappingList[index + 1].high === defaultAxesMappings.arrows[1].high &&
-          mappingList[index + 1].low === defaultAxesMappings.arrows[1].low
-        ) {
+        } else if (mappingMatches(defaultAxesMappings.arrows)) {
           selector.value = "arrows";
         } else {
           selector.value = "custom";
         }
       } else if (mappingList[index].type === "virtual_cursor") {
-        selector.value = "cursor";
+        if (mappingMatches(defaultAxesMappings.fixedCursor)) {
+          selector.value = 'fixed-cursor';
+        } else {
+          selector.value = "cursor";
+        }
       } else {
         // should never happen
         selector.value = "none";
@@ -939,25 +986,32 @@ class GamepadEditor extends EventTarget {
     };
     updateOverlay();
 
+    const setEmptyMapping = () => {
+      mappingList[index] = transformAndCopyMapping(emptyMapping());
+      mappingList[index + 1] = transformAndCopyMapping(emptyMapping());
+    };
+
+    const setMapping = (other) => {
+      mappingList[index] = transformAndCopyMapping(other[0]);
+      mappingList[index + 1] = transformAndCopyMapping(other[1]);
+    };
+
     selector.addEventListener("change", () => {
       if (selector.value === "custom") {
-        // If key mappings already exist, leave them as-is
+        // If key mappings already exist, leave them as-is, otherwise set some default keys
         if (mappingList[index].type !== "key") {
-          mappingList[index] = transformAndCopyMapping(defaultAxesMappings.arrows[0]);
-          mappingList[index + 1] = transformAndCopyMapping(defaultAxesMappings.arrows[1]);
+          setMapping(defaultAxesMappings.arrows);
         }
       } else if (selector.value === "arrows") {
-        mappingList[index] = transformAndCopyMapping(defaultAxesMappings.arrows[0]);
-        mappingList[index + 1] = transformAndCopyMapping(defaultAxesMappings.arrows[1]);
+        setMapping(defaultAxesMappings.arrows);
       } else if (selector.value === "wasd") {
-        mappingList[index] = transformAndCopyMapping(defaultAxesMappings.wasd[0]);
-        mappingList[index + 1] = transformAndCopyMapping(defaultAxesMappings.wasd[1]);
+        setMapping(defaultAxesMappings.wasd);
       } else if (selector.value === "cursor") {
-        mappingList[index] = transformAndCopyMapping(defaultAxesMappings.cursor[0]);
-        mappingList[index + 1] = transformAndCopyMapping(defaultAxesMappings.cursor[1]);
+        setMapping(defaultAxesMappings.cursor);
+      } else if (selector.value === "fixed-cursor") {
+        setMapping(defaultAxesMappings.fixedCursor);
       } else {
-        mappingList[index] = transformAndCopyMapping(emptyMapping());
-        mappingList[index + 1] = transformAndCopyMapping(emptyMapping());
+        setEmptyMapping();
       }
       updateOverlay();
       this.changed();
