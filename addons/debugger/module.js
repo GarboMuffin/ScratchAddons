@@ -7,9 +7,20 @@ const STATUS_DONE = 4;
 
 let vm;
 
+/**
+ * https://github.com/LLK/scratch-audio/blob/develop/src/SoundPlayer.js
+ * @typedef SoundPlayer
+ * @property {number} playbackRate
+ * @property {(newRate: number) => void} setPlaybackRate
+ * @property {AudioBufferSourceNode|null} outputNode
+ * @property {boolean} isPlaying
+ */
+
 let paused = false;
 let pausedThreadState = new WeakMap();
 let pauseNewThreads = false;
+/** @type {WeakMap<SoundPlayer, {playbackRate: number; timeUntilEnd: number}>} */
+let pausedSoundState = new WeakMap();
 
 let steppingThread = null;
 
@@ -83,6 +94,64 @@ const stepUnsteppedThreads = (lastSteppedThread) => {
   }
 };
 
+/**
+ * @param {(soundPlayer: SoundPlayer) => void} callback
+ */
+const forEachSoundPlayer = (callback) => {
+  const targets = vm.runtime.targets.filter(i => i.isOriginal)
+  const sprites = targets.map(i => i.sprite);
+  const soundBanks = sprites.map(i => i.soundBank);
+  const soundPlayers = soundBanks.map(i => Object.values(i.soundPlayers)).flat();
+  soundPlayers.forEach(callback);
+};
+
+/**
+ * Replaces SoundPlayer#setPlaybackRate when the SoundPlayer has been paused by the addon.
+ * @param {number} newRate
+ * @this {SoundPlayer}
+ */
+const trappedSetPlaybackRate = function (newRate) {
+  pausedSoundState.get(this).playbackRate = newRate;
+};
+
+/**
+ * @param {SoundPlayer} soundPlayer
+ */
+const pauseSound = (soundPlayer) => {
+  if (pausedSoundState.has(soundPlayer) || !soundPlayer.isPlaying) {
+    // Already paused or not playing.
+    return;
+  }
+
+  /** @type {AudioContext} */
+  const audioContext = vm.runtime.audioEngine.audioContext;
+  const realSoundDuration = soundPlayer.outputNode.buffer.duration / soundPlayer.playbackRate;
+  const endTime = soundPlayer.startingUntil + realSoundDuration;
+  const timeUntilEnd = endTime - audioContext.currentTime;
+  pausedSoundState.set(soundPlayer, {
+    playbackRate: soundPlayer.playbackRate,
+    timeUntilEnd
+  });
+
+  soundPlayer.setPlaybackRate(0);
+  soundPlayer.setPlaybackRate = trappedSetPlaybackRate;
+};
+
+/**
+ * @param {SoundPlayer} soundPlayer
+ */
+ const unpauseSound = (soundPlayer) => {
+  const pauseState = pausedSoundState.get(soundPlayer);
+  if (!pauseState) {
+    // Wasn't paused.
+    return;
+  }
+
+  // Restore the original setPlaybackRate from the prototype chain
+  delete soundPlayer.setPlaybackRate;
+  soundPlayer.setPlaybackRate(pauseState.playbackRate);
+};
+
 export const setPaused = (_paused) => {
   if (paused !== _paused) {
     paused = _paused;
@@ -90,7 +159,8 @@ export const setPaused = (_paused) => {
   }
 
   if (_paused) {
-    vm.runtime.audioEngine.audioContext.suspend();
+    forEachSoundPlayer(pauseSound);
+
     if (!vm.runtime.ioDevices.clock._paused) {
       vm.runtime.ioDevices.clock.pause();
     }
@@ -102,7 +172,9 @@ export const setPaused = (_paused) => {
       eventTarget.dispatchEvent(new CustomEvent("step"));
     }
   } else {
-    vm.runtime.audioEngine.audioContext.resume();
+    forEachSoundPlayer(unpauseSound);
+    pausedSoundState = new WeakMap();
+
     vm.runtime.ioDevices.clock.resume();
     for (const thread of vm.runtime.threads) {
       const pauseState = pausedThreadState.get(thread);
@@ -296,23 +368,20 @@ export const singleStep = () => {
 
     // End of VM step, emulate one frame of time passing.
     vm.runtime.ioDevices.clock._pausedTime += vm.runtime.currentStepTime;
-    // Skip all sounds forward by vm.runtime.currentStepTime milliseconds so it's as
-    //  if they where playing for one frame.
-    const audioContext = vm.runtime.audioEngine.audioContext;
-    for (const target of vm.runtime.targets) {
-      for (const soundId of Object.keys(target.sprite.soundBank.soundPlayers)) {
-        const soundPlayer = target.sprite.soundBank.soundPlayers[soundId];
-        if (soundPlayer.outputNode) {
-          soundPlayer.outputNode.stop(audioContext.currentTime);
-          soundPlayer._createSource();
-          soundPlayer.outputNode.start(
-            audioContext.currentTime,
-            audioContext.currentTime - soundPlayer.startingUntil + vm.runtime.currentStepTime / 1000
-          );
-          soundPlayer.startingUntil -= vm.runtime.currentStepTime / 1000;
+
+    // Skip all paused sounds forward by vm.runtime.currentStepTime milliseconds so it's as
+    // if they were playing for one frame.
+    forEachSoundPlayer((soundPlayer) => {
+      const pauseState = pausedSoundState.get(soundPlayer);
+      if (pauseState) {
+        pauseState.timeUntilEnd -= vm.runtime.currentStepTime / 1000;
+        if (pauseState.timeUntilEnd < 0) {
+          soundPlayer.stopImmediately();
+          unpauseSound(soundPlayer);
         }
       }
-    }
+    });
+
     // Move all threads forward one frame in time. For blocks like `wait () seconds`
     for (const thread of vm.runtime.threads) {
       if (pausedThreadState.has(thread)) {
