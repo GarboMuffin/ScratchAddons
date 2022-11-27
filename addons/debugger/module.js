@@ -98,10 +98,10 @@ const stepUnsteppedThreads = (lastSteppedThread) => {
  * @param {(soundPlayer: SoundPlayer) => void} callback
  */
 const forEachSoundPlayer = (callback) => {
-  const targets = vm.runtime.targets.filter(i => i.isOriginal)
-  const sprites = targets.map(i => i.sprite);
-  const soundBanks = sprites.map(i => i.soundBank);
-  const soundPlayers = soundBanks.map(i => Object.values(i.soundPlayers)).flat();
+  const targets = vm.runtime.targets.filter((i) => i.isOriginal);
+  const sprites = targets.map((i) => i.sprite);
+  const soundBanks = sprites.map((i) => i.soundBank);
+  const soundPlayers = soundBanks.map((i) => Object.values(i.soundPlayers)).flat();
   soundPlayers.forEach(callback);
 };
 
@@ -130,7 +130,7 @@ const pauseSound = (soundPlayer) => {
   const timeUntilEnd = endTime - audioContext.currentTime;
   pausedSoundState.set(soundPlayer, {
     playbackRate: soundPlayer.playbackRate,
-    timeUntilEnd
+    timeUntilEnd,
   });
 
   soundPlayer.setPlaybackRate(0);
@@ -140,7 +140,7 @@ const pauseSound = (soundPlayer) => {
 /**
  * @param {SoundPlayer} soundPlayer
  */
- const unpauseSound = (soundPlayer) => {
+const unpauseSound = (soundPlayer) => {
   const pauseState = pausedSoundState.get(soundPlayer);
   if (!pauseState) {
     // Wasn't paused.
