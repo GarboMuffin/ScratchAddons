@@ -68,20 +68,20 @@ const defaultAxesMappings = {
   ],
   fixedCursor: [
     {
-      type: 'virtual_cursor',
-      high: '=+x',
-      low: '=-x',
+      type: "virtual_cursor",
+      high: "=+x",
+      low: "=-x",
       sensitivity: 80,
-      deadZone: 0
+      deadZone: 0,
     },
     {
-      type: 'virtual_cursor',
-      high: '=-y',
-      low: '=+y',
+      type: "virtual_cursor",
+      high: "=-y",
+      low: "=+y",
       sensitivity: 80,
-      deadZone: 0
-    }
-  ]
+      deadZone: 0,
+    },
+  ],
 };
 
 const emptyMapping = () => ({
@@ -566,10 +566,10 @@ class GamepadLib extends EventTarget {
       if (action) {
         // an axis value just beyond the deadzone should have a multiplier near 0, a high value should have a multiplier of 1
         const multiplier = (Math.abs(value) - deadZone) / (1 - deadZone);
-        const isAbsolute = action.startsWith('=');
+        const isAbsolute = action.startsWith("=");
         if (isAbsolute) {
-          const isX = action.includes('x');
-          const isPositive = action.includes('+');
+          const isX = action.includes("x");
+          const isPositive = action.includes("+");
           const magnitude = multiplier * mapping.sensitivity;
           const oldValue = isX ? this.virtualCursor.x : this.virtualCursor.y;
           const newValue = isPositive ? magnitude : -magnitude;
@@ -925,19 +925,17 @@ class GamepadEditor extends EventTarget {
       })
     );
 
-    const mappingIsEmpty = () => (
+    const mappingIsEmpty = () =>
       mappingList[index].high === null &&
       mappingList[index].low === null &&
       mappingList[index + 1].high === null &&
-      mappingList[index + 1].low === null
-    );
+      mappingList[index + 1].low === null;
 
-    const mappingMatches = (other) => (
+    const mappingMatches = (other) =>
       mappingList[index].high === other[0].high &&
       mappingList[index].low === other[0].low &&
       mappingList[index + 1].high === other[1].high &&
-      mappingList[index + 1].low === other[1].low
-    );
+      mappingList[index + 1].low === other[1].low;
 
     const updateDropdownValue = () => {
       if (mappingIsEmpty()) {
@@ -955,7 +953,7 @@ class GamepadEditor extends EventTarget {
         }
       } else if (mappingList[index].type === "virtual_cursor") {
         if (mappingMatches(defaultAxesMappings.fixedCursor)) {
-          selector.value = 'fixed-cursor';
+          selector.value = "fixed-cursor";
         } else {
           selector.value = "cursor";
         }
