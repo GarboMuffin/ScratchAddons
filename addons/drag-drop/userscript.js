@@ -87,7 +87,7 @@ export default async function ({ addon, console }) {
     if (el) {
       return {
         el,
-        callback
+        callback,
       };
     }
     return null;
