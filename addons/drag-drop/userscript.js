@@ -1,25 +1,21 @@
 export default async function ({ addon, console }) {
   const DRAG_OVER_CLASS = "sa-dragged-over";
 
-  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
   const reactAwareSetValue = (el, value) => {
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
     nativeInputValueSetter.call(el, value);
     el.dispatchEvent(new Event("change", { bubbles: true }));
   };
 
-  const globalHandleDragOver = (e) => {
-    if (addon.self.disabled) return;
+  let currentDropTarget = null;
 
-    if (!e.dataTransfer.types.includes("Files")) {
-      return;
-    }
-
+  const findDropTarget = (target) => {
     let el;
     let callback;
     if (
-      (el = e.target.closest('div[class*="sprite-selector_sprite-selector"]')) ||
-      (el = e.target.closest('div[class*="stage-selector_stage-selector"]')) ||
-      (el = e.target.closest('div[class*="selector_wrapper"]'))
+      (el = target.closest('div[class*="sprite-selector_sprite-selector"]')) ||
+      (el = target.closest('div[class*="stage-selector_stage-selector"]')) ||
+      (el = target.closest('div[class*="selector_wrapper"]'))
     ) {
       callback = (files) => {
         const hdFilter = addon.settings.get("use-hd-upload") ? "" : ":not(.sa-better-img-uploads-input)";
@@ -29,7 +25,7 @@ export default async function ({ addon, console }) {
       };
     } else if (
       !addon.tab.redux.state.scratchGui.mode.isPlayerOnly &&
-      (el = e.target.closest('div[class*="monitor_list-monitor"]'))
+      (el = target.closest('div[class*="monitor_list-monitor"]'))
     ) {
       callback = (files) => {
         const contextMenuBefore = document.querySelector("body > .react-contextmenu.react-contextmenu--visible");
@@ -75,7 +71,7 @@ export default async function ({ addon, console }) {
         contextMenu.children[0].click();
       };
     } else if (
-      (el = e.target.closest('div[class*="question_question-input"] > input[class*="input_input-form_l9eYg"]'))
+      (el = target.closest('div[class*="question_question-input"] > input[class*="input_input-form_l9eYg"]'))
     ) {
       callback = async (files) => {
         const text = (await Promise.all(Array.from(files, (file) => file.text())))
@@ -88,47 +84,71 @@ export default async function ({ addon, console }) {
         el.setSelectionRange(selectionStart, selectionStart + text.length);
       };
     }
-    if (!el) {
-      return;
+    if (el) {
+      return {
+        el,
+        callback
+      };
     }
-
-    e.preventDefault();
-
-    if (el.classList.contains(DRAG_OVER_CLASS)) {
-      return;
-    }
-    el.classList.add(DRAG_OVER_CLASS);
-
-    const handleDrop = (e) => {
-      e.preventDefault();
-      cleanup();
-      if (e.dataTransfer.types.includes("Files") && e.dataTransfer.files.length > 0) {
-        callback(e.dataTransfer.files);
-      }
-    };
-
-    const handleDragOver = (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "copy";
-    };
-    e.dataTransfer.dropEffect = "copy";
-
-    const handleDragLeave = (e) => {
-      e.preventDefault();
-      cleanup();
-    };
-
-    const cleanup = () => {
-      el.classList.remove(DRAG_OVER_CLASS);
-      el.removeEventListener("dragover", handleDragOver);
-      el.removeEventListener("dragleave", handleDragLeave);
-      el.removeEventListener("drop", handleDrop);
-    };
-
-    el.addEventListener("dragover", handleDragOver);
-    el.addEventListener("dragleave", handleDragLeave);
-    el.addEventListener("drop", handleDrop);
+    return null;
   };
 
-  document.addEventListener("dragover", globalHandleDragOver, { useCapture: true });
+  const resetDropTarget = () => {
+    if (currentDropTarget) {
+      currentDropTarget.el.classList.remove(DRAG_OVER_CLASS);
+      currentDropTarget = null;
+    }
+  };
+
+  const handleDragOver = (e) => {
+    if (currentDropTarget) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+      return;
+    }
+
+    if (addon.self.disabled) {
+      return;
+    }
+
+    if (!e.dataTransfer.types.includes("Files")) {
+      return;
+    }
+
+    const newDropTarget = findDropTarget(e.target);
+    if (!newDropTarget) {
+      return;
+    }
+
+    resetDropTarget();
+    currentDropTarget = newDropTarget;
+    currentDropTarget.el.classList.add(DRAG_OVER_CLASS);
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
+  const handleDragLeave = (e) => {
+    // The dragleave event has some quirks.
+    // If you have a DOM structure like this:
+    // <div>abc <span>def</span> xyz</div>
+    // If the cursor moves from the div element to the span element, it fires a dragleave
+    // event with the div as the target.
+    if (currentDropTarget && !currentDropTarget.el.contains(e.target)) {
+      resetDropTarget();
+    }
+  };
+
+  const handleDrop = (e) => {
+    if (currentDropTarget) {
+      e.preventDefault();
+      if (e.dataTransfer.types.includes("Files") && e.dataTransfer.files.length > 0) {
+        currentDropTarget.callback(e.dataTransfer.files);
+      }
+      resetDropTarget();
+    }
+  };
+
+  document.addEventListener("dragover", handleDragOver);
+  document.addEventListener("dragleave", handleDragLeave);
+  document.addEventListener("drop", handleDrop);
 }
