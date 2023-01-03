@@ -22,8 +22,12 @@ export default async function ({ addon, msg, console }) {
       );
 
   // https://github.com/LLK/scratch-vm/blob/7c6f1e44fb0a9b0d0279225cd4c62fbe59b6af54/src/engine/blocks.js#L388-L394
+  const targetHasLocalVariable = (target, name, type) => {
+    return !!target.lookupVariableByNameAndType(name, type, true);
+  };
+
   const getTargetsWithLocalVariableNamed = (name, type) =>
-    vm.runtime.targets.filter((target) => target.isOriginal && target.lookupVariableByNameAndType(name, type, true));
+    vm.runtime.targets.filter((target) => target.isOriginal && targetHasLocalVariable(target, name, type));
 
   const getVmVariable = (id) => vm.editingTarget.lookupVariableById(id);
   const isStageSelected = () => vm.editingTarget.isStage;
@@ -150,6 +154,15 @@ export default async function ({ addon, msg, console }) {
           alert(msg("cant-convert-stage"));
           return;
         }
+
+        // If the VM has been corrupted somehow, it's possible for a global variable and local variable to have the same
+        // name. This is very bad and should never happen.
+        // Instead of making the situation worse than it already is, refuse to continue.
+        if (targetHasLocalVariable(editingTarget, name, type)) {
+          alert(msg("local-and-global-variable-have-same-name"));
+          return;
+        }
+
         // Variables used by unfocused sprites cannot be made local
         // That includes cases where the variable is used by multiple sprites and where it's only used by an unfocused sprite
         const targets = getTargetsThatUseVariable(id);
@@ -170,7 +183,7 @@ export default async function ({ addon, msg, console }) {
           return;
         }
       } else {
-        // Global variables must not conflict with any local variables
+        // Global variables must not conflict with any local variables in any sprite
         const targets = getTargetsWithLocalVariableNamed(name, type).filter((target) => target !== editingTarget);
         if (targets.length > 0) {
           alert(
