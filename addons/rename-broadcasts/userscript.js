@@ -146,6 +146,9 @@ export default async function ({ addon, msg, console }) {
     const modalTitle = msg("RENAME_BROADCAST_MODAL_TITLE");
     const oldName = variable.name;
     const id = variable.getId();
+    if (variable.type !== "broadcast_msg") {
+      throw new Error("Variable is not a broadcast_msg");
+    }
     const promptText = msg("RENAME_BROADCAST_TITLE", { name: oldName });
     const promptDefaultText = oldName;
 
