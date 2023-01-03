@@ -120,7 +120,7 @@ export default async function ({ addon, msg, console }) {
         let field = option.dom.querySelector("field[name=" + option.pickField + "]");
         if (field.getAttribute("id")) {
           field.innerText = option.option[0];
-          field.setAttribute("id", option.option[1] + "-" + option.option[0]);
+          field.setAttribute("id", option.option[1]);
         } else {
           field.innerText = option.option[1];
         }
