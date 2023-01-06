@@ -148,7 +148,7 @@ export default class DevTools {
             callback: () => {
               let wksp = this.getWorkspace();
               let v = wksp.getVariableById(this.selVarID);
-              let varName = window.prompt(this.msg("replace", { name: v.name }));
+              let varName = window.prompt(this.msg("replace", { name: v.name }), v.name);
               if (varName) {
                 this.doReplaceVariable(this.selVarID, varName, v.type);
               }
