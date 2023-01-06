@@ -15,7 +15,6 @@ export default class DevTools {
     this.codeTab = null;
     this.costTab = null;
     this.costTabBody = null;
-    this.selVarID = null;
     this.canShare = false;
 
     this.mouseXY = { x: 0, y: 0 };
@@ -141,16 +140,22 @@ export default class DevTools {
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
         if (block.getCategory() === "data" || block.getCategory() === "data-lists") {
-          this.selVarID = block.getVars()[0];
+          const selectedVariableId = block.getVars()[0];
           items.push({
             enabled: true,
             text: this.m("swap", { var: block.getCategory() === "data" ? this.m("variables") : this.m("lists") }),
-            callback: () => {
-              let wksp = this.getWorkspace();
-              let v = wksp.getVariableById(this.selVarID);
-              let varName = window.prompt(this.msg("replace", { name: v.name }), v.name);
-              if (varName) {
-                this.doReplaceVariable(this.selVarID, varName, v.type);
+            callback: async () => {
+              const workspace = this.getWorkspace();
+              const variable = workspace.getVariableById(selectedVariableId);
+              const oldName = variable.name;
+              const newName = await this.addon.tab.prompt(
+                this.msg("replace-title"),
+                this.msg("replace", { name: oldName }),
+                oldName,
+                { useEditorClasses: true }
+              );
+              if (newName) {
+                this.doReplaceVariable(selectedVariableId, newName, variable.type);
               }
             },
             separator: true,
