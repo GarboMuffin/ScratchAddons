@@ -20,7 +20,7 @@ export default class DevTools {
 
     this.mouseXY = { x: 0, y: 0 };
 
-    /** @type {Node|null} */
+    /** @type {{xml: Element, timesPasted: number}|null} */
     this.clipboard = null;
   }
 
@@ -64,24 +64,12 @@ export default class DevTools {
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
         items.push({
-          enabled: !!ScratchBlocks.clipboardXml_,
+          enabled: this.clipboard !== null,
           text: this.m("paste"),
           separator: true,
           _isDevtoolsFirstItem: true,
           callback: () => {
-            let ids = this.getTopBlockIDs();
-
-            document.dispatchEvent(
-              new KeyboardEvent("keydown", {
-                keyCode: 86,
-                ctrlKey: true,
-                griff: true,
-              })
-            );
-
-            setTimeout(() => {
-              this.beginDragOfNewBlocksNotInIDs(ids);
-            }, 10);
+            this.paste();
           },
         });
         return items;
@@ -101,28 +89,28 @@ export default class DevTools {
             },
             separator: true,
           },
-          {
-            enabled: true,
-            text: this.m("copy-all"),
-            callback: () => {
-              this.eventCopyClick(block);
-            },
-            separator: true,
-          },
+          // {
+          //   enabled: true,
+          //   text: this.m("copy-all"),
+          //   callback: () => {
+          //     // this.eventCopyClick(block);
+          //   },
+          //   separator: true,
+          // },
           {
             enabled: true,
             text: this.m("copy-block"),
             callback: () => {
-              this.eventCopyClick(block, 1);
+              this.copy(block);
             },
           },
-          {
-            enabled: true,
-            text: this.m("cut-block"),
-            callback: () => {
-              this.eventCopyClick(block, 2);
-            },
-          }
+          // {
+          //   enabled: true,
+          //   text: this.m("cut-block"),
+          //   callback: () => {
+          //     this.eventCopyClick(block, 2);
+          //   },
+          // }
         );
         // const BROADCAST_BLOCKS = ["event_whenbroadcastreceived", "event_broadcast", "event_broadcastandwait"];
         // if (BROADCAST_BLOCKS.includes(block.type)) {
@@ -329,11 +317,103 @@ export default class DevTools {
     const xy = block.getRelativeToSurfaceXY();
     xml.setAttribute('x', xy.x);
     xml.setAttribute('y', xy.y);
-    this.clipboard = xml;
+    this.clipboard = {
+      xml,
+      timesPasted: 0
+    };
+  }
+
+  generateRandomVariableId() {
+    const CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%()*+,-./:;=?@[]^_`{|}~";
+    let result = "";
+    for (let i = 0; i < 20; i++) {
+      result += CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+    }
+    return result;
+  }
+
+  /**
+   * @param {string} originalName
+   * @param {string} type
+   * @returns {string}
+   */
+  getGloballyUnusedVariableName(originalName, type) {
+    const vm = this.addon.tab.traps.vm;
+    const allNames = vm.runtime.getAllVarNamesOfType(type);
+    if (allNames.includes(originalName)) {
+      let n = 2;
+      while (true) {
+        const newName = `${originalName} ${n}`;
+        if (!allNames.includes(newName)) {
+          return newName;
+        }
+        n += 1;
+      }
+    }
+    return originalName;
+  }
+
+  /**
+   * Create a copy of a Blockly XML with unrecognized variables rewritten with new IDs.
+   * @param {Element} originalBlockXml
+   */
+  rewriteUnknownVariables(originalBlockXml) {
+    const copyXml = originalBlockXml.cloneNode(true);
+    const fields = copyXml.querySelectorAll('field[name="VARIABLE"], field[name="LIST"]');
+
+    const workspace = this.getWorkspace();
+    const vm = this.addon.tab.traps.vm;
+    const isStage = vm.editingTarget.isStage;
+
+    for (const field of fields) {
+      const variableId = field.getAttribute('id');
+      if (workspace.getVariableById(variableId)) {
+        // Variable ID already exists, don't need to touch anything
+        continue;
+      }
+
+      const variableName = field.textContent;
+      const variableType = field.getAttribute('variabletype');
+      if (workspace.getVariable(variableName, variableType)) {
+        // A variable with the name and type already exists, don't need to touch anything
+        continue;
+      }
+
+      // This variable was a local variable in another sprite, and this sprite doesn't have
+      // an equivalent variable.
+      field.setAttribute('id', this.generateRandomVariableId());
+      if (isStage) {
+        // For non-stages, this variable will be created locally, but in the stage it will
+        // be created globally.
+        field.textContent = this.getGloballyUnusedVariableName(variableName, variableType);
+      } else {
+        // TODO: see if old variable was since converted from local to global, have to rename then
+      }
+    }
+
+    return copyXml;
   }
 
   paste() {
+    if (!this.clipboard) {
+      return;
+    }
 
+    const xml = this.rewriteUnknownVariables(this.clipboard.xml);
+    const newBlock = this.ScratchBlocks.Xml.domToBlock(xml, this.getWorkspace());
+
+    // TODO: RTL
+    this.clipboard.timesPasted += 1;
+    const x = +this.clipboard.xml.getAttribute('x') + this.clipboard.timesPasted * 32;
+    const y = +this.clipboard.xml.getAttribute('y') + this.clipboard.timesPasted * 32;
+    newBlock.moveBy(x, y);
+
+    newBlock.select();
+
+    // Fix flyout checkbox for newly created variables
+    Blockly.getMainWorkspace().refreshToolboxSelection_();
+
+    // TODO: grab it onto the mouse cursor
   }
 
   /**
@@ -588,13 +668,20 @@ export default class DevTools {
       }
     }
 
-    if (e.keyCode === 86 && ctrlKey && !e.griff) {
+    // TODO: macOS
+
+    if (e.keyCode === 67 && ctrlKey) {
+      // Ctrl+C
+      e.preventDefault();
+      e.stopPropagation();
+      // TODO
+    }
+
+    if (e.keyCode === 86 && ctrlKey) {
       // Ctrl + V
-      // Set a timeout so we can take control of the paste after the event
-      let ids = this.getTopBlockIDs();
-      setTimeout(() => {
-        this.beginDragOfNewBlocksNotInIDs(ids);
-      }, 10);
+      e.preventDefault();
+      e.stopPropagation();
+      this.paste();
     }
   }
 
