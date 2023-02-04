@@ -37,10 +37,10 @@ export default class DevTools {
     }
   }
   async addContextMenus() {
-    const blockly = await this.addon.tab.traps.getBlockly();
-    const oldCleanUpFunc = blockly.WorkspaceSvg.prototype.cleanUp;
+    const ScratchBlocks = await this.addon.tab.traps.getBlockly();
+    const oldCleanUpFunc = ScratchBlocks.WorkspaceSvg.prototype.cleanUp;
     const self = this;
-    blockly.WorkspaceSvg.prototype.cleanUp = function () {
+    ScratchBlocks.WorkspaceSvg.prototype.cleanUp = function () {
       if (self.addon.settings.get("enableCleanUpPlus")) {
         self.doCleanUp();
       } else {
@@ -48,17 +48,17 @@ export default class DevTools {
       }
     };
 
-    let originalMsg = blockly.Msg.CLEAN_UP;
-    if (this.addon.settings.get("enableCleanUpPlus")) blockly.Msg.CLEAN_UP = this.m("clean-plus");
+    let originalMsg = ScratchBlocks.Msg.CLEAN_UP;
+    if (this.addon.settings.get("enableCleanUpPlus")) ScratchBlocks.Msg.CLEAN_UP = this.m("clean-plus");
     this.addon.settings.addEventListener("change", () => {
-      if (this.addon.settings.get("enableCleanUpPlus")) blockly.Msg.CLEAN_UP = this.m("clean-plus");
-      else blockly.Msg.CLEAN_UP = originalMsg;
+      if (this.addon.settings.get("enableCleanUpPlus")) ScratchBlocks.Msg.CLEAN_UP = this.m("clean-plus");
+      else ScratchBlocks.Msg.CLEAN_UP = originalMsg;
     });
 
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
         items.push({
-          enabled: blockly.clipboardXml_,
+          enabled: ScratchBlocks.clipboardXml_,
           text: this.m("paste"),
           separator: true,
           _isDevtoolsFirstItem: true,
