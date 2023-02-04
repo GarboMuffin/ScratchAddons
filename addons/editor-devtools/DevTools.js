@@ -89,19 +89,19 @@ export default class DevTools {
             },
             separator: true,
           },
-          // {
-          //   enabled: true,
-          //   text: this.m("copy-all"),
-          //   callback: () => {
-          //     // this.eventCopyClick(block);
-          //   },
-          //   separator: true,
-          // },
+          {
+            enabled: true,
+            text: this.m("copy-all"),
+            callback: () => {
+              this.copyAll(block);
+            },
+            separator: true,
+          },
           {
             enabled: true,
             text: this.m("copy-block"),
             callback: () => {
-              this.copy(block);
+              this.copySingle(block);
             },
           },
           // {
@@ -312,7 +312,7 @@ export default class DevTools {
     }, 100);
   }
 
-  copy(block) {
+  copyAll(block) {
     if (!block) {
       this.clipboard = null;
       return;
@@ -327,7 +327,21 @@ export default class DevTools {
     };
   }
 
+  copySingle(block) {
+    const next = block.getNextBlock();
+    if (next) {
+      next.unplug(false);
+    }
+    this.copyAll(block);
+    setTimeout(() => {
+      if (next) {
+        next.workspace.undo();
+      }
+    }, 0);
+  }
+
   generateRandomVariableId() {
+    // TODO: refactor out
     const CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%()*+,-./:;=?@[]^_`{|}~";
     let result = "";
     for (let i = 0; i < 20; i++) {
@@ -417,6 +431,9 @@ export default class DevTools {
     const x = +this.clipboard.xml.getAttribute('x') + this.clipboard.timesPasted * X_OFFSET;
     const y = +this.clipboard.xml.getAttribute('y') + this.clipboard.timesPasted * Y_OFFSET;
     newBlock.moveBy(x, y);
+
+    // TODO: undo/redo group
+    // TODO: can we actually use pasteBlock ?
 
     newBlock.select();
 
@@ -682,7 +699,7 @@ export default class DevTools {
       // Ctrl+C
       e.preventDefault();
       e.stopPropagation();
-      this.copy(this.ScratchBlocks.selected);
+      this.copyAll(this.ScratchBlocks.selected);
     }
 
     if (e.keyCode === 86 && ctrlKey) {
@@ -690,33 +707,6 @@ export default class DevTools {
       e.preventDefault();
       e.stopPropagation();
       this.paste();
-    }
-  }
-
-  eventCopyClick(block, blockOnly) {
-    let wksp = this.getWorkspace();
-
-    if (block) {
-      block.select();
-      let next = blockOnly ? block.getNextBlock() : null;
-      if (next) {
-        next.unplug(false); // setParent(null);
-      }
-
-      // separate child temporarily
-      document.dispatchEvent(new KeyboardEvent("keydown", { keyCode: 67, ctrlKey: true }));
-      if (next || blockOnly === 2) {
-        setTimeout(() => {
-          if (next) {
-            wksp.undo(); // undo the unplug above...
-          }
-          if (blockOnly === 2) {
-            UndoGroup.startUndoGroup(wksp);
-            block.dispose(true);
-            UndoGroup.endUndoGroup(wksp);
-          }
-        }, 0);
-      }
     }
   }
 
