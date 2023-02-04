@@ -104,13 +104,13 @@ export default class DevTools {
               this.copySingle(block);
             },
           },
-          // {
-          //   enabled: true,
-          //   text: this.m("cut-block"),
-          //   callback: () => {
-          //     this.eventCopyClick(block, 2);
-          //   },
-          // }
+          {
+            enabled: true,
+            text: this.m("cut-block"),
+            callback: () => {
+              this.cut(block);
+            },
+          }
         );
         // const BROADCAST_BLOCKS = ["event_whenbroadcastreceived", "event_broadcast", "event_broadcastandwait"];
         // if (BROADCAST_BLOCKS.includes(block.type)) {
@@ -338,6 +338,15 @@ export default class DevTools {
         next.workspace.undo();
       }
     }, 0);
+  }
+
+  cut(block) {
+    const next = block.getNextBlock();
+    if (next) {
+      next.unplug(true);
+    }
+    this.copyAll(block);
+    block.dispose();
   }
 
   generateRandomVariableId() {
