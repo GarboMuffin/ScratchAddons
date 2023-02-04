@@ -359,6 +359,7 @@ export default class DevTools {
    */
   rewriteUnknownVariables(originalBlockXml) {
     const copyXml = originalBlockXml.cloneNode(true);
+    // TODO: broadcasts ???
     const fields = copyXml.querySelectorAll('field[name="VARIABLE"], field[name="LIST"]');
 
     const workspace = this.getWorkspace();
@@ -384,10 +385,13 @@ export default class DevTools {
       field.setAttribute('id', this.generateRandomVariableId());
       if (isStage) {
         // For non-stages, this variable will be created locally, but in the stage it will
-        // be created globally.
-        field.textContent = this.getGloballyUnusedVariableName(variableName, variableType);
+        // be created globally. We need to make sure that the new name won't conflict with
+        // any local variables in any other sprites.
+        field.textContent = this.getUnusedVariableName(variableName, variableType);
       } else {
-        // TODO: see if old variable was since converted from local to global, have to rename then
+        // Variable will be made locally. We don't need to touch anything.
+        // We already checked previously that there is no variable with the same name and type, so
+        // we know that this name is not going to collide with any global variables.
       }
     }
 
