@@ -414,7 +414,7 @@ export default class DevTools {
         // For non-stages, this variable will be created locally, but in the stage it will
         // be created globally. We need to make sure that the new name won't conflict with
         // any local variables in any other sprites.
-        field.textContent = this.getUnusedVariableName(variableName, variableType);
+        field.textContent = this.getGloballyUnusedVariableName(variableName, variableType);
       } else {
         // Variable will be made locally. We don't need to touch anything.
         // We already checked previously that there is no variable with the same name and type, so
