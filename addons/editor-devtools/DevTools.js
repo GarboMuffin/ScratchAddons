@@ -403,13 +403,15 @@ export default class DevTools {
       return;
     }
 
+    const workspace = this.getWorkspace();
     const xml = this.rewriteUnknownVariables(this.clipboard.xml);
     const newBlock = this.ScratchBlocks.Xml.domToBlock(xml, this.getWorkspace());
 
-    // TODO: RTL
+    const X_OFFSET = workspace.RTL ? -32 : 32;
+    const Y_OFFSET = 32;
     this.clipboard.timesPasted += 1;
-    const x = +this.clipboard.xml.getAttribute('x') + this.clipboard.timesPasted * 32;
-    const y = +this.clipboard.xml.getAttribute('y') + this.clipboard.timesPasted * 32;
+    const x = +this.clipboard.xml.getAttribute('x') + this.clipboard.timesPasted * X_OFFSET;
+    const y = +this.clipboard.xml.getAttribute('y') + this.clipboard.timesPasted * Y_OFFSET;
     newBlock.moveBy(x, y);
 
     newBlock.select();
