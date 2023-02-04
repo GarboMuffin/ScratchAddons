@@ -19,6 +19,9 @@ export default class DevTools {
     this.canShare = false;
 
     this.mouseXY = { x: 0, y: 0 };
+
+    /** @type {Node|null} */
+    this.clipboard = null;
   }
 
   async init() {
@@ -39,6 +42,8 @@ export default class DevTools {
 
   async addContextMenus() {
     const ScratchBlocks = await this.addon.tab.traps.getBlockly();
+    this.ScratchBlocks = ScratchBlocks;
+
     const oldCleanUpFunc = ScratchBlocks.WorkspaceSvg.prototype.cleanUp;
     const self = this;
     ScratchBlocks.WorkspaceSvg.prototype.cleanUp = function () {
@@ -319,6 +324,18 @@ export default class DevTools {
     }, 100);
   }
 
+  copy(block) {
+    const xml = this.ScratchBlocks.Xml.blockToDom(block);
+    const xy = block.getRelativeToSurfaceXY();
+    xml.setAttribute('x', xy.x);
+    xml.setAttribute('y', xy.y);
+    this.clipboard = xml;
+  }
+
+  paste() {
+
+  }
+
   /**
    * Badly Orphaned - might want to delete these!
    * @param topBlock
@@ -537,7 +554,7 @@ export default class DevTools {
       }
     };
 
-    if (document.URL.indexOf("editor") <= 0) {
+    if (this.addon.tab.editorMode !== 'editor') {
       return;
     }
 
