@@ -475,98 +475,6 @@ export default class DevTools {
     UndoGroup.endUndoGroup(wksp);
   }
 
-  /*
-    function doInjectScripts(codeString) {
-      let w = getWorkspace();
-      let xml = new XML(); // document.implementation.createDocument(null, "xml");
-      let x = xml.xmlDoc.firstChild;
-
-      let tree = math.parse(codeString);
-      console.log(tree);
-
-      const binaryOperatorTypes = {
-        add: "operator_add",
-        subtract: "operator_subtract",
-        this.multiply: "operator_multiply",
-        divide: "operator_divide",
-      };
-
-      const BLOCK_TYPE = {
-        number: "math_number",
-        text: "text",
-      };
-
-      function translateMathToXml(x, tree, shadowType) {
-        let xShadowField = null;
-        if (shadowType) {
-          let xShadow = xml.newXml(x, "shadow", { type: shadowType });
-          if (shadowType === BLOCK_TYPE.number) {
-            xShadowField = xml.newXml(xShadow, "field", { name: "NUM" });
-          } else if (shadowType === BLOCK_TYPE.text) {
-            xShadowField = xml.newXml(xShadow, "field", { name: "TEXT" });
-          }
-        }
-
-        if (!tree || !tree.type) {
-          return;
-        }
-
-        if (tree.type === "OperatorNode") {
-          let operatorType = binaryOperatorTypes[tree.fn];
-          if (operatorType) {
-            let xOp = newXml(x, "block", { type: operatorType });
-            translateMathToXml(xml.newXml(xOp, "value", { name: "NUM1" }), tree.args[0], BLOCK_TYPE.number);
-            translateMathToXml(xml.newXml(xOp, "value", { name: "NUM2" }), tree.args[1], BLOCK_TYPE.number);
-            return;
-          }
-
-          return;
-        }
-
-        if (tree.type === "ConstantNode") {
-          // number or text in quotes
-          if (xShadowField) {
-            xml.setAttr(xShadowField, { text: tree.value });
-          }
-          return;
-        }
-
-        if (tree.type === "SymbolNode") {
-          // variable
-          let xVar = xml.newXml(x, "block", { type: "data_variable" });
-          xml.newXml(xVar, "field", { name: "VARIABLE", text: tree.name });
-          return;
-        }
-
-        if (tree.type === "FunctionNode") {
-          // Method Call
-          if (tree.fn.name === "join") {
-            let xOp = newXml(x, "block", { type: "operator_join" });
-            translateMathToXml(xml.newXml(xOp, "value", { name: "STRING1" }), tree.args[0], BLOCK_TYPE.text);
-            translateMathToXml(xml.newXml(xOp, "value", { name: "STRING2" }), tree.args[1], BLOCK_TYPE.text);
-            return;
-          }
-        }
-      }
-
-      translateMathToXml(x, tree);
-      console.log(x);
-
-      let ids = Blockly.Xml.domToWorkspace(x, w);
-      console.log(ids);
-    }
-     */
-  /*
-    function clickInject(e) {
-      let codeString = window.prompt("Griffpatch: Enter an expression (i.e. a+2*3)");
-      if (codeString) {
-        doInjectScripts(codeString);
-      }
-      e.preventDefault();
-      return false;
-    }
-    */
-
   /**
    * Returns a Set of the top blocks in this workspace / sprite
    * @returns {Set<any>} Set of top blocks
@@ -671,10 +579,6 @@ export default class DevTools {
         this.beginDragOfNewBlocksNotInIDs(ids);
       }, 10);
     }
-
-    // if (e.keyCode === 220 && (!document.activeElement || document.activeElement.tagName === 'INPUT')) {
-    //
-    // }
   }
 
   eventCopyClick(block, blockOnly) {
