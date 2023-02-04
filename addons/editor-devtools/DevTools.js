@@ -21,7 +21,7 @@ export default class DevTools {
 
     this.mouseXY = { x: 0, y: 0 };
 
-    /** @type {{xml: Element, timesPasted: number}|null} */
+    /** @type {Element|null} */
     this.clipboard = null;
   }
 
@@ -322,10 +322,7 @@ export default class DevTools {
     const xy = block.getRelativeToSurfaceXY();
     xml.setAttribute('x', xy.x);
     xml.setAttribute('y', xy.y);
-    this.clipboard = {
-      xml,
-      timesPasted: 0
-    };
+    this.clipboard = xml;
   }
 
   copySingle(block) {
@@ -372,22 +369,23 @@ export default class DevTools {
   }
 
   /**
-   * Create a copy of a Blockly XML with unrecognized variables rewritten with new IDs.
+   * Create a copy of a Blockly XML with various fixes.
    * @param {Element} originalBlockXml
    */
-  rewriteUnknownVariables(originalBlockXml) {
+  fixupBlockXML(originalBlockXml) {
     const copyXml = originalBlockXml.cloneNode(true);
     // TODO: broadcasts ???
-    const fields = copyXml.querySelectorAll('field[name="VARIABLE"], field[name="LIST"]');
 
     const workspace = this.getWorkspace();
     const vm = this.addon.tab.traps.vm;
     const isStage = vm.editingTarget.isStage;
 
+    // We may need to rewrite variable references.
+    const fields = copyXml.querySelectorAll('field[name="VARIABLE"], field[name="LIST"]');
     for (const field of fields) {
       const variableId = field.getAttribute('id');
       if (workspace.getVariableById(variableId)) {
-        // Variable ID already exists, don't need to touch anything
+        // Variable ID is in scope, don't need to touch anything
         continue;
       }
 
@@ -398,18 +396,21 @@ export default class DevTools {
         continue;
       }
 
-      // This variable was a local variable in another sprite, and this sprite doesn't have
-      // an equivalent variable.
+      // If we get here, this variable was existed in the sprite when the XML was copied, but
+      // no longer exists. It may have been deleted, or it was a local variable that does not
+      // have an equivalent in the current sprite. In the latter case, it is important that we
+      // give the variable a new ID.
       field.setAttribute('id', generateId());
+
       if (isStage) {
-        // For non-stages, this variable will be created locally, but in the stage it will
-        // be created globally. We need to make sure that the new name won't conflict with
-        // any local variables in any other sprites.
+        // For non-stages, this variable will be created locally, but in the stage it will be
+        // created globally. We need to make sure that the name won't conflict with any local
+        // variables in any other sprites.
         field.textContent = this.getGloballyUnusedVariableName(variableName, variableType);
       } else {
         // Variable will be made locally. We don't need to touch anything.
-        // We already checked previously that there is no variable with the same name and type, so
-        // we know that this name is not going to collide with any global variables.
+        // We already checked previously that there is no variable with the same name and type
+        // in scope, so we know that this won't conflict with any other variables.
       }
     }
 
@@ -422,25 +423,16 @@ export default class DevTools {
     }
 
     const workspace = this.getWorkspace();
-    const xml = this.rewriteUnknownVariables(this.clipboard.xml);
-    const newBlock = this.ScratchBlocks.Xml.domToBlock(xml, this.getWorkspace());
-
-    const X_OFFSET = workspace.RTL ? -32 : 32;
-    const Y_OFFSET = 32;
-    this.clipboard.timesPasted += 1;
-    const x = +this.clipboard.xml.getAttribute('x') + this.clipboard.timesPasted * X_OFFSET;
-    const y = +this.clipboard.xml.getAttribute('y') + this.clipboard.timesPasted * Y_OFFSET;
-    newBlock.moveBy(x, y);
-
-    // TODO: undo/redo group
-    // TODO: can we actually use pasteBlock ?
-
-    newBlock.select();
+    const xml = this.fixupBlockXML(this.clipboard);
+    workspace.paste(xml);
+    const newBlock = this.ScratchBlocks.selected;
 
     // Fix flyout checkbox for newly created variables
-    Blockly.getMainWorkspace().refreshToolboxSelection_();
+    workspace.refreshToolboxSelection_();
 
-    // TODO: grab it onto the mouse cursor
+    if (this.addon.settings.get("enablePasteBlocksAtMouse")) {
+      this.startDraggingBlock(newBlock);
+    }
   }
 
   /**
@@ -599,40 +591,14 @@ export default class DevTools {
     UndoGroup.endUndoGroup(wksp);
   }
 
-  /**
-   * Returns a Set of the top blocks in this workspace / sprite
-   * @returns {Set<any>} Set of top blocks
-   */
-  getTopBlockIDs() {
-    let wksp = this.getWorkspace();
-    let topBlocks = wksp.getTopBlocks();
-    let ids = new Set();
-    for (const block of topBlocks) {
-      ids.add(block.id);
-    }
-    return ids;
-  }
-
-  /**
-   * Initiates a drag event for all block stacks except those in the set of ids.
-   * But why? - Because we know all the ids of the existing stacks before we paste / duplicate - so we can find the
-   * new stack by excluding all the known ones.
-   * @param ids Set of previously known ids
-   */
-  beginDragOfNewBlocksNotInIDs(ids) {
-    if (!this.addon.settings.get("enablePasteBlocksAtMouse")) {
-      return;
-    }
-    let wksp = this.getWorkspace();
-    let topBlocks = wksp.getTopBlocks();
-    for (const block of topBlocks) {
-      if (!ids.has(block.id)) {
-        // console.log("I found a new block!!! - " + block.id);
-        // todo: move the block to the mouse pointer?
-        let mouseXYClone = { x: this.mouseXY.x, y: this.mouseXY.y };
-        this.domHelpers.triggerDragAndDrop(block.svgPath_, null, mouseXYClone);
-      }
-    }
+  startDraggingBlock(block) {
+    setTimeout(() => {
+      const position = {
+        x: this.mouseXY.x,
+        y: this.mouseXY.y
+      };
+      this.domHelpers.triggerDragAndDrop(block.svgPath_, null, position);
+    });
   }
 
   updateMousePosition(e) {
