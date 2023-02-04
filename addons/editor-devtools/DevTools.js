@@ -1,6 +1,7 @@
 // import ShowBroadcast from "./show-broadcast.js";
 import DomHelpers from "./DomHelpers.js";
 import UndoGroup from "./UndoGroup.js";
+import generateId from './id.js';
 
 export default class DevTools {
   constructor(addon, msg, m) {
@@ -349,16 +350,6 @@ export default class DevTools {
     block.dispose();
   }
 
-  generateRandomVariableId() {
-    // TODO: refactor out
-    const CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%()*+,-./:;=?@[]^_`{|}~";
-    let result = "";
-    for (let i = 0; i < 20; i++) {
-      result += CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
-    }
-    return result;
-  }
-
   /**
    * @param {string} originalName
    * @param {string} type
@@ -409,7 +400,7 @@ export default class DevTools {
 
       // This variable was a local variable in another sprite, and this sprite doesn't have
       // an equivalent variable.
-      field.setAttribute('id', this.generateRandomVariableId());
+      field.setAttribute('id', generateId());
       if (isStage) {
         // For non-stages, this variable will be created locally, but in the stage it will
         // be created globally. We need to make sure that the new name won't conflict with
