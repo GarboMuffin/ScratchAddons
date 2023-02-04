@@ -36,6 +36,7 @@ export default class DevTools {
       this.initInner(root);
     }
   }
+
   async addContextMenus() {
     const ScratchBlocks = await this.addon.tab.traps.getBlockly();
     const oldCleanUpFunc = ScratchBlocks.WorkspaceSvg.prototype.cleanUp;
@@ -58,7 +59,7 @@ export default class DevTools {
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
         items.push({
-          enabled: ScratchBlocks.clipboardXml_,
+          enabled: !!ScratchBlocks.clipboardXml_,
           text: this.m("paste"),
           separator: true,
           _isDevtoolsFirstItem: true,
@@ -82,6 +83,7 @@ export default class DevTools {
       },
       { workspace: true }
     );
+
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
         items.push(
@@ -138,6 +140,7 @@ export default class DevTools {
       },
       { blocks: true }
     );
+
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
         if (block.getCategory() === "data" || block.getCategory() === "data-lists") {
