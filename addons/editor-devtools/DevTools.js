@@ -674,8 +674,6 @@ export default class DevTools {
       }
     }
 
-    // TODO: macOS
-
     if (e.keyCode === 67 && ctrlKey) {
       // Ctrl+C
       e.preventDefault();
