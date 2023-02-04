@@ -313,6 +313,10 @@ export default class DevTools {
   }
 
   copy(block) {
+    if (!block) {
+      this.clipboard = null;
+      return;
+    }
     const xml = this.ScratchBlocks.Xml.blockToDom(block);
     const xy = block.getRelativeToSurfaceXY();
     xml.setAttribute('x', xy.x);
@@ -678,7 +682,7 @@ export default class DevTools {
       // Ctrl+C
       e.preventDefault();
       e.stopPropagation();
-      // TODO
+      this.copy(this.ScratchBlocks.selected);
     }
 
     if (e.keyCode === 86 && ctrlKey) {
