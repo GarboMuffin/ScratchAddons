@@ -1,7 +1,7 @@
 // import ShowBroadcast from "./show-broadcast.js";
 import DomHelpers from "./DomHelpers.js";
 import UndoGroup from "./UndoGroup.js";
-import generateId from './id.js';
+import generateId from "./id.js";
 
 export default class DevTools {
   constructor(addon, msg, m) {
@@ -320,8 +320,8 @@ export default class DevTools {
     }
     const xml = this.ScratchBlocks.Xml.blockToDom(block);
     const xy = block.getRelativeToSurfaceXY();
-    xml.setAttribute('x', xy.x);
-    xml.setAttribute('y', xy.y);
+    xml.setAttribute("x", xy.x);
+    xml.setAttribute("y", xy.y);
     this.clipboard = xml;
   }
 
@@ -383,14 +383,14 @@ export default class DevTools {
     // We may need to rewrite variable references.
     const fields = copyXml.querySelectorAll('field[name="VARIABLE"], field[name="LIST"]');
     for (const field of fields) {
-      const variableId = field.getAttribute('id');
+      const variableId = field.getAttribute("id");
       if (workspace.getVariableById(variableId)) {
         // Variable ID is in scope, don't need to touch anything
         continue;
       }
 
       const variableName = field.textContent;
-      const variableType = field.getAttribute('variabletype');
+      const variableType = field.getAttribute("variabletype");
       if (workspace.getVariable(variableName, variableType)) {
         // A variable with the name and type already exists, don't need to touch anything
         continue;
@@ -400,7 +400,7 @@ export default class DevTools {
       // no longer exists. It may have been deleted, or it was a local variable that does not
       // have an equivalent in the current sprite. In the latter case, it is important that we
       // give the variable a new ID.
-      field.setAttribute('id', generateId());
+      field.setAttribute("id", generateId());
 
       if (isStage) {
         // For non-stages, this variable will be created locally, but in the stage it will be
@@ -418,8 +418,8 @@ export default class DevTools {
     // https://github.com/LLK/scratch-blocks/blob/8233c1fb1136b3c7f520c9b2ec0027c6eefc98f8/core/workspace_svg.js#L1030-L1032
     // We adjust for this at paste-time instead of copy-time so that if someone copies then switches language, the block
     // will still paste in the right spot.
-    const x = +copyXml.getAttribute('x');
-    copyXml.setAttribute('x', -x);
+    const x = +copyXml.getAttribute("x");
+    copyXml.setAttribute("x", -x);
 
     return copyXml;
   }
@@ -602,7 +602,7 @@ export default class DevTools {
     setTimeout(() => {
       const position = {
         x: this.mouseXY.x,
-        y: this.mouseXY.y
+        y: this.mouseXY.y,
       };
       this.domHelpers.triggerDragAndDrop(block.svgPath_, null, position);
     });
@@ -634,7 +634,7 @@ export default class DevTools {
       }
     };
 
-    if (this.addon.tab.editorMode !== 'editor') {
+    if (this.addon.tab.editorMode !== "editor") {
       return;
     }
 
