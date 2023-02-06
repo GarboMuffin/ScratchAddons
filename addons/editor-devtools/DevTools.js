@@ -414,6 +414,13 @@ export default class DevTools {
       }
     }
 
+    // scratch-blocks' pasteBlock_ handles RTL in a very strange way.
+    // https://github.com/LLK/scratch-blocks/blob/8233c1fb1136b3c7f520c9b2ec0027c6eefc98f8/core/workspace_svg.js#L1030-L1032
+    // We adjust for this at paste-time instead of copy-time so that if someone copies then switches language, the block
+    // will still paste in the right spot.
+    const x = +copyXml.getAttribute('x');
+    copyXml.setAttribute('x', -x);
+
     return copyXml;
   }
 
