@@ -32,7 +32,7 @@ const matchesUSB = (gamepad, vendor, product) => {
 const createGamepadButton = (value) => ({
   pressed: value >= 0.1,
   touched: false,
-  value
+  value,
 });
 
 /**
@@ -61,8 +61,8 @@ export const normalizeGamepad = (gamepad) => {
   //  - Start is button 7 in Firefox, 9 in Chrome
   //  - D-pad left/right is on axis 0, up/down on axis 1 (2 total axes)
   if (
-    navigator.userAgent.includes('Firefox') &&
-    navigator.userAgent.includes('Linux') &&
+    navigator.userAgent.includes("Firefox") &&
+    navigator.userAgent.includes("Linux") &&
     (gamepad.axes.length === 8 || gamepad.axes.length === 2)
   ) {
     newButtons = [
@@ -83,12 +83,7 @@ export const normalizeGamepad = (gamepad) => {
       createGamepadButton(gamepad.axes[gamepad.axes.length - 2] < 0 ? 1 : 0), // D-pad left
       createGamepadButton(gamepad.axes[gamepad.axes.length - 2] > 0 ? 1 : 0), // D-pad right
     ];
-    newAxes = [
-      gamepad.axes[0],
-      gamepad.axes[1],
-      gamepad.axes[3],
-      gamepad.axes[4]
-    ];
+    newAxes = [gamepad.axes[0], gamepad.axes[1], gamepad.axes[3], gamepad.axes[4]];
   }
 
   // MaxFire Blaze2 - Vendor 0e8f Product 0003
@@ -96,18 +91,13 @@ export const normalizeGamepad = (gamepad) => {
   // There are also 10 axes for no apparent reason. Most axes are invalid and either report
   // a fixed value or nonsense far outside of the [-1, 1] range they should.
   // Reported in https://discord.com/channels/806602307750985799/806602307750985803/1108633733420023848
-  if (matchesUSB(gamepad, '0e8f', '0003') && gamepad.axes.length === 10) {
-    newAxes = [
-      gamepad.axes[0],
-      gamepad.axes[1],
-      gamepad.axes[2],
-      gamepad.axes[5]
-    ];
+  if (matchesUSB(gamepad, "0e8f", "0003") && gamepad.axes.length === 10) {
+    newAxes = [gamepad.axes[0], gamepad.axes[1], gamepad.axes[2], gamepad.axes[5]];
   }
 
   if (newButtons || newAxes) {
     if (newButtons) {
-      newButtons = newButtons.map(button => button || createGamepadButton(0));
+      newButtons = newButtons.map((button) => button || createGamepadButton(0));
     }
     if (newAxes) {
       newAxes = newAxes.map((axis) => axis || 0);
@@ -119,7 +109,7 @@ export const normalizeGamepad = (gamepad) => {
       axes: newAxes || gamepad.axes,
       connected: gamepad.connected,
       mapping: gamepad.connected,
-      timestamp: gamepad.connected
+      timestamp: gamepad.connected,
     };
     return cloned;
   }

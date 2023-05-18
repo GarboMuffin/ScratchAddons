@@ -1,4 +1,4 @@
-import {getNormalizedGamepads, normalizeGamepad} from './normalize-gamepads.js';
+import { getNormalizedGamepads, normalizeGamepad } from "./normalize-gamepads.js";
 
 let console = window.console;
 
