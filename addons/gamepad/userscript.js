@@ -1,8 +1,20 @@
+// @ts-check
 import GamepadLib from "./gamepadlib.js";
 
 /** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, global, console, msg }) {
   const vm = addon.tab.traps.vm;
+
+  vm.runtime.on('targetWasCreated', target => {
+    const listVar = target.lookupVariableByNameAndType('variable name', 'list');
+    if (listVar) {
+      listVar.value._monitorUpToDate = false;
+    }
+    renderer.updateDrawableVisible(target.drawableID, false);
+    const storage = vm.runtime.storage;
+    vm.runtime.storage.load(storage.AssetType.ImageBitmap, '...', storage.DataFormat.PNG)
+      .then((asset) => asset.encodeDataURI());
+  });
 
   // Wait for the project to finish loading. Renderer and scripts will not be fully available until this happens.
   await new Promise((resolve) => {
