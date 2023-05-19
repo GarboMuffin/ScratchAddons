@@ -5,14 +5,15 @@ import GamepadLib from "./gamepadlib.js";
 export default async function ({ addon, global, console, msg }) {
   const vm = addon.tab.traps.vm;
 
-  vm.runtime.on('targetWasCreated', target => {
-    const listVar = target.lookupVariableByNameAndType('variable name', 'list');
+  vm.runtime.on("targetWasCreated", (target) => {
+    const listVar = target.lookupVariableByNameAndType("variable name", "list");
     if (listVar) {
       listVar.value._monitorUpToDate = false;
     }
     renderer.updateDrawableVisible(target.drawableID, false);
     const storage = vm.runtime.storage;
-    vm.runtime.storage.load(storage.AssetType.ImageBitmap, '...', storage.DataFormat.PNG)
+    vm.runtime.storage
+      .load(storage.AssetType.ImageBitmap, "...", storage.DataFormat.PNG)
       .then((asset) => asset.encodeDataURI());
   });
 
