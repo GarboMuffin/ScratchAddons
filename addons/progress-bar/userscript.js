@@ -1,8 +1,11 @@
-export default async function ({ addon, global, console, msg }) {
+export default async function ({ addon, console, msg }) {
   const useTopBar = addon.settings.get("topbar");
 
   const barOuter = document.createElement("div");
   barOuter.className = "u-progress-bar-outer";
+  const barBackground = document.createElement("div");
+  barBackground.className = "u-progress-bar-background";
+  barOuter.appendChild(barBackground);
   const barInner = document.createElement("div");
   barInner.className = "u-progress-bar-inner";
   barOuter.appendChild(barInner);
@@ -14,7 +17,7 @@ export default async function ({ addon, global, console, msg }) {
   } else {
     barOuter.classList.add("u-progress-bar-integrated");
   }
-  addon.tab.displayNoneWhileDisabled(barOuter);
+  addon.tab.displayNoneWhileDisabled(barOuter, { display: "flex" });
 
   // We track the loading phase so that we can detect when the phase changed to reset and move the progress bar accordingly.
   const NONE = "none";
