@@ -36,7 +36,7 @@ export default class Trap extends Listenable {
    * This is different from window.Blockly.
    * @async
    * @throws when on non-project page.
-   * @returns {Promise<ScratchBlocks.RealBlockly>}
+   * @returns {Promise<import("../../libraries/thirdparty/blockly-types/core/blockly")>}
    */
   async getBlockly() {
     if (this._cache.Blockly) return this._cache.Blockly;

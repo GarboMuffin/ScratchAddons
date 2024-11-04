@@ -5,6 +5,10 @@ import GamepadLib from "./gamepadlib.js";
 export default async function ({ addon, global, console, msg }) {
   const vm = addon.tab.traps.vm;
 
+  // Does not do anything, just testing types
+  const Blockly = await addon.tab.traps.getBlockly();
+
+  // Does not do anything, just testing types
   vm.runtime.on("targetWasCreated", (target) => {
     const listVar = target.lookupVariableByNameAndType("variable name", "list");
     if (listVar) {
