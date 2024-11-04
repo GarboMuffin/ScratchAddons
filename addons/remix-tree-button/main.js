@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   //define remix tree button elements
   while (true) {

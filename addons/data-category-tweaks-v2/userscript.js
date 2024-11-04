@@ -1,5 +1,6 @@
 import updateToolboxXML from "../../libraries/common/cs/update-toolbox-xml.js";
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg, safeMsg }) {
   const ScratchBlocks = await addon.tab.traps.getBlockly();
 

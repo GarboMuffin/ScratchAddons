@@ -1,5 +1,6 @@
 import downloadBlob from "../../libraries/common/cs/download-blob.js";
 
+/** @param {UserscriptUtilities} param0 */
 export default async ({ addon, console, msg }) => {
   const LENGTH_LIMIT = 600;
   const DEFAULT_SETTINGS = {

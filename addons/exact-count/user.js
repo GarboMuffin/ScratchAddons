@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon }) {
   const CACHE = {
     projects: null,

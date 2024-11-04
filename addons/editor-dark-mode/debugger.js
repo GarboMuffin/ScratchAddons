@@ -1,5 +1,6 @@
 import { textColor } from "../../libraries/common/cs/text-color.esm.js";
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   // Style the charts in Debugger's Performance tab
   await addon.tab.loadScript("/libraries/thirdparty/cs/chart.min.js");

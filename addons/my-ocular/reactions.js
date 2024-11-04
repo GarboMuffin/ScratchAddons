@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   let posts = document.querySelectorAll(".blockpost");
   const isLoggedIn = await addon.auth.fetchIsLoggedIn();

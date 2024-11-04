@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, msg, console }) {
   const oldSend = XMLHttpRequest.prototype.send;
 

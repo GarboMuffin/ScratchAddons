@@ -1,5 +1,6 @@
 import { eventTarget as disableSelfEventTarget } from "./disable-self.js";
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   addon.tab
     .waitForElement(":root > body", {

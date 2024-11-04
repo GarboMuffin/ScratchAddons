@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   const oldAnimate = $.fn.animate;
   $.fn.animate = function (style, ...args) {

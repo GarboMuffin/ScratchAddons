@@ -1,5 +1,6 @@
 import { isPaused, setPaused, onPauseChanged, setup } from "../debugger/module.js";
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   setup(addon);
 

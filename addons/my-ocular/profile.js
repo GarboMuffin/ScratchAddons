@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   const username = Scratch.INIT_DATA.PROFILE.model.username;
   let data = await fetchStatus(username);

@@ -2,6 +2,7 @@
  * Used for the automatic browser full screen setting
  * and for hiding the scrollbar in full screen.
  */
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   // "Browser fullscreen" is defined as the mode that hides the browser UI.
   function updateBrowserFullscreen() {

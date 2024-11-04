@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   addon.tab.waitForElement("#navigation .login-item").then(() => {
     addon.tab.waitForElement(".studio-page").then((page) => {

@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async ({ addon, console, msg }) => {
   addon.tab.redux.initialize();
   addon.tab.redux.addEventListener("statechanged", ({ detail }) => {

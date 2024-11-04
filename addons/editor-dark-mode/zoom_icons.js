@@ -3,6 +3,7 @@ import { textColor, alphaBlend } from "../../libraries/common/cs/text-color.esm.
 const XLINK_NS = "http://www.w3.org/1999/xlink";
 const iconSelector = ".blocklyZoom > image";
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   const recolorSvg = (svg) => {
     const backgroundColor = alphaBlend(addon.settings.get("workspace"), addon.settings.get("palette"));

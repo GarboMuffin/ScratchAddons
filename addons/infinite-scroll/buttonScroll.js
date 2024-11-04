@@ -35,6 +35,7 @@ async function commentLoader(
   }
 }
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   if (window.location.pathname.split("/")[1] === "users" && addon.settings.get("profileCommentScroll"))
     commentLoader(addon, "#content", "[data-control=load-more]");

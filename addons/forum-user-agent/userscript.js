@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   if (!window.mySettings) return;
   const ua = window.mySettings.markupSet.find((x) => x.className);

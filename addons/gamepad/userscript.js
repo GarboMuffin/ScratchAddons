@@ -1,6 +1,7 @@
 import GamepadLib from "./gamepadlib.js";
 import addSmallStageClass from "../../libraries/common/cs/small-stage.js";
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   const vm = addon.tab.traps.vm;
 

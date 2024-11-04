@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon }) {
   if (addon.tab.clientVersion === "scratch-www") return;
   let span;

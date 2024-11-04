@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   const enabledAddons = await addon.self.getEnabledAddons("community");
   const footer = await addon.tab.waitForElement("#footer");

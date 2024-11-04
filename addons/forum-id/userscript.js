@@ -1,4 +1,5 @@
 import { setupForumId, getIDLink } from "../better-quoter/module.js";
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   if (!document.querySelector("textarea")) return;
   setupForumId(addon);

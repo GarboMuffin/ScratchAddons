@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   function createBetterProfilePage(featuredThumb, featuredLink, featuredHeading, featuredTitle) {
     document.documentElement.style.setProperty("--featured-thumb", `url("${featuredThumb}")`);

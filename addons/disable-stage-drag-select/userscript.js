@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async ({ addon, console }) => {
   const vm = addon.tab.traps.vm;
 

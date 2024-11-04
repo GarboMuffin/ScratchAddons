@@ -5,6 +5,7 @@
 
 import { updateAllBlocks } from "../../libraries/common/cs/update-all-blocks.js";
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   const Blockly = await addon.tab.traps.getBlockly();
 

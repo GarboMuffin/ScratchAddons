@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   const CDN2_REGEX = /(.*\/get_image\/.*?\/[0-9]+?_)([0-9]+?)x([0-9]+?)(\.[a-z]+)/;
   const UPLOADS_REGEX = /^https?:\/\/uploads\.scratch\.mit\.edu\//;

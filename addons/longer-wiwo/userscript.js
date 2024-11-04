@@ -1,5 +1,6 @@
 /* global $ */
 // $ is global jQuery instance on scratchr2 pages
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, msg }) {
   const status = $('textarea[name="status"]');
   const left = $("#status-chars-left").parent();

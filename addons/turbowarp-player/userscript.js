@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   const action = addon.settings.get("action");
   let playerToggled = false;

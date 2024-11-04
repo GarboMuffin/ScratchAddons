@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   // Fetch as text without parsing as JSON, because guess what,
   // the code will stringify anyway!

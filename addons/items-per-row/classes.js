@@ -18,6 +18,7 @@ function setClasses(setting, value, thresholds) {
   }
 }
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   await addon.tab.waitForElement("body");
   const updateClasses = () => {

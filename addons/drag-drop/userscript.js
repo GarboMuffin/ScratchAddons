@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   /** @type {HTMLElement|null} */
   let currentDraggingElement = null;

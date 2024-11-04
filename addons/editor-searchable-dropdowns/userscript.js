@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   const Blockly = await addon.tab.traps.getBlockly();
   const vm = addon.tab.traps.vm;

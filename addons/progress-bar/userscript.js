@@ -1,5 +1,6 @@
 import { isBadRequest } from "../faster-project-loading/module.js";
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   const useTopBar = addon.settings.get("topbar");
 

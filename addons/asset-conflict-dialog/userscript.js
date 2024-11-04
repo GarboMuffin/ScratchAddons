@@ -1,6 +1,7 @@
 import { addDefaultAssetFolderIfMissing } from "../folders/userscript.js";
 import { assetSelect, createAndAppendElement } from "./utils.js";
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   function createAssetConflictDialog(fileName, actionClickCallback) {
     // Create the modal

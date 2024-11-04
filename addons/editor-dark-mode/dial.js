@@ -3,6 +3,7 @@ import { textColor, multiply, alphaBlend } from "../../libraries/common/cs/text-
 const iconSelector = "img[class*='dial_']";
 const dataUriRegex = new RegExp("^data:image/svg\\+xml;base64,([A-Za-z0-9+/=]*)$");
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   const recolorSvg = (svg) => {
     return svg

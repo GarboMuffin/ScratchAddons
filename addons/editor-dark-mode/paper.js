@@ -1,5 +1,6 @@
 import { textColor, multiply, brighten, alphaBlend, makeHsv } from "../../libraries/common/cs/text-color.esm.js";
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   const paper = await addon.tab.traps.getPaper();
 

@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console, msg }) {
   let isScratchR2 = addon.tab.clientVersion === "scratchr2";
 

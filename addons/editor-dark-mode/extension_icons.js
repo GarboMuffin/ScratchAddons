@@ -3,6 +3,7 @@ import { updateAllBlocks } from "../../libraries/common/cs/update-all-blocks.js"
 
 const dataUriRegex = new RegExp("^data:image/svg\\+xml;base64,([A-Za-z0-9+/=]*)$");
 
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   const Blockly = await addon.tab.traps.getBlockly();
 

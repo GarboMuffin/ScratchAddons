@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, msg }) {
   function addRemainingReplyCount(comment) {
     if (!comment) return;

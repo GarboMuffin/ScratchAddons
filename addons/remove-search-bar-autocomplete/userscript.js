@@ -1,3 +1,4 @@
+/** @param {UserscriptUtilities} param0 */
 export default async function ({ addon, console }) {
   // Detects whether the current page is using scratch-www or scratchr2.
   // The search bars have different selectors depending on this, so we need to figure out which selector to use.
