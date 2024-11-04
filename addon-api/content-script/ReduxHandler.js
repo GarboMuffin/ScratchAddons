@@ -32,7 +32,7 @@ export default class ReduxHandler extends Listenable {
 
   /**
    * Redux state.
-   * @type {object}
+   * @type {ScratchGUI.ReduxState}
    */
   get state() {
     return __scratchAddonsRedux.state;
@@ -40,7 +40,7 @@ export default class ReduxHandler extends Listenable {
 
   /**
    * Dispatches redux state change.
-   * @param {object} payload - payload to pass to redux.
+   * @param {ScratchGUI.ReduxEvent} payload - payload to pass to redux.
    * @throws when Redux is unavailable.
    */
   dispatch(payload) {

@@ -17,7 +17,7 @@ export default class Trap extends Listenable {
   /**
    * scratch-vm instance.
    * @throws when on non-project page.
-   * @type {object}
+   * @type {VM}
    */
   get vm() {
     if (!this._getEditorMode()) throw new Error("Cannot access vm on non-project page");
@@ -74,7 +74,7 @@ export default class Trap extends Listenable {
    * This is different from window.Blockly.
    * @async
    * @throws when on non-project page.
-   * @returns {Promise<object>}
+   * @returns {Promise<import("../../node_modules/blockly/core/blockly.d.ts")>}
    */
   async getBlockly() {
     if (this._cache.Blockly) return this._cache.Blockly;
@@ -88,7 +88,7 @@ export default class Trap extends Listenable {
    * Unlike Blockly#getMainWorkspace, this always returns the editor workspace
    * (and not the custom block prompt workspace).
    * The result is not cached and should be queried every time workspace access is needed.
-   * @returns {object}
+   * @returns {import("../../node_modules/blockly/core/workspace_svg.js").WorkspaceSvg|null}
    */
   getWorkspace() {
     try {
