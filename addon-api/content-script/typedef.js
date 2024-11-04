@@ -12,5 +12,3 @@
  * @property {function} safeMsg - Gets localized and HTML-escaped messages. Placeholders are NOT escaped.
  * @property {Console} console - Console API with formatting.
  */
-
-export default {};
