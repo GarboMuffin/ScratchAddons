@@ -1,22 +1,22 @@
 {
-    "compilerOptions": {
-        "noEmit": true,
-        "allowJs": true,
-        "checkJs": true,
-        "target": "ES2022",
-        "module": "ES6",
-        "allowSyntheticDefaultImports": true,
-    },
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true,
+    "target": "ES2022",
+    "module": "ES6",
+    "allowSyntheticDefaultImports": true
+  },
 
-    "include": [
-        // @turbowarp/types' types are weird and not modules, so import here.
-        // scratch-gui will import the types for scratch-vm etc.
-        "node_modules/@turbowarp/types/types/scratch-gui.d.ts",
+  "include": [
+    // @turbowarp/types' types are weird and not modules, so import here.
+    // scratch-gui will import the types for scratch-vm etc.
+    "node_modules/@turbowarp/types/types/scratch-gui.d.ts",
 
-        // Blockly types are a module so they are imported where they are used
+    // Blockly types are a module so they are imported where they are used
 
-        // TypeScript will check these files:
-        "addon-api/**/*",
-        "addons/**/*",
-    ]
+    // TypeScript will check these files:
+    "addon-api/**/*",
+    "addons/**/*"
+  ]
 }
