@@ -56,7 +56,7 @@ export default async function ({ addon, msg }) {
           }
         },
         modalTitle,
-        varType
+        varType,
       );
       return;
     }

@@ -23,7 +23,7 @@ export default async function ({ addon, global, console }) {
         container.style.display = "inline-block";
       }
     },
-    { capture: true }
+    { capture: true },
   );
 
   addon.self.addEventListener("disabled", () => {

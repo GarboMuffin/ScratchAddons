@@ -73,7 +73,7 @@ export default class DevTools {
                 keyCode: 86,
                 ctrlKey: true,
                 griff: true,
-              })
+              }),
             );
 
             setTimeout(() => {
@@ -83,7 +83,7 @@ export default class DevTools {
         });
         return items;
       },
-      { workspace: true }
+      { workspace: true },
     );
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
@@ -118,7 +118,7 @@ export default class DevTools {
             callback: () => {
               this.eventCopyClick(block, 2);
             },
-          }
+          },
         );
         // const BROADCAST_BLOCKS = ["event_whenbroadcastreceived", "event_broadcast", "event_broadcastandwait"];
         // if (BROADCAST_BLOCKS.includes(block.type)) {
@@ -139,7 +139,7 @@ export default class DevTools {
         // }
         return items;
       },
-      { blocks: true }
+      { blocks: true },
     );
     this.addon.tab.createBlockContextMenu(
       (items, block) => {
@@ -161,7 +161,7 @@ export default class DevTools {
         }
         return items;
       },
-      { blocks: true, flyout: true }
+      { blocks: true, flyout: true },
     );
   }
 
@@ -814,7 +814,7 @@ export default class DevTools {
                     </span>
                 </label>
             </div>
-        `
+        `,
     );
 
     floatBar = document.getElementById("s3devFloatingBar");
@@ -885,7 +885,7 @@ export default class DevTools {
 
     // Griffpatch - on second thoughts - lets sort blocks by length so that shortest ones appear at the top.
     options.sort((a, b) =>
-      a.desc.length < b.desc.length ? -1 : a.desc.length > b.desc.length ? 1 : a.desc.localeCompare(b.desc)
+      a.desc.length < b.desc.length ? -1 : a.desc.length > b.desc.length ? 1 : a.desc.localeCompare(b.desc),
     );
 
     // Previous sort was just alphabetical
