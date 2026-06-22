@@ -1,0 +1,40 @@
+.sa-backpack-preview {
+  position: fixed;
+  z-index: 10000;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 90vw;
+  padding: 8px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  /* The preview is purely informational and must never swallow pointer events. */
+  pointer-events: none;
+}
+
+.sa-backpack-preview[data-sa-hidden="true"] {
+  display: none;
+}
+
+.sa-backpack-preview-image {
+  display: block;
+  /* max-width / max-height are set from the addon setting in the userscript. */
+  object-fit: contain;
+  image-rendering: auto;
+}
+
+.sa-backpack-preview-label {
+  max-width: 100%;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.3;
+  text-align: center;
+  color: #575e75;
+  word-break: break-word;
+}

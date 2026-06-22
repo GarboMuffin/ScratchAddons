@@ -1,0 +1,40 @@
+{
+  "name": "Backpack item preview",
+  "description": "Hover over an item in the backpack to see a larger preview of it, making it easy to read full scripts and tell costumes, sprites and sounds apart.",
+  "credits": [{ "name": "Claude Opus 4.8 (Claude Code)", "link": "https://www.anthropic.com/claude-code" }],
+  "tags": ["editor"],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "preview.css",
+      "matches": ["projects"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Maximum preview size (px)",
+      "id": "size",
+      "type": "integer",
+      "min": 96,
+      "max": 600,
+      "default": 256
+    },
+    {
+      "name": "Hover delay (ms)",
+      "id": "delay",
+      "type": "integer",
+      "min": 0,
+      "max": 1000,
+      "default": 250
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "enabledByDefault": false,
+  "versionAdded": "1.46.0"
+}
