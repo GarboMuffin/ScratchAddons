@@ -1,0 +1,41 @@
+{
+  "name": "Live comment refreshing",
+  "description": "Checks a project's comments every so often and shows newly posted comments (and replies in threads you've opened) without you having to reload the page.",
+  "tags": ["community", "comments"],
+  "credits": [
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude"
+    }
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Check for new comments every",
+      "id": "interval",
+      "type": "select",
+      "potentialValues": [
+        { "id": "15", "name": "15 seconds" },
+        { "id": "30", "name": "30 seconds" },
+        { "id": "60", "name": "1 minute" },
+        { "id": "120", "name": "2 minutes" }
+      ],
+      "default": "30"
+    },
+    {
+      "name": "Also load new replies in threads you've opened",
+      "id": "replies",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "versionAdded": "1.46.0",
+  "enabledByDefault": false
+}

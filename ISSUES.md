@@ -30,3 +30,7 @@ Do not re-pick an issue listed here.
   New addon `editor-addon-menu`: native-styled "Addons" menu beside File/Edit with a Settings link +
   Feedback, plus a shared `api.js` (addItem/removeItem) so addon buttons get one home instead of
   cluttering the bar. Verified light/dark, open/close, settings link, shared API, dynamic toggle.
+- **#2215** — Live Comment Refreshing (8 👍) — **IMPLEMENTED (projects only, per maintainer)**.
+  New addon `live-comments`: polls the project comments API every 15s–2min and merges new top-level
+  comments + new replies (opened threads) into scratch-www's Redux (ADD_NEW_COMMENT/SET_REPLIES) so
+  React renders them fully; op-badge/infinite-scroll stay compatible. Verified end-to-end + disable.
