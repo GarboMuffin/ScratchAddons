@@ -26,3 +26,7 @@ Do not re-pick an issue listed here.
 - **#2645** — Bolder / larger operator symbols (7 👍) — **IMPLEMENTED**.
   New addon `operator-symbols`: bolds the tiny + - * / < > = symbols and offers swaps (× ÷,
   full-width ＋－＝＜＞). Mutates Blockly.Msg + tags the symbol FieldLabel; verified bold/subst/restore.
+- **#2110** — Make editor header/menu less crowded (8 👍) — **IMPLEMENTED (maintainer-blessed slice)**.
+  New addon `editor-addon-menu`: native-styled "Addons" menu beside File/Edit with a Settings link +
+  Feedback, plus a shared `api.js` (addItem/removeItem) so addon buttons get one home instead of
+  cluttering the bar. Verified light/dark, open/close, settings link, shared API, dynamic toggle.

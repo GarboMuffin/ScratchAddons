@@ -1,0 +1,42 @@
+.sa-addon-menu {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.sa-addon-menu-logo {
+  height: 1.25rem;
+  width: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Match the gap Scratch puts between a menu's icon and its label. */
+.sa-addon-menu .menu-bar_collapsible-label_,
+.sa-addon-menu [class*="menu-bar_collapsible-label_"] {
+  margin-left: 0.25rem;
+}
+
+.sa-addon-menu-caret {
+  width: 0.75rem;
+  height: 0.5rem;
+  margin-left: 0.25rem;
+  fill: none;
+  stroke: hsla(0, 100%, 100%, 1);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+/* The dropdown list itself is given Scratch's own menu classes, so it inherits
+   the editor's theming (including editor-dark-mode). Only minor tweaks here. */
+.sa-addon-menu-list {
+  min-width: 9rem;
+}
+
+.sa-addon-menu-empty {
+  opacity: 0.6;
+  cursor: default;
+  white-space: nowrap;
+}

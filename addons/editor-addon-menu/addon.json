@@ -1,0 +1,27 @@
+{
+  "name": "Scratch Addons editor menu",
+  "description": "Adds a Scratch Addons menu next to File and Edit in the project editor. It links to settings and gives addon buttons a single home, so the editor header stays tidy instead of filling up with separate buttons.",
+  "tags": ["editor", "editorMenuBar"],
+  "credits": [
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude"
+    }
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "style.css",
+      "matches": ["projects"]
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "versionAdded": "1.46.0",
+  "enabledByDefault": false
+}
