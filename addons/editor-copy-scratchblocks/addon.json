@@ -1,0 +1,16 @@
+{
+  "name": "Copy blocks as scratchblocks",
+  "description": "Adds a right-click option in the editor to copy a script (or the whole workspace) to the clipboard as scratchblocks text, ready to paste into the forums, the wiki, or an LLM.",
+  "tags": ["editor", "codeEditor"],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "credits": [{ "name": "Claude Opus 4.8 (Claude Code)", "link": "https://www.anthropic.com/claude-code" }],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "enabledByDefault": false,
+  "versionAdded": "1.46.0"
+}
