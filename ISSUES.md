@@ -107,3 +107,7 @@ Do not re-pick an issue listed here.
   `select`-type settings with 3+ options now render as a compact themed `<select>` dropdown instead of a
   wide button row; 2-option ones keep the pill toggle (per maintainer TheColaber). Edited addon-setting
   component. Verified 4-opt/3-opt → dropdown, 2-opt → pills, value change, and enabled/disabled in Chromium.
+- **#2622** — Better test our new addons (6 👍) — **IMPLEMENTED (PR-template checklist)**.
+  Process/meta issue; its one concrete deliverable was a testing checklist in the PR template's Tests
+  section. Added optional reminders (browser, console, settings, dynamic enable/disable, other-addon
+  interplay) — framed as encouragement, not requirements, per maintainer pushback against mandating it.
