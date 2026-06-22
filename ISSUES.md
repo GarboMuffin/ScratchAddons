@@ -141,3 +141,7 @@ Do not re-pick an issue listed here.
   `if<1=0>` stops execution (tested: control 100→150, wrapped stays 100). Sync path is Xml.domToBlock +
   Blockly connections (like block-switching); refreshWorkspace duplicates blocks. A safe, fully-tested
   comment/uncomment with all stack-position edge cases is more than one loop can responsibly verify.
+- **#1646** — Website Font Customization (5 👍) — **NEW ADDON `website-font`**.
+  Userstyle + `customCssVariables` map/ternary: pick one of 10 curated fonts or type any installed font
+  name; applied site-wide (homepage/profiles/studios/forums) with monospace preserved for code.
+  Verified curated select (Comic Sans/Georgia), default, forum monospace, and clean disable in Chromium.

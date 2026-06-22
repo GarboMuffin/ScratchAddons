@@ -179,6 +179,7 @@
   "// and so on, and we want some themes to override others.",
   "// For website:",
   "dark-www",
+  "website-font",
   "scratch3to2",
   "scratchr2",
   "colorblind",

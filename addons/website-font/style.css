@@ -1,0 +1,39 @@
+/* Apply the chosen font across the website's text, keeping Scratch's stack as a fallback. */
+body,
+button,
+input,
+textarea,
+select,
+optgroup,
+.button,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+span,
+label,
+li,
+dd,
+dt,
+td,
+th,
+blockquote {
+  font-family: var(--websiteFont-fontFamily), "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+}
+
+/* Keep code and other monospace text monospaced. */
+pre,
+code,
+tt,
+kbd,
+samp,
+.code,
+.postmsg .code,
+.markItUpEditor,
+.blockpost .code {
+  font-family: "Courier New", Courier, monospace !important;
+}

@@ -1,0 +1,73 @@
+{
+  "name": "Website font",
+  "description": "Lets you change the font used across the Scratch website. Pick one of the common fonts, or type the name of any font installed on your device.",
+  "credits": [
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude-code"
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "style.css",
+      "matches": ["scratchWWWNoProject", "profiles", "studios", "forums"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Font",
+      "id": "font",
+      "type": "select",
+      "potentialValues": [
+        { "id": "default", "name": "Scratch default" },
+        { "id": "system-ui", "name": "Your operating system's font" },
+        { "id": "arial", "name": "Arial" },
+        { "id": "verdana", "name": "Verdana" },
+        { "id": "tahoma", "name": "Tahoma" },
+        { "id": "trebuchet", "name": "Trebuchet MS" },
+        { "id": "georgia", "name": "Georgia" },
+        { "id": "times", "name": "Times New Roman" },
+        { "id": "courier", "name": "Courier New (monospace)" },
+        { "id": "comic-sans", "name": "Comic Sans MS" }
+      ],
+      "default": "default"
+    },
+    {
+      "name": "Custom font name (overrides the choice above when filled in)",
+      "id": "customFont",
+      "type": "string",
+      "default": ""
+    }
+  ],
+  "customCssVariables": [
+    {
+      "name": "fontFamily",
+      "value": {
+        "type": "ternary",
+        "source": { "type": "settingValue", "settingId": "customFont" },
+        "true": { "type": "settingValue", "settingId": "customFont" },
+        "false": {
+          "type": "map",
+          "source": { "type": "settingValue", "settingId": "font" },
+          "options": {
+            "default": "\"Helvetica Neue\"",
+            "system-ui": "system-ui",
+            "arial": "Arial",
+            "verdana": "Verdana",
+            "tahoma": "Tahoma",
+            "trebuchet": "\"Trebuchet MS\"",
+            "georgia": "Georgia",
+            "times": "\"Times New Roman\"",
+            "courier": "\"Courier New\"",
+            "comic-sans": "\"Comic Sans MS\""
+          },
+          "default": "\"Helvetica Neue\""
+        }
+      }
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "tags": ["community", "theme"],
+  "versionAdded": "1.46.0"
+}
