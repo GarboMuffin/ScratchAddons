@@ -1,0 +1,49 @@
+/* Resize the real stage (canvas display size) so the renderer can redraw crisply and the
+   stage header controls keep their natural size — no scaling of the controls. */
+body.sa-resizable-stage-active [class*="stage_stage_"],
+body.sa-resizable-stage-active [class*="stage_stage_"] canvas {
+  width: var(--sa-rs-w) !important;
+  height: var(--sa-rs-h) !important;
+}
+
+.sa-resizable-stage-handle {
+  flex: 0 0 auto;
+  width: 8px;
+  align-self: stretch;
+  cursor: col-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  z-index: 10;
+  touch-action: none;
+}
+
+.sa-resizable-stage-grip {
+  width: 2px;
+  height: 40px;
+  border-radius: 2px;
+  background: hsla(0, 0%, 0%, 0.18);
+  transition: background 0.12s ease, height 0.12s ease;
+}
+
+.sa-resizable-stage-handle:hover .sa-resizable-stage-grip {
+  background: var(--ui-secondary, hsla(215, 100%, 65%, 0.9));
+  height: 64px;
+}
+
+.sa-resizable-stage-dragging {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+.sa-resizable-stage-dragging .sa-resizable-stage-grip {
+  background: var(--ui-secondary, hsla(215, 100%, 65%, 1));
+  height: 64px;
+}
+
+/* While dragging, suppress pointer events on the stage canvas so a fast drag that crosses
+   onto the stage doesn't start interacting with the project. */
+.sa-resizable-stage-dragging [class*="stage_stage_"] {
+  pointer-events: none !important;
+}

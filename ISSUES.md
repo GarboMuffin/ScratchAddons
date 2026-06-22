@@ -3,6 +3,10 @@
 One issue per loop. "Processed" = implemented, or judged already-done / invalid / infeasible.
 Do not re-pick an issue listed here.
 
+- **#2217** — Resizable editor areas (8 👍) — **IMPLEMENTED (scoped to stage)**.
+  New addon `resizable-stage`: drag a divider between code area and stage to resize the stage
+  (real CSS resize + renderer.resize, controls stay crisp; sprite pane uses native compact
+  layout when narrow). Double-click resets. Verified in Chromium.
 - **#2336** — Copy block/stack to clipboard as scratchblocks (12 👍) — **IMPLEMENTED**.
   New addon `editor-copy-scratchblocks`: right-click "Copy as scratchblocks" / "Copy all"
   (Blockly tree → scratchblocks text). Verified in Chromium.

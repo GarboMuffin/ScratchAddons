@@ -1,0 +1,40 @@
+{
+  "name": "Resizable stage",
+  "description": "Adds a draggable divider between the code area and the stage so you can shrink the stage to get a larger scripting area (or enlarge it). Double-click the divider to reset.",
+  "credits": [
+    {
+      "name": "Claude (Opus 4.8, Claude Code)",
+      "link": "https://www.anthropic.com/claude-code"
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "style.css",
+      "matches": ["projects"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Allow enlarging the stage past its default size",
+      "id": "allowLarger",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "Remember the stage size between sessions",
+      "id": "remember",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "tags": ["editor", "codeEditor"],
+  "versionAdded": "1.46.0"
+}
