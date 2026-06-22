@@ -1,0 +1,26 @@
+{
+  "name": "Costume editor font size",
+  "description": "Adds a numeric font size box to the vector costume editor so text labels can be sized precisely. Select one or more text items (or use the Text tool) and type a size.",
+  "credits": [
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude-code"
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "style.css",
+      "matches": ["projects"]
+    }
+  ],
+  "tags": ["editor", "costumeEditor"],
+  "versionAdded": "1.46.0"
+}

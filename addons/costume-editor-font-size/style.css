@@ -1,0 +1,31 @@
+.sa-cefs-control {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 6px;
+  color: inherit;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.sa-cefs-label {
+  opacity: 0.85;
+}
+
+.sa-cefs-input {
+  width: 3.4em;
+  box-sizing: border-box;
+  padding: 3px 4px;
+  border: 1px solid rgba(128, 128, 128, 0.45);
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+}
+
+.sa-cefs-input:focus {
+  outline: none;
+  border-color: var(--looks-secondary, #855cd6);
+  box-shadow: 0 0 0 2px rgba(133, 92, 214, 0.25);
+}

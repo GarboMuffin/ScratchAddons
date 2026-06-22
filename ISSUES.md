@@ -74,3 +74,7 @@ Do not re-pick an issue listed here.
   missing/ambiguous, esp. non-English); only `editor-copy-scratchblocks` does the forward direction.
   The backpack (backpack.scratch.mit.edu) only exists logged-in and all writes need the user's token, so
   it can be neither implemented end-to-end nor verified without an account — out of scope per loop rules.
+- **#4638** — Font size for costume editor (7 👍) — **IMPLEMENTED**.
+  New addon `costume-editor-font-size`: numeric "Font size" box in the vector paint editor mode-tools row;
+  reads/sets effective size (fontSize×scale) of selected text item(s), preserves center, commits via
+  onUpdateImage. Multi-select sets many labels to one size. Verified set/multi/undo/disable in Chromium.
