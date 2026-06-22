@@ -1,0 +1,35 @@
+{
+  "name": "Resizable block palette",
+  "description": "Adds a draggable divider on the right edge of the block palette so you can widen it (to read long variable/list blocks) or narrow it for more script space. Double-click the divider to reset.",
+  "credits": [
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude-code"
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "style.css",
+      "matches": ["projects"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Remember the palette width between sessions",
+      "id": "remember",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "tags": ["editor", "codeEditor"],
+  "versionAdded": "1.46.0",
+  "relatedAddons": ["hide-flyout"]
+}

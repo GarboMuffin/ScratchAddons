@@ -116,3 +116,7 @@ Do not re-pick an issue listed here.
   `<fieldset>` (top-level `settingGroups` give localized names). Works on the settings page + popup iframe.
   NOTE: addon.json can't declare it until the external manifest-schema adds the fields (CI-validated,
   additionalProperties:false). Verified end-to-end with a temp scratch-notifier manifest (reverted).
+- **#5044** — An addon to resize the block palette (6 👍) — **IMPLEMENTED**.
+  New addon `resize-palette`: draggable divider on the flyout's right edge resizes the block palette
+  (overrides Scratch's fixed flyout getWidth() + reflow); persists via localStorage, double-click resets.
+  Verified widen/narrow, persistence, reset, disable, and hide-flyout compatibility in Chromium.

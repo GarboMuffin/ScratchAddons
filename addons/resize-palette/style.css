@@ -1,0 +1,39 @@
+.sa-resize-palette-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  margin-left: -4px;
+  z-index: 45;
+  cursor: ew-resize;
+  background: transparent;
+}
+
+.sa-resize-palette-divider::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--looks-secondary, #4d97ff);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.sa-resize-palette-divider:hover::after,
+body.sa-resize-palette-dragging .sa-resize-palette-divider::after {
+  opacity: 1;
+}
+
+body.sa-resize-palette-dragging {
+  cursor: ew-resize;
+  user-select: none;
+}
+
+body.sa-resize-palette-dragging .blocklyFlyout,
+body.sa-resize-palette-dragging .blocklyWorkspace {
+  pointer-events: none;
+}
