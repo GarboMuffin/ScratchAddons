@@ -22,6 +22,10 @@
     {
       "name": "TheColaber",
       "link": "https://scratch.mit.edu/users/TheColaber/"
+    },
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude-code"
     }
   ],
   "userscripts": [
@@ -37,6 +41,12 @@
     }
   ],
   "settings": [
+    {
+      "name": "Open the TurboWarp link from the project notes, if there is one",
+      "id": "notesLink",
+      "type": "boolean",
+      "default": true
+    },
     {
       "name": "Button behavior",
       "id": "action",

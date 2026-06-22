@@ -26,6 +26,22 @@ export default async function ({ addon, console, msg }) {
     button.title = "TurboWarp";
   }
 
+  // If the creator put a TurboWarp link (with their own settings/parameters) in the project's
+  // instructions or notes, prefer that over a bare turbowarp.org/<id> link. Returns the first
+  // such link, or null.
+  function getNotesTurboWarpLink() {
+    if (!addon.settings.get("notesLink")) return null;
+    const info = addon.tab.redux.state?.preview?.projectInfo;
+    if (!info) return null;
+    const text = `${info.instructions || ""}\n${info.description || ""}`;
+    // Match a turbowarp.org link with a path/query (so a bare "turbowarp.org" mention is ignored).
+    const match = text.match(/(?:https?:\/\/)?turbowarp\.org\/[^\s"'<>)]+/i);
+    if (!match) return null;
+    let url = match[0].replace(/[.,]+$/, ""); // trailing punctuation isn't part of the link
+    if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
+    return url;
+  }
+
   button.onclick = async (e) => {
     const projectId = window.location.pathname.split("/")[2];
     let search = "";
@@ -45,11 +61,10 @@ export default async function ({ addon, console, msg }) {
       search = `#?token=${projectToken}`;
     }
     if (action === "link" || e.ctrlKey || e.metaKey) {
-      window.open(
-        `https://turbowarp.org/${window.location.pathname.split("/")[2]}${search}`,
-        "_blank",
-        "noopener,noreferrer"
-      );
+      // Use the creator's link from the notes when present (public projects only, since a
+      // notes link can't carry the private-project token we computed above).
+      const notesLink = search ? null : getNotesTurboWarpLink();
+      window.open(notesLink || `https://turbowarp.org/${projectId}${search}`, "_blank", "noopener,noreferrer");
     } else {
       playerToggled = !playerToggled;
       if (playerToggled) {

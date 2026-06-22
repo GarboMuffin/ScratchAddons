@@ -128,3 +128,7 @@ Do not re-pick an issue listed here.
   Added OS-aware `{cmdKey}`/`{optKey}` placeholders to the l10n lib (localizable key names in `_general`,
   substituted for all locales incl. the English fast-path); applied to ctrl-enter-post + block-duplicate,
   dropping their redundant macOS notes. Verified Ctrl/Alt (Linux) and Cmd/Option (Mac UA) in Chromium.
+- **#5707** — Smarter TurboWarp button (6 👍) — **IMPLEMENTED (in turbowarp-player)**.
+  The open-new-tab action now opens the first turbowarp.org link found in the project's instructions/notes
+  (preserving the creator's URL params), else the default turbowarp.org/<id>. New setting (default on),
+  public projects only. Verified default/notes-link/edge-cases/setting-off via window.open intercept.
