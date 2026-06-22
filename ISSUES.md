@@ -99,3 +99,7 @@ Do not re-pick an issue listed here.
   messages load (needs DNR/webRequest, per maintainer) + add a manual "Mark all as read" button. But the
   unread counter, the request (403 without auth), and the button all live on the login-only /messages page,
   so nothing is observable/verifiable without an account — out of scope per loop rules.
+- **#1092** — Change the green color of the forums (6 👍) — **INVALID/OBSOLETE (no longer green)**.
+  The forums were redesigned since 2020: the "Discuss Scratch" header (`#brdheader`/`.box`) is now neutral
+  light gray `#f7f7f7` (confirmed in Scratch's own main.css, dark-www off) with no green anywhere. The
+  green header the issue asks to recolor no longer exists, so there's nothing to change.
