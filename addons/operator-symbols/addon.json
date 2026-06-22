@@ -1,0 +1,66 @@
+{
+  "name": "Readable operator symbols",
+  "description": "Makes the tiny symbols in math and comparison operator blocks (+ - * / < > =) bolder, and lets you swap in clearer signs like × and ÷.",
+  "tags": ["editor", "codeEditor", "theme"],
+  "credits": [
+    {
+      "name": "astrosticks",
+      "link": "https://github.com/astrosticks"
+    },
+    {
+      "name": "Secret-chest",
+      "link": "https://github.com/Secret-chest"
+    },
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude"
+    }
+  ],
+  "relatedAddons": ["custom-block-text", "custom-block-shape", "editor-theme3"],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Bold symbols",
+      "id": "bold",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "name": "Multiplication sign",
+      "id": "multiply",
+      "type": "select",
+      "potentialValues": [
+        { "id": "asterisk", "name": "* (asterisk)" },
+        { "id": "cross", "name": "× (cross)" },
+        { "id": "dot", "name": "· (dot)" },
+        { "id": "asteriskOperator", "name": "∗ (asterisk operator)" }
+      ],
+      "default": "asterisk"
+    },
+    {
+      "name": "Division sign",
+      "id": "divide",
+      "type": "select",
+      "potentialValues": [
+        { "id": "slash", "name": "/ (slash)" },
+        { "id": "obelus", "name": "÷ (division sign)" }
+      ],
+      "default": "slash"
+    },
+    {
+      "name": "Use wider + − = < > symbols",
+      "id": "fullwidth",
+      "type": "boolean",
+      "default": false
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "versionAdded": "1.46.0",
+  "enabledByDefault": false
+}

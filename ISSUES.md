@@ -23,3 +23,6 @@ Do not re-pick an issue listed here.
 - **#5211** — Rethink the Scratch Addons mission statement (10 👍) — **ALREADY DONE**.
   `README.md` already uses the agreed mission statement verbatim; the old "collect, archive" wording
   is absent from this repo. Extension-store description was deferred to a separate issue.
+- **#2645** — Bolder / larger operator symbols (7 👍) — **IMPLEMENTED**.
+  New addon `operator-symbols`: bolds the tiny + - * / < > = symbols and offers swaps (× ÷,
+  full-width ＋－＝＜＞). Mutates Blockly.Msg + tags the symbol FieldLabel; verified bold/subst/restore.
