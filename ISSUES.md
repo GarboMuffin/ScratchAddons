@@ -132,3 +132,7 @@ Do not re-pick an issue listed here.
   The open-new-tab action now opens the first turbowarp.org link found in the project's instructions/notes
   (preserving the creator's URL params), else the default turbowarp.org/<id>. New setting (default on),
   public projects only. Verified default/notes-link/edge-cases/setting-off via window.open intercept.
+- **#6721** — Coding experience checklist (6 👍) — **TRACKING ISSUE; addressed its docs item**.
+  Umbrella checklist of sub-issues (most are separate #s, several already done). Implemented its one
+  un-delegated, concrete item: CONTRIBUTING.md now explains opening the whole repo folder in VS Code so
+  the `.vscode/` workspace settings (manifest-schema validation, formatter, recommended extensions) apply.

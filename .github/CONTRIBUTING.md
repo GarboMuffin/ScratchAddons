@@ -32,6 +32,8 @@ New to contributing? [octocat/Spoon-Knife](https://github.com/octocat/Spoon-Knif
 
 Looking for a code editor? We recommend [Visual Studio Code](https://code.visualstudio.com/).
 
+If you use VS Code, open the **whole repository folder** (File → Open Folder), not just a single file. The repository ships workspace settings in `.vscode/`, and they only take effect when the folder is open. With the folder open you automatically get: autocompletion and validation for `addon.json` files (against our manifest schema), our shared editor settings (indentation, line endings, and Prettier set as the default formatter so "Format Document" follows our style), and a prompt to install our two recommended extensions — [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) (which flags mistakes as you type). Accept that prompt, or install them from the Extensions view.
+
 Testing changes once you have downloaded the source code is very easy and you don't need any additional software to do so. See how to run the source code for Scratch Addons in our [documentation](https://scratchaddons.com/docs/getting-started/installing/#installing-on-google-chrome-or-microsoft-edge).
 
 ### Guidelines and tips
