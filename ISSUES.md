@@ -90,3 +90,7 @@ Do not re-pick an issue listed here.
   Settings badges: 4 loud category colors (forums/editor/player/website) → one neutral gray; beta red→yellow;
   new/updated purple→orange (purple removed, incl. update-notice border). Left the contested orange↔blue
   brand recolor (#4810) alone. Verified all badge colors render correctly in Chromium (main + Themes).
+- **#6388** — Name the project being shared/unshared/deleted (7 👍) — **IMPLEMENTED (in confirm-actions)**.
+  Confirmation dialogs now name the project: share reads the redux title (project page + editor), unshare/
+  delete read the My Stuff row title (.media-info-item.title>a); falls back to the generic message if no
+  name. Verified share (real redux title), unshare+delete (mock row), and fallback in Chromium.

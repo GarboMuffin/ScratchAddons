@@ -1,6 +1,22 @@
 export default async function ({ addon, console, msg }) {
   let override = false;
 
+  addon.tab.redux.initialize();
+
+  // The title of a project's row on the My Stuff page (where unshare/delete happen).
+  const getMyStuffProjectName = (el) => {
+    const row = el.closest(".media-item-content, .media-item");
+    const name = row?.querySelector(".media-info-item.title > a")?.textContent?.trim();
+    return name || null;
+  };
+
+  // The title of the project currently open in the project page or editor (where share happens).
+  const getOpenProjectName = () => {
+    const state = addon.tab.redux.state;
+    const name = state?.preview?.projectInfo?.title || state?.scratchGui?.projectTitle;
+    return (typeof name === "string" && name.trim()) || null;
+  };
+
   document.addEventListener(
     "click",
     (e) => {
@@ -22,7 +38,8 @@ export default async function ({ addon, console, msg }) {
         )
       ) {
         confirmationTitle = addon.tab.scratchMessage("project.share.shareButton");
-        confirmationMessage = msg("share");
+        const name = getOpenProjectName();
+        confirmationMessage = name ? msg("share-named", { name }) : msg("share");
       }
       // Unshare Project
       if (
@@ -31,7 +48,8 @@ export default async function ({ addon, console, msg }) {
         location.hash !== "#galleries"
       ) {
         confirmationTitle = e.target.closest(".media-stats a.unshare").textContent;
-        confirmationMessage = msg("unshare");
+        const name = getMyStuffProjectName(e.target);
+        confirmationMessage = name ? msg("unshare-named", { name }) : msg("unshare");
       }
       // Follow/Unfollow User
       if (addon.settings.get("followinguser") && e.target.closest("#profile-data .follow-button")) {
@@ -81,7 +99,8 @@ export default async function ({ addon, console, msg }) {
       // Send Project to Trash
       if (addon.settings.get("removingprojects") && e.target.closest(".media-trash")) {
         confirmationTitle = msg("removeproject-title");
-        confirmationMessage = msg("removeproject");
+        const name = getMyStuffProjectName(e.target);
+        confirmationMessage = name ? msg("removeproject-named", { name }) : msg("removeproject");
       }
       let isSigningOutFromEditor = false;
       // Sign out

@@ -5,6 +5,10 @@
     {
       "name": "TheColaber",
       "link": "https://scratch.mit.edu/users/TheColaber/"
+    },
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude-code"
     }
   ],
   "dynamicEnable": true,
