@@ -16,3 +16,6 @@ Do not re-pick an issue listed here.
   New addon `editor-more-blocks`: adds a "More Blocks" palette category with the hidden-but-functional
   vanilla 2.0 carryover blocks (while, for each, all at once, counter trio). They save as real opcodes
   so projects run for everyone. Verified in Chromium (renders + counter executes).
+- **#5211** — Rethink the Scratch Addons mission statement (10 👍) — **ALREADY DONE**.
+  `README.md` already uses the agreed mission statement verbatim; the old "collect, archive" wording
+  is absent from this repo. Extension-store description was deferred to a separate issue.
