@@ -33,10 +33,20 @@ throwaway profile at `/tmp/sa-test-profile` and **does not touch the user's real
 (that profile is usually already running and its lock would conflict — always use a separate
 `--user-data-dir`). It needs a display; on this machine that's `DISPLAY=:0`.
 
-**Each launch starts from a fresh profile by default** — `launch.sh` kills any Chromium using the
-profile and deletes it before launching, so stale state from a previous test run can't leak in (this
-is what caused "weird" reused-profile behaviour). That means the dev-mode fix is re-applied and addons
-must be re-enabled every launch. Set `SA_TEST_KEEP_PROFILE=1` to reuse the existing profile instead.
+**Reuse within a session; fresh across sessions.** If a Chromium is already running on the port,
+`launch.sh` **reuses it** — it keeps the profile and just opens the URL in a new tab (which loads your
+latest edited files from disk). So calling `launch.sh` repeatedly mid-session is cheap and keeps state
+(enabled addons stay enabled, no re-applying the dev-mode fix). It only starts **fresh** — kill any
+Chromium on the profile, wipe the profile, relaunch — when **nothing is running** on the port, which is
+the normal start-of-session state because the previous session's cleanup (`pkill`, see Cleanup) closed
+its Chromium. That's how the profile stays unshared between unrelated sessions while being reused within
+one. Overrides: `SA_TEST_FRESH=1` forces a clean relaunch even if an instance is running;
+`SA_TEST_KEEP_PROFILE=1` keeps the profile dir on a fresh launch.
+
+Because a fresh launch wipes the profile, after one you must re-enable the addon under test (the
+dev-mode fix is re-applied automatically). Adding a **new** addon to `addons.json` needs the background
+service worker to re-read it, so use `SA_TEST_FRESH=1` (or reload the extension) after creating one —
+reusing a running instance won't pick up a newly-added addon id.
 
 ### Why the launcher exists: the developer-mode gotcha
 
@@ -89,9 +99,19 @@ page.close();
 ```
 
 Helpers in `cdp.mjs`: `listTargets()`, `scratchPage()`, `serviceWorker()`, `browserWs()`,
-`openScratchPage()`, `openFreshScratchTab()`, and `Conn` with `.eval()`, `.navigate()`,
-`.screenshot()`, `.autoAcceptDialogs()`, `.send()` (raw CDP), `.onEvent()`. `page.eval()` runs in the
-page **main world**, where the Scratch globals below live.
+`openScratchPage()`, `openFreshScratchTab()`, `closeAllScratchTabs()`, and `Conn` with `.eval()`,
+`.navigate()`, `.screenshot()`, `.autoAcceptDialogs()`, `.closeTab()`, `.close()`, `.send()` (raw CDP),
+`.onEvent()`. `page.eval()` runs in the page **main world**, where the Scratch globals below live.
+
+**Close tabs you open — don't let them pile up.** `page.close()` only drops the WebSocket; the browser
+tab stays open. To actually close a tab, call `await page.closeTab()` (uses `Target.closeTarget`, which
+force-closes past the editor's "unsaved changes" `beforeunload` prompt — no hang). Two rules that keep
+Scratch tabs from accumulating across runs:
+
+- Open editor tabs with `openFreshScratchTab()` — it closes existing Scratch tabs as it opens the new
+  one. Don't hand-roll `fetch("/json/new")`; that leaks a tab every run.
+- End a script with `await page.closeTab()` for the tab it opened, or `await closeAllScratchTabs()` to
+  sweep everything when you're done testing.
 
 ### Reloading after you edit addon files — use a fresh tab, not navigate
 

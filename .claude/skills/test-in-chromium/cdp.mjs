@@ -43,13 +43,16 @@ export class Conn {
       }
     });
   }
-  static async open(wsUrl) {
+  static async open(wsUrl, targetId) {
     const ws = new WebSocket(wsUrl);
     await new Promise((res, rej) => {
       ws.addEventListener("open", res, { once: true });
       ws.addEventListener("error", rej, { once: true });
     });
-    return new Conn(ws);
+    const conn = new Conn(ws);
+    conn.wsUrl = wsUrl;
+    conn.targetId = targetId;
+    return conn;
   }
   send(method, params = {}, sessionId) {
     const id = ++this.id;
@@ -67,12 +70,32 @@ export class Conn {
     this.ws.close();
   }
 
+  // Actually CLOSE the browser tab (not just this WebSocket). Uses Target.closeTarget,
+  // which force-closes past the editor's "unsaved changes" beforeunload prompt — so tabs
+  // never pile up and never hang. Call this (not close()) when a test script is done with
+  // a tab it opened. Safe to call even if the targetId is unknown (it's looked up).
+  async closeTab() {
+    let id = this.targetId;
+    if (!id) {
+      const t = (await listTargets()).find((x) => x.webSocketDebuggerUrl === this.wsUrl);
+      id = t && t.id;
+    }
+    if (id) {
+      const browser = await Conn.open(await browserWs());
+      await browser.send("Target.closeTarget", { targetId: id }).catch(() => {});
+      browser.close();
+    }
+    this.close();
+  }
+
   // Evaluate an expression in this target's (main-world) context.
   async eval(expression, { awaitPromise = true, returnByValue = true } = {}) {
     await this.send("Runtime.enable");
     const res = await this.send("Runtime.evaluate", { expression, awaitPromise, returnByValue });
     if (res.exceptionDetails) {
-      throw new Error("EVAL: " + JSON.stringify(res.exceptionDetails.exception?.description || res.exceptionDetails.text));
+      throw new Error(
+        "EVAL: " + JSON.stringify(res.exceptionDetails.exception?.description || res.exceptionDetails.text)
+      );
     }
     return res.result.value;
   }
@@ -115,7 +138,23 @@ export class Conn {
 export async function openScratchPage() {
   const pt = await scratchPage();
   if (!pt) throw new Error("No scratch.mit.edu page target open");
-  return Conn.open(pt.webSocketDebuggerUrl);
+  return Conn.open(pt.webSocketDebuggerUrl, pt.id);
+}
+
+// Cleanup helper: force-close every open Scratch tab (bypassing beforeunload).
+// Call at the end of a test run so editor tabs don't accumulate across runs and
+// waste resources. Returns the number of tabs closed.
+export async function closeAllScratchTabs() {
+  const browser = await Conn.open(await browserWs());
+  let n = 0;
+  for (const t of await listTargets()) {
+    if (t.type === "page" && /scratch\.mit\.edu/.test(t.url)) {
+      await browser.send("Target.closeTarget", { targetId: t.id }).catch(() => {});
+      n++;
+    }
+  }
+  browser.close();
+  return n;
 }
 
 // Open a FRESH editor tab and (by default) force-close existing Scratch tabs.
@@ -125,7 +164,10 @@ export async function openScratchPage() {
 // "unsaved changes" beforeunload prompt (which blocks navigate/reload). Old tabs are closed
 // with Target.closeTarget, which force-closes without running beforeunload.
 // Returns a Conn already wired with autoAcceptDialogs(); wait for the VM yourself.
-export async function openFreshScratchTab(url = "https://scratch.mit.edu/projects/editor/", { closeOthers = true } = {}) {
+export async function openFreshScratchTab(
+  url = "https://scratch.mit.edu/projects/editor/",
+  { closeOthers = true } = {}
+) {
   const browser = await Conn.open(await browserWs());
   const { targetId } = await browser.send("Target.createTarget", { url });
   if (closeOthers) {
@@ -138,7 +180,7 @@ export async function openFreshScratchTab(url = "https://scratch.mit.edu/project
   browser.close();
   const pt = (await listTargets()).find((t) => t.id === targetId);
   if (!pt) throw new Error("Failed to open fresh Scratch tab");
-  const conn = await Conn.open(pt.webSocketDebuggerUrl);
+  const conn = await Conn.open(pt.webSocketDebuggerUrl, targetId);
   await conn.autoAcceptDialogs();
   return conn;
 }
