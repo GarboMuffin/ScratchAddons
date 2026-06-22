@@ -69,3 +69,8 @@ Do not re-pick an issue listed here.
   the advanced context menu (copy/cut/paste + make space), matching maintainer Joeclinton1's 2-addon plan.
   (find-bar, jump-to-def, swap-local-global, move-to-top-bottom, cleanup-blocks-plus already split prior.)
   Verified menu item presence, functional swap, devtools intact, no duplicate, clean dynamic disable.
+- **#3225** — Backpacking scratchblocks in forums (7 👍) — **INFEASIBLE (no parser + account-gated)**.
+  Needs a scratchblocks-3.x → sb3 parser that doesn't exist (maintainers confirmed in-thread it's
+  missing/ambiguous, esp. non-English); only `editor-copy-scratchblocks` does the forward direction.
+  The backpack (backpack.scratch.mit.edu) only exists logged-in and all writes need the user's token, so
+  it can be neither implemented end-to-end nor verified without an account — out of scope per loop rules.
