@@ -34,3 +34,7 @@ Do not re-pick an issue listed here.
   New addon `live-comments`: polls the project comments API every 15s–2min and merges new top-level
   comments + new replies (opened threads) into scratch-www's Redux (ADD_NEW_COMMENT/SET_REPLIES) so
   React renders them fully; op-badge/infinite-scroll stay compatible. Verified end-to-end + disable.
+- **#1643** — Pin comments in projects and studios (8 👍) — **INFEASIBLE (account-gated, can't verify)**.
+  Maintainer-endorsed design stores the pin in the owner's project/studio description ("Pinned
+  comment: <link>"); pinning therefore requires logging in as the owner, and no real pinned data can
+  exist to test the display side. Both halves need a Scratch account — out of scope per loop rules.
