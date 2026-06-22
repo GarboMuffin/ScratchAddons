@@ -1,0 +1,35 @@
+{
+  "name": "More blocks",
+  "description": "Adds a \"More Blocks\" palette category with hidden-but-functional vanilla blocks carried over from Scratch 2.0: while, for each, all at once, and the counter blocks. These save as ordinary Scratch blocks, so projects that use them still run for people who don't have Scratch Addons.",
+  "credits": [
+    {
+      "name": "williamhorning",
+      "link": "https://github.com/williamhorning/"
+    },
+    {
+      "name": "lisa-wolfgang",
+      "link": "https://github.com/lisa-wolfgang/"
+    },
+    {
+      "name": "Claude Opus 4.8 (Claude Code)"
+    }
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "info": [
+    {
+      "type": "info",
+      "text": "These are real Scratch blocks that were removed from the palette but still run correctly. Projects using them work for everyone, even without Scratch Addons.",
+      "id": "vanilla"
+    }
+  ],
+  "tags": ["editor", "codeEditor"],
+  "versionAdded": "1.46.0",
+  "enabledByDefault": false,
+  "dynamicEnable": true,
+  "dynamicDisable": true
+}

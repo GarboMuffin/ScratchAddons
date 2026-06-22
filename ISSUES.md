@@ -12,3 +12,7 @@ Do not re-pick an issue listed here.
 - **#1095** — Better backpack (11 👍) — **IMPLEMENTED (scoped)**.
   New addon `backpack-preview`: hover a backpack item for a large floating preview (tiny ~32px
   tiles make scripts unreadable). Configurable size/delay. Verified in Chromium.
+- **#817** — More blocks addon (10 👍) — **IMPLEMENTED (scoped to maintainer-blessed subset)**.
+  New addon `editor-more-blocks`: adds a "More Blocks" palette category with the hidden-but-functional
+  vanilla 2.0 carryover blocks (while, for each, all at once, counter trio). They save as real opcodes
+  so projects run for everyone. Verified in Chromium (renders + counter executes).
