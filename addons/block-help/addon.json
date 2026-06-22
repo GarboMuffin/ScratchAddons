@@ -1,0 +1,29 @@
+{
+  "name": "Block help",
+  "description": "Adds a \"Help\" option to the right-click menu of blocks that opens the matching Scratch Wiki page, so you can quickly look up what a block does.",
+  "tags": ["editor", "codeEditor"],
+  "credits": [
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude"
+    }
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Open the wiki in a new tab",
+      "id": "newTab",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "versionAdded": "1.46.0",
+  "enabledByDefault": false
+}

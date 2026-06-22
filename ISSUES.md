@@ -46,3 +46,7 @@ Do not re-pick an issue listed here.
   Popup shows a blue count badge on the Messaging tab; new background `getMsgCount` reads the cached
   IDB count, popup polls it (3s) + on tab switch. Hidden when logged out / 0; formats 1k / 9k+.
   Verified handler, render, formatting, and logged-out hiding in Chromium (mockup-faithful).
+- **#1748** — Add help feature to editor (7 👍) — **IMPLEMENTED**.
+  New addon `block-help`: right-click a block → "Help" opens its Scratch Wiki page (verified opcode→page
+  map for the standard palette, category-page fallback otherwise). Verified in Chromium via real Blockly
+  context menus that the item appears and opens the correct URL (incl. +, #, % encoding).
