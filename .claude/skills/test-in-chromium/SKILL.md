@@ -33,6 +33,11 @@ throwaway profile at `/tmp/sa-test-profile` and **does not touch the user's real
 (that profile is usually already running and its lock would conflict — always use a separate
 `--user-data-dir`). It needs a display; on this machine that's `DISPLAY=:0`.
 
+**Each launch starts from a fresh profile by default** — `launch.sh` kills any Chromium using the
+profile and deletes it before launching, so stale state from a previous test run can't leak in (this
+is what caused "weird" reused-profile behaviour). That means the dev-mode fix is re-applied and addons
+must be re-enabled every launch. Set `SA_TEST_KEEP_PROFILE=1` to reuse the existing profile instead.
+
 ### Why the launcher exists: the developer-mode gotcha
 
 A brand-new Chromium profile has **Developer mode OFF**. Recent Chrome then disables any unpacked
@@ -162,5 +167,6 @@ Then `Read` the PNG to look at it.
 pkill -f "user-data-dir=/tmp/sa-test-profile"   # stop the test Chromium
 ```
 
-The profile persists between runs (so the dev-mode fix and enabled addons stick); `rm -rf
-/tmp/sa-test-profile` for a clean slate.
+By default the profile is wiped and recreated on every `launch.sh` run, so there's usually nothing to
+clean up manually. If you launched with `SA_TEST_KEEP_PROFILE=1`, `rm -rf /tmp/sa-test-profile` to
+reset it.

@@ -11,14 +11,20 @@
 # Env:
 #   SA_TEST_PROFILE  user-data-dir (default /tmp/sa-test-profile)
 #   SA_TEST_PORT     remote debugging port (default 9222)
+#   SA_TEST_KEEP_PROFILE  set to 1 to reuse an existing profile instead of
+#                         wiping it (default: start fresh every launch)
+#   SA_TEST_WINDOW_SIZE   window size W,H (default 1920,1080 — 16:9)
 #
-# Re-running is safe: if the profile is already patched it just relaunches.
+# By default each launch starts from a CLEAN profile: any Chromium using the
+# profile is killed and the profile dir is deleted, so stale state from a
+# previous test run can't leak in. Set SA_TEST_KEEP_PROFILE=1 to opt out.
 set -euo pipefail
 
 REPO="${1:-$(git -C "$(dirname "$0")" rev-parse --show-toplevel 2>/dev/null || pwd)}"
 URL="${2:-https://scratch.mit.edu/projects/editor/}"
 PROFILE="${SA_TEST_PROFILE:-/tmp/sa-test-profile}"
 PORT="${SA_TEST_PORT:-9222}"
+WINDOW_SIZE="${SA_TEST_WINDOW_SIZE:-1920,1080}"
 LOG="/tmp/sa-test-chromium.log"
 
 CHROME="$(command -v chromium || command -v chromium-browser || command -v google-chrome || true)"
@@ -31,6 +37,8 @@ common_args=(
   --load-extension="$REPO"
   --disable-extensions-except="$REPO"
   --no-first-run --no-default-browser-check
+  --window-position=0,0
+  --window-size="$WINDOW_SIZE"
 )
 
 launch() { DISPLAY="${DISPLAY:-:0}" nohup "$CHROME" "${common_args[@]}" "$@" >"$LOG" 2>&1 & echo $!; }
@@ -40,6 +48,14 @@ kill_profile() { pkill -f "user-data-dir=$PROFILE" 2>/dev/null || true; sleep 2;
 patched() {
   node -e 'const fs=require("fs");try{const j=JSON.parse(fs.readFileSync(process.argv[1]));process.exit(j.extensions?.ui?.developer_mode?0:1)}catch(e){process.exit(1)}' "$PROFILE/Default/Preferences" 2>/dev/null
 }
+
+# Start fresh by default: kill any Chromium on this profile and delete it, so
+# each launch begins from a clean slate (set SA_TEST_KEEP_PROFILE=1 to reuse).
+if [ "${SA_TEST_KEEP_PROFILE:-0}" != "1" ]; then
+  echo "Starting fresh: removing existing profile at $PROFILE…"
+  kill_profile
+  rm -rf "$PROFILE"
+fi
 
 if ! patched; then
   echo "First run: materialising profile, then enabling developer mode…"
