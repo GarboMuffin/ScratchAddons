@@ -162,3 +162,26 @@ chrome.runtime.onMessage.addListener((message) => {
     updateBadge(scratchAddons.cookieStoreId);
   }
 });
+
+// Used by the popup to show the unread message count on the Messaging tab.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message !== "getMsgCount") return;
+  (async () => {
+    let db;
+    try {
+      if (!scratchAddons.localState.allReady) {
+        await new Promise((resolve) => scratchAddons.localEvents.addEventListener("ready", resolve, { once: true }));
+      }
+      const isLoggedIn = scratchAddons.globalState.auth.isLoggedIn;
+      db = await MessageCache.openDatabase();
+      const count = (await db.get("count", scratchAddons.cookieStoreId)) || 0;
+      sendResponse({ count, isLoggedIn });
+    } catch (e) {
+      console.error("Could not get message count for popup", e);
+      sendResponse({ count: 0, isLoggedIn: false });
+    } finally {
+      if (db) await db.close();
+    }
+  })();
+  return true; // respond asynchronously
+});

@@ -22,11 +22,18 @@ const vue = new Vue({
       popups: [],
       currentPopup: null,
       popupsWithIframes: [],
+      msgCount: 0,
     };
   },
   methods: {
     msg(message, ...params) {
       return chrome.i18n.getMessage(message, ...params);
+    },
+    refreshMsgCount() {
+      chrome.runtime.sendMessage("getMsgCount", (res) => {
+        if (chrome.runtime.lastError || !res) return;
+        this.msgCount = res.isLoggedIn ? res.count : 0;
+      });
     },
     direction() {
       return chrome.i18n.getMessage("@@bidi_dir");
@@ -46,6 +53,7 @@ const vue = new Vue({
         });
         if (!this.popupsWithIframes.includes(popup)) this.popupsWithIframes.push(popup);
         setTimeout(() => document.querySelector("iframe:not([style='display: none;'])").focus(), 0);
+        this.refreshMsgCount();
       }
     },
     openInNewTab(popup) {
@@ -70,6 +78,21 @@ const vue = new Vue({
       const ver = chrome.runtime.getManifest().version;
       return prerelease ? ver + "-pre" : ver;
     },
+    formattedMsgCount() {
+      const count = this.msgCount;
+      if (count < 1000) return String(count);
+      if (count <= 9000) return Math.floor(count / 1000) + "k";
+      return "9k+";
+    },
+  },
+  mounted() {
+    // Keep the unread count on the Messaging tab in sync, including while the
+    // user reads messages in the Messaging tab (which lowers the count).
+    this.refreshMsgCount();
+    this._msgCountInterval = setInterval(() => this.refreshMsgCount(), 3000);
+  },
+  beforeDestroy() {
+    clearInterval(this._msgCountInterval);
   },
 });
 

@@ -124,6 +124,22 @@ button {
 .popup-title {
   padding-inline-start: 5px;
 }
+.msg-count-badge {
+  display: inline-block;
+  min-width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  padding: 0 5px;
+  margin-inline-start: 6px;
+  border-radius: 9px;
+  background-color: #4c97ff;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 18px;
+  text-align: center;
+}
+
 .popout {
   cursor: pointer;
 }

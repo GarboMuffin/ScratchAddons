@@ -42,3 +42,7 @@ Do not re-pick an issue listed here.
   New in-extension `webpages/onboarding/` "Setup" wizard (welcome → editor/player/website/popup addon
   cards → done), enables curated addons via changeEnabledState; opened on install (transition.js).
   Follow-up site popups/inactivity reminders are separate future work. Verified full flow in Chromium.
+- **#5127** — Unread message count on popup "Messaging" tab (8 👍) — **IMPLEMENTED**.
+  Popup shows a blue count badge on the Messaging tab; new background `getMsgCount` reads the cached
+  IDB count, popup polls it (3s) + on tab switch. Hidden when logged out / 0; formats 1k / 9k+.
+  Verified handler, render, formatting, and logged-out hiding in Chromium (mockup-faithful).

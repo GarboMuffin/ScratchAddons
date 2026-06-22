@@ -39,6 +39,12 @@
       >
         <img v-if="popup.icon" :src="popup.icon" class="popup-icon" draggable="false" />
         <a class="popup-title">{{ popup.name }}</a>
+        <span
+          v-if="popup._addonId === 'scratch-messaging' && msgCount > 0"
+          class="msg-count-badge"
+          :title="msg('messaging')"
+          >{{ formattedMsgCount }}</span
+        >
         <span v-if="popup.fullscreen" class="popout" @click="openInNewTab(popup)">
           <img
             src="../../images/icons/popout.svg"
