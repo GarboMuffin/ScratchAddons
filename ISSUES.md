@@ -145,3 +145,7 @@ Do not re-pick an issue listed here.
   Userstyle + `customCssVariables` map/ternary: pick one of 10 curated fonts or type any installed font
   name; applied site-wide (homepage/profiles/studios/forums) with monospace preserved for code.
   Verified curated select (Comic Sans/Georgia), default, forum monospace, and clean disable in Chromium.
+- **#1677** — Website comment preview (5 👍) — **NEW ADDON `comment-preview`**.
+  Adds Write/Preview tabs to the comment box; preview renders emoji codes (`_:)_` etc.), @mentions and
+  URLs as they'll post, HTML-escaped. Verified on the profile composer in Chromium (emoji/links/escaping/
+  empty/toggle). React project/studio composer is login-gated; uses emoji-picker's known selector.

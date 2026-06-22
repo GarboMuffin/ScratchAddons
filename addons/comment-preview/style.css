@@ -1,0 +1,58 @@
+.sa-comment-preview-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.sa-comment-preview-tab {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 3px 12px;
+  border: 1px solid #cad0d6;
+  border-radius: 5px;
+  background: #f2f4f6;
+  color: #575e75;
+  cursor: pointer;
+}
+
+.sa-comment-preview-tab:hover {
+  background: #e8ebf0;
+}
+
+.sa-comment-preview-tab.sa-comment-preview-active {
+  background: #4c97ff;
+  border-color: #4c97ff;
+  color: #fff;
+}
+
+.sa-comment-preview-panel {
+  min-height: 2.5em;
+  padding: 8px 10px;
+  border: 1px solid #cad0d6;
+  border-radius: 5px;
+  background: #fff;
+  color: #575e75;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.sa-comment-preview-panel.sa-comment-preview-empty {
+  color: #9aa0a6;
+  font-style: italic;
+}
+
+.sa-comment-preview-emoji {
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+}
+
+.sa-comment-preview-panel a {
+  color: #4c97ff;
+  text-decoration: none;
+}
+
+.sa-comment-preview-panel a:hover {
+  text-decoration: underline;
+}

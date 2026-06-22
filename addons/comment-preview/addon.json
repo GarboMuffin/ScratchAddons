@@ -1,0 +1,25 @@
+{
+  "name": "Comment preview",
+  "description": "Adds a Preview tab to the comment box so you can see how emojis and links will look before posting.",
+  "credits": [
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude-code"
+    }
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["profiles", "projects", "studios"]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "style.css",
+      "matches": ["profiles", "projects", "studios"]
+    }
+  ],
+  "dynamicEnable": true,
+  "tags": ["community", "comments"],
+  "versionAdded": "1.46.0"
+}
