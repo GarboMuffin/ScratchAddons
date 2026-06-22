@@ -86,3 +86,7 @@ Do not re-pick an issue listed here.
   Needs a team-controlled server file (data.scratchaddons.com/disabledaddons.json → currently HTTP 404)
   that I can't create/verify, plus core-background + privacy-policy + consent-UI changes. 61 comments,
   no maintainer consensus (privacy/opt-out debated). Sensitive remote kill-switch — out of scope per loop.
+- **#4983** — Use colors in our UIs more meaningfully (7 👍) — **IMPLEMENTED (badge cleanup slice)**.
+  Settings badges: 4 loud category colors (forums/editor/player/website) → one neutral gray; beta red→yellow;
+  new/updated purple→orange (purple removed, incl. update-notice border). Left the contested orange↔blue
+  brand recolor (#4810) alone. Verified all badge colors render correctly in Chromium (main + Themes).

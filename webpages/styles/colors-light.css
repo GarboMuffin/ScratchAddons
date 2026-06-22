@@ -23,8 +23,8 @@
   --warning-background: var(--red);
   --warning-border: var(--red-variant);
   --info-border: var(--content-border);
-  --update-background: rgba(177, 23, 248, 0.1);
-  --update-border: rgba(177, 23, 248, 0.2);
+  --update-background: rgba(255, 123, 38, 0.1);
+  --update-border: rgba(255, 123, 38, 0.4);
   --update-text: #222;
 
   --hover-highlight: rgba(0, 0, 0, 0.05);

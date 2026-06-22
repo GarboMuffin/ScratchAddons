@@ -16,35 +16,35 @@ export default [
   {
     name: "new",
     matchName: "new",
-    color: "purple",
+    color: "orange",
   },
   {
     name: "updated",
     matchName: "updated",
-    color: "purple",
+    color: "orange",
   },
   {
     name: "updatedWithSettings",
     matchName: "updatedWithSettings",
-    color: "purple",
+    color: "orange",
   },
   {
     name: "beta",
     tooltipText: "betaTooltip",
     matchName: "beta",
-    color: "red",
+    color: "yellow",
     iframeAlwaysShow: true,
   },
   {
     name: "forums",
     tooltipText: "forumsTooltip",
     matchName: "forums",
-    color: "green",
+    color: "gray",
   },
   {
     name: "forEditor",
     matchName: "editor",
-    color: "darkgreen",
+    color: "gray",
     addonTabShow: {
       theme: true,
     },
@@ -52,7 +52,7 @@ export default [
   {
     name: "forPlayer",
     matchName: "player",
-    color: "lightblue",
+    color: "gray",
     addonTabShow: {
       theme: true,
     },
@@ -60,7 +60,7 @@ export default [
   {
     name: "forWebsite",
     matchName: "community",
-    color: "yellow",
+    color: "gray",
     addonTabShow: {
       theme: true,
     },

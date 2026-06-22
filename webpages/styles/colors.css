@@ -5,6 +5,7 @@
   --brand-orange-min-font-weight: normal;
   --orange: #ff7b26;
   --orange-opacity35: rgba(255, 123, 38, 0.35);
+  --orange-opacity75: rgba(255, 123, 38, 0.75);
   --yellow-opacity50: rgba(253, 221, 43, 0.5);
   --green: #008000;
   --light-green-variant: #53b31c;
@@ -43,7 +44,7 @@
   --warning-icon-filter: brightness(0) invert(1);
   --info-border: var(--content-separator);
   --update-background: var(--navigation-background);
-  --update-border: var(--purple-opacity75);
+  --update-border: var(--orange-opacity75);
   --update-text: #fff;
 
   --modal-overlay: rgba(0, 0, 0, 0.65);

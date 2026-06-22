@@ -59,6 +59,14 @@
   background: rgb(177, 23, 248);
   border-color: #b20eb8;
 }
+.badge.orange {
+  background: #ff7b26;
+  border-color: #c75e1a;
+}
+.badge.gray {
+  background: #69707d;
+  border-color: #464c57;
+}
 .filter-option.sel.blue {
   background: #175ef8;
 }
