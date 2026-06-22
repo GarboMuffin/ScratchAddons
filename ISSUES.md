@@ -103,3 +103,7 @@ Do not re-pick an issue listed here.
   The forums were redesigned since 2020: the "Discuss Scratch" header (`#brdheader`/`.box`) is now neutral
   light gray `#f7f7f7` (confirmed in Scratch's own main.css, dark-www off) with no green anywhere. The
   green header the issue asks to recolor no longer exists, so there's nothing to change.
+- **#3642** — Use drop-downs on the Settings Page (6 👍) — **IMPLEMENTED**.
+  `select`-type settings with 3+ options now render as a compact themed `<select>` dropdown instead of a
+  wide button row; 2-option ones keep the pill toggle (per maintainer TheColaber). Edited addon-setting
+  component. Verified 4-opt/3-opt → dropdown, 2-opt → pills, value change, and enabled/disabled in Chromium.

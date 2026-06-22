@@ -88,7 +88,11 @@
         @change="updateSettings()"
         :disabled="!addon._enabled"
       />
-      <div v-if="setting.type === 'select'" class="filter-options" role="radiogroup">
+      <div
+        v-if="setting.type === 'select' && setting.potentialValues.length <= 2"
+        class="filter-options"
+        role="radiogroup"
+      >
         <div v-for="option of setting.potentialValues">
           <input
             type="radio"
@@ -102,6 +106,15 @@
           <label class="filter-option" :for="selectOptionId(option)">{{ option.name }}</label>
         </div>
       </div>
+      <select
+        v-if="setting.type === 'select' && setting.potentialValues.length > 2"
+        class="setting-input select-input"
+        v-model="addonSettings[setting.id]"
+        @change="updateSettings()"
+        :disabled="!addon._enabled"
+      >
+        <option v-for="option of setting.potentialValues" :value="option.id">{{ option.name }}</option>
+      </select>
     </template>
     <div v-else class="setting-input-container dropdown-parent" :class="{ 'full-radius': tableChild }">
       <template v-if="setting.type === 'positive_integer'">
@@ -217,6 +230,31 @@
     border-radius: 16px;
   }
 
+  /* "select" settings with more than two options render as a compact dropdown
+     instead of a wide row of buttons. */
+  .setting-input.select-input {
+    border-radius: 4px;
+    width: auto;
+    max-width: 260px;
+    cursor: pointer;
+    padding-inline-end: 32px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='none' stroke='%23808080' stroke-width='1.5' d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+  [dir="rtl"] .setting-input.select-input {
+    background-position: left 12px center;
+    padding-inline-end: 12px;
+    padding-inline-start: 32px;
+  }
+  .setting-input.select-input:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+
   .setting-input-container {
     display: flex;
     align-items: center;
@@ -248,7 +286,8 @@
     height: 18px;
     margin-inline-end: 8px;
     border-radius: 5px;
-    background: linear-gradient(45deg, #777 25%, transparent 25%), linear-gradient(-45deg, #777 25%, transparent 25%),
+    background:
+      linear-gradient(45deg, #777 25%, transparent 25%), linear-gradient(-45deg, #777 25%, transparent 25%),
       linear-gradient(45deg, transparent 75%, #777 75%), linear-gradient(-45deg, transparent 75%, #777 75%);
     background-color: white;
     background-size: 6px 6px;
