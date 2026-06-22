@@ -63,7 +63,8 @@ export default async function ({ addon, console }) {
 
     let dsx = 0;
     let dsy = 0;
-    if (x < left + margin) dsx = speedFor(x - left); // near left edge → reveal content to the left
+    if (x < left + margin)
+      dsx = speedFor(x - left); // near left edge → reveal content to the left
     else if (x > right - margin) dsx = -speedFor(right - x); // near right edge → reveal content to the right
     if (y < top + margin) dsy = speedFor(y - top);
     else if (y > bottom - margin) dsy = -speedFor(bottom - y);

@@ -24,7 +24,9 @@ body.sa-resizable-stage-active [class*="stage_stage_"] canvas {
   height: 40px;
   border-radius: 2px;
   background: hsla(0, 0%, 0%, 0.18);
-  transition: background 0.12s ease, height 0.12s ease;
+  transition:
+    background 0.12s ease,
+    height 0.12s ease;
 }
 
 .sa-resizable-stage-handle:hover .sa-resizable-stage-grip {
