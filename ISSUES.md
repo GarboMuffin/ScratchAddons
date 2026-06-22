@@ -136,3 +136,8 @@ Do not re-pick an issue listed here.
   Umbrella checklist of sub-issues (most are separate #s, several already done). Implemented its one
   un-delegated, concrete item: CONTRIBUTING.md now explains opening the whole repo folder in VS Code so
   the `.vscode/` workspace settings (manifest-schema validation, formatter, recommended extensions) apply.
+- **#1271** — Comment out blocks (5 👍) — **DEFERRED (proven approach, but large/risky for one loop)**.
+  Confirmed: VM ignores Blockly disabled (no `disabled` in scratch-vm/sb3), but wrapping a block in
+  `if<1=0>` stops execution (tested: control 100→150, wrapped stays 100). Sync path is Xml.domToBlock +
+  Blockly connections (like block-switching); refreshWorkspace duplicates blocks. A safe, fully-tested
+  comment/uncomment with all stack-position edge cases is more than one loop can responsibly verify.
