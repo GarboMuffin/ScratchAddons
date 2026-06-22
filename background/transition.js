@@ -8,7 +8,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   const [major, minor, _] = currentVersion.split(".");
   if (details.reason === "install") {
     if (normalInstall) {
-      chrome.tabs.create({ url: `https://scratchaddons.com/${localeSlash}welcome/?${utm}` });
+      // Open the in-extension onboarding ("Setup") wizard, which lets new users
+      // enable a hand-picked selection of addons before they get started.
+      chrome.tabs.create({ url: chrome.runtime.getURL("webpages/onboarding/index.html") });
     }
     chrome.storage.local.set({
       bannerSettings: { lastShown: `${major}.${minor}` },

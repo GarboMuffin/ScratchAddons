@@ -490,5 +490,89 @@
   "extensionStoreDescription4": {
     "message": "This project is not affiliated, associated, or in any way officially connected with the Scratch website or the organizations that maintain it.",
     "description": "Used in the description for the extension stores"
+  },
+  "onboardingSetup": {
+    "message": "Setup",
+    "description": "Header shown at the top of the onboarding (first-run setup) pages"
+  },
+  "onboardingWelcomeTitle": {
+    "message": "Welcome to a new Scratch.",
+    "description": "Title on the first onboarding page"
+  },
+  "onboardingWelcomeSubtitle": {
+    "message": "With over 100 customizable addons, your Scratch experience will never be the same.",
+    "description": "Subtitle on the first onboarding page"
+  },
+  "onboardingGetStarted": {
+    "message": "Get started",
+    "description": "Button that begins the onboarding"
+  },
+  "onboardingEditorTitle": {
+    "message": "Customize the editor",
+    "description": "Title of the onboarding step for project editor addons"
+  },
+  "onboardingEditorSubtitle": {
+    "message": "Pick the editor addons you'd like to try. You can enable more in the settings.",
+    "description": "Subtitle of the editor onboarding step"
+  },
+  "onboardingPlayerTitle": {
+    "message": "Customize the project player",
+    "description": "Title of the onboarding step for project player addons"
+  },
+  "onboardingPlayerSubtitle": {
+    "message": "You can enable more addons and make advanced changes in the settings.",
+    "description": "Subtitle of the project player onboarding step"
+  },
+  "onboardingWebsiteTitle": {
+    "message": "Customize the website",
+    "description": "Title of the onboarding step for website addons"
+  },
+  "onboardingWebsiteSubtitle": {
+    "message": "You can enable more addons and make advanced changes in the settings.",
+    "description": "Subtitle of the website onboarding step"
+  },
+  "onboardingPopupTitle": {
+    "message": "Customize the popup",
+    "description": "Title of the onboarding step for popup addons"
+  },
+  "onboardingPopupSubtitle": {
+    "message": "These features let you manage Scratch from the extension icon.",
+    "description": "Subtitle of the popup onboarding step"
+  },
+  "onboardingBack": {
+    "message": "Back",
+    "description": "Button to go to the previous onboarding step"
+  },
+  "onboardingNext": {
+    "message": "Next",
+    "description": "Button to go to the next onboarding step"
+  },
+  "onboardingFinish": {
+    "message": "Finish",
+    "description": "Button on the last addon-selection onboarding step"
+  },
+  "onboardingChangeLater": {
+    "message": "You can always change this later.",
+    "description": "Reassurance shown under the onboarding step buttons"
+  },
+  "onboardingDoneTitle": {
+    "message": "You're all set!",
+    "description": "Title of the final onboarding page"
+  },
+  "onboardingDoneSubtitle": {
+    "message": "Go ahead and try out your new addons, or browse even more options in the settings.",
+    "description": "Subtitle of the final onboarding page"
+  },
+  "onboardingOpenScratch": {
+    "message": "Open Scratch",
+    "description": "Button that opens scratch.mit.edu from the final onboarding page"
+  },
+  "onboardingOpenSettings": {
+    "message": "Open settings",
+    "description": "Button that opens the settings page from the final onboarding page"
+  },
+  "onboardingDoneHint": {
+    "message": "You can open the settings at any time by clicking the extension icon, then the settings icon in the upper-right corner.",
+    "description": "Hint shown under the buttons on the final onboarding page"
   }
 }

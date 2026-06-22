@@ -38,3 +38,7 @@ Do not re-pick an issue listed here.
   Maintainer-endorsed design stores the pin in the owner's project/studio description ("Pinned
   comment: <link>"); pinning therefore requires logging in as the owner, and no real pinned data can
   exist to test the display side. Both halves need a Scratch account — out of scope per loop rules.
+- **#5209** — Improve onboarding process (8 👍) — **IMPLEMENTED (onboarding wizard, per mockups)**.
+  New in-extension `webpages/onboarding/` "Setup" wizard (welcome → editor/player/website/popup addon
+  cards → done), enables curated addons via changeEnabledState; opened on install (transition.js).
+  Follow-up site popups/inactivity reminders are separate future work. Verified full flow in Chromium.
