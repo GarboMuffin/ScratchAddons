@@ -82,3 +82,7 @@ Do not re-pick an issue listed here.
   Added a setting to `block-duplicate`: alt-dragging the variable dropdown of a set/change block pulls out
   a `data_variable` reporter (via the existing Gesture patch + Gesture.startField) instead of duplicating
   the whole block. Verified set+change reporter pull, block-body still dupes, and setting-off revert.
+- **#5248** — Disable addons remotely for all users (7 👍) — **INFEASIBLE (infra + unresolved policy)**.
+  Needs a team-controlled server file (data.scratchaddons.com/disabledaddons.json → currently HTTP 404)
+  that I can't create/verify, plus core-background + privacy-policy + consent-UI changes. 61 comments,
+  no maintainer consensus (privacy/opt-out debated). Sensitive remote kill-switch — out of scope per loop.
