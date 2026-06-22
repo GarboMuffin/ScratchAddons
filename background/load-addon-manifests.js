@@ -242,6 +242,19 @@ const localizeSettings = (addonId, setting, tableId) => {
         }
       }
     }
+    // Substitute the {cmdKey}/{optKey} modifier-key placeholders in user-facing strings. The
+    // English (useDefault) path above skips l10n.get, so do this unconditionally for every locale.
+    const sub = (s) => scratchAddons.l10n.substituteKeys(s);
+    if (manifest.name) manifest.name = sub(manifest.name);
+    if (manifest.description) manifest.description = sub(manifest.description);
+    for (const info of manifest.info || []) info.text = sub(info.text);
+    if (manifest.popup?.name) manifest.popup.name = sub(manifest.popup.name);
+    for (const group of manifest.settingGroups || []) if (group.name) group.name = sub(group.name);
+    for (const setting of manifest.settings || []) {
+      if (setting.name) setting.name = sub(setting.name);
+      if (setting.description) setting.description = sub(setting.description);
+    }
+
     scratchAddons.manifests.push({ addonId, manifest });
   }
   if (!cache) {

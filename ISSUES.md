@@ -124,3 +124,7 @@ Do not re-pick an issue listed here.
   Pure release-workflow proposal (master/beta branching, release cadence) — needs maintainer policy
   adoption + Transifex reconfig + branch/CI automation, no consensus (apple502j skeptical, cadence
   debated). No concrete in-repo code deliverable; can't implement/verify in a loop. Out of scope.
+- **#5181** — Show "Cmd"/"Ctrl" per platform in descriptions (6 👍) — **IMPLEMENTED (l10n placeholder)**.
+  Added OS-aware `{cmdKey}`/`{optKey}` placeholders to the l10n lib (localizable key names in `_general`,
+  substituted for all locales incl. the English fast-path); applied to ctrl-enter-post + block-duplicate,
+  dropping their redundant macOS notes. Verified Ctrl/Alt (Linux) and Cmd/Option (Mac UA) in Chromium.

@@ -1,16 +1,10 @@
 {
-  "name": "Ctrl+Enter to post",
-  "description": "Automatically posts the comment or forum post on Ctrl+Enter.",
+  "name": "{cmdKey}+Enter to post",
+  "description": "Automatically posts the comment or forum post on {cmdKey}+Enter.",
   "credits": [
     {
       "name": "Weredime (9gr)",
       "link": "https://scratch.mit.edu/users/9gr/"
-    }
-  ],
-  "info": [
-    {
-      "text": "On macOS, you can also use the Cmd key.",
-      "id": "macOS"
     }
   ],
   "settings": [

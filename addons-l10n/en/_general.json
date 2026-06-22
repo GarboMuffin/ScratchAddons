@@ -12,5 +12,10 @@
 
   "_general/meta/managedBySa": "Managed by Scratch Addons",
   "_general/meta/addonSettings": "Addon Settings",
-  "_general/meta/message-from-sa": "Message from Scratch Addons"
+  "_general/meta/message-from-sa": "Message from Scratch Addons",
+
+  "_general/keys/ctrl": "Ctrl",
+  "_general/keys/cmd": "Cmd",
+  "_general/keys/alt": "Alt",
+  "_general/keys/option": "Option"
 }
