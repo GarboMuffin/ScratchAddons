@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Launch Chromium with the Scratch Addons extension loaded for testing, working
+# around the fresh-profile "developer mode is off" block that otherwise disables
+# unpacked MV3 extensions (so no content scripts inject and nothing works).
+#
+# Always runs HEADFUL (visible on $DISPLAY): the real GPU matters for WebGL/rendering
+# addons, and a human can watch. Don't add headless here.
+#
+# Usage:
+#   ./launch.sh [repo_dir] [url]
+# Env:
+#   SA_TEST_PROFILE  user-data-dir (default /tmp/sa-test-profile)
+#   SA_TEST_PORT     remote debugging port (default 9222)
+#
+# Re-running is safe: if the profile is already patched it just relaunches.
+set -euo pipefail
+
+REPO="${1:-$(git -C "$(dirname "$0")" rev-parse --show-toplevel 2>/dev/null || pwd)}"
+URL="${2:-https://scratch.mit.edu/projects/editor/}"
+PROFILE="${SA_TEST_PROFILE:-/tmp/sa-test-profile}"
+PORT="${SA_TEST_PORT:-9222}"
+LOG="/tmp/sa-test-chromium.log"
+
+CHROME="$(command -v chromium || command -v chromium-browser || command -v google-chrome || true)"
+[ -z "$CHROME" ] && { echo "No chromium/chrome binary found"; exit 1; }
+[ -f "$REPO/manifest.json" ] || { echo "No manifest.json in $REPO — is that the extension root?"; exit 1; }
+
+common_args=(
+  --remote-debugging-port="$PORT"
+  --user-data-dir="$PROFILE"
+  --load-extension="$REPO"
+  --disable-extensions-except="$REPO"
+  --no-first-run --no-default-browser-check
+)
+
+launch() { DISPLAY="${DISPLAY:-:0}" nohup "$CHROME" "${common_args[@]}" "$@" >"$LOG" 2>&1 & echo $!; }
+
+kill_profile() { pkill -f "user-data-dir=$PROFILE" 2>/dev/null || true; sleep 2; }
+
+patched() {
+  node -e 'const fs=require("fs");try{const j=JSON.parse(fs.readFileSync(process.argv[1]));process.exit(j.extensions?.ui?.developer_mode?0:1)}catch(e){process.exit(1)}' "$PROFILE/Default/Preferences" 2>/dev/null
+}
+
+if ! patched; then
+  echo "First run: materialising profile, then enabling developer mode…"
+  pid=$(launch about:blank)
+  for _ in $(seq 1 30); do sleep 1; [ -f "$PROFILE/Default/Preferences" ] && grep -q '"settings"' "$PROFILE/Default/Preferences" && break; done
+  kill_profile
+  node -e '
+    const fs=require("fs"); const p=process.argv[1];
+    const j=JSON.parse(fs.readFileSync(p,"utf8"));
+    j.extensions=j.extensions||{}; j.extensions.ui=j.extensions.ui||{};
+    j.extensions.ui.developer_mode=true;            // turn on Developer mode
+    const DEV_BIT=16777216;                          // DISABLE_UNSUPPORTED_DEVELOPER_EXTENSION
+    for(const [id,e] of Object.entries(j.extensions.settings||{})){
+      if(Array.isArray(e.disable_reasons) && e.disable_reasons.includes(DEV_BIT)){
+        e.disable_reasons=e.disable_reasons.filter(r=>r!==DEV_BIT);
+        if(e.disable_reasons.length===0) e.state=1;   // ENABLED
+        console.log("force-enabled extension", id);
+      }
+    }
+    fs.writeFileSync(p, JSON.stringify(j));
+    console.log("developer_mode=true written");
+  ' "$PROFILE/Default/Preferences"
+fi
+
+echo "Launching Chromium (profile=$PROFILE port=$PORT, headful on ${DISPLAY:-:0})…"
+launch --new-window "$URL" >/dev/null
+sleep 5
+
+echo "Targets:"
+curl -s --max-time 5 "http://localhost:$PORT/json/list" \
+  | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{for(const x of JSON.parse(s))console.log(" ",x.type,"|",(x.url||"").slice(0,80))})'
+echo
+echo "Enable the addon you're testing via the Scratch Addons settings UI:"
+echo "  chrome-extension://<EXTENSION_ID>/webpages/settings/index.html   (id from the service_worker target above)"
+echo "DevTools endpoint: http://localhost:$PORT  — drive it with cdp.mjs."
