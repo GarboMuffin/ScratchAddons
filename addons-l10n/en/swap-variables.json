@@ -1,0 +1,7 @@
+{
+  "swap-variables/swap": "Swap {var} in sprite",
+  "swap-variables/replace": "Switch all {name} in this sprite for the variable named:",
+  "swap-variables/var-not-exist": "That variable does not exist...",
+  "swap-variables/variables": "variables",
+  "swap-variables/lists": "lists"
+}

@@ -1,12 +1,7 @@
 {
-  "editor-devtools/var-not-exist": "That variable does not exist...",
-  "editor-devtools/replace": "Developer tools: Switch all {name} in this sprite for the variable named:",
   "editor-devtools/paste": "Paste",
   "editor-devtools/copy-all": "Copy All",
   "editor-devtools/copy-block": "Copy Block",
   "editor-devtools/cut-block": "Cut Block",
-  "editor-devtools/make-space": "Make Space",
-  "editor-devtools/swap": "Swap {var} in Sprite",
-  "editor-devtools/lists": "lists",
-  "editor-devtools/variables": "variables"
+  "editor-devtools/make-space": "Make Space"
 }

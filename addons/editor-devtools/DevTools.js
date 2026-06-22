@@ -1,6 +1,5 @@
 import DomHelpers from "./DomHelpers.js";
 import UndoGroup from "../../libraries/common/cs/UndoGroup.js";
-import { getVariableUsesById } from "../../libraries/common/cs/devtools-utils.js";
 
 export default class DevTools {
   constructor(addon, msg, m) {
@@ -12,7 +11,6 @@ export default class DevTools {
     this.codeTab = null;
     this.costTab = null;
     this.costTabBody = null;
-    this.selVarID = null;
     this.canShare = false;
 
     this.mouseXY = { x: 0, y: 0 };
@@ -161,31 +159,6 @@ export default class DevTools {
       },
       { blocks: true }
     );
-
-    this.addon.tab.createBlockContextMenu(
-      (items, block) => {
-        if (block.type.startsWith("data_")) {
-          this.selVarID = block.getVars()[0];
-          items.push(
-            { separator: true },
-            {
-              enabled: true,
-              text: this.m("swap", { var: block.type.includes("list") ? this.m("lists") : this.m("variables") }),
-              callback: () => {
-                let wksp = this.getWorkspace();
-                let v = wksp.getVariableMap().getVariableById(this.selVarID);
-                let varName = window.prompt(this.msg("replace", { name: v.name }));
-                if (varName) {
-                  this.doReplaceVariable(this.selVarID, varName, v.type);
-                }
-              },
-            }
-          );
-        }
-        return items;
-      },
-      { blocks: true, flyout: true }
-    );
   }
 
   async patchCopyShortcuts() {
@@ -278,37 +251,6 @@ export default class DevTools {
     const { x, y } = block.getRelativeToSurfaceXY();
     const width = block.getRootBlock().getHeightWidth().width;
     return block.RTL ? { pos: { x: x + width, y }, xMax: x } : { pos: { x, y }, xMax: x + width };
-  }
-
-  /**
-   * Quick and dirty replace all instances of one variable / list with another variable / list
-   * @param varId original variable name
-   * @param newVarName new variable name
-   * @param type type of variable ("" = variable, anything else is a list?
-   */
-  doReplaceVariable(varId, newVarName, type) {
-    let wksp = this.getWorkspace();
-    let v = wksp.getVariableMap().getVariable(newVarName, type);
-    if (!v) {
-      alert(this.msg("var-not-exist"));
-      return;
-    }
-    let newVId = v.getId();
-
-    UndoGroup.startUndoGroup(wksp);
-    let blocks = getVariableUsesById(varId, wksp);
-    for (const block of blocks) {
-      try {
-        if (type === "") {
-          block.getField("VARIABLE").setValue(newVId);
-        } else {
-          block.getField("LIST").setValue(newVId);
-        }
-      } catch (e) {
-        // ignore
-      }
-    }
-    UndoGroup.endUndoGroup(wksp);
   }
 
   /**

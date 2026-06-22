@@ -64,3 +64,8 @@ Do not re-pick an issue listed here.
   New addon `user-hovercards`: hover any username/avatar (profile links sitewide) → floating card with
   avatar, ST badge, country, join date, About me / What I'm working on (api.scratch.mit.edu, cached).
   Auto-adapts to dark backgrounds (dark-www). Verified light/dark, ST badge, project comments + disable.
+- **#3700** — Split editor-devtools into more specific addons (7 👍) — **IMPLEMENTED (final split step)**.
+  Extracted the variable/list "swap" feature into new addon `swap-variables`; `editor-devtools` is now just
+  the advanced context menu (copy/cut/paste + make space), matching maintainer Joeclinton1's 2-addon plan.
+  (find-bar, jump-to-def, swap-local-global, move-to-top-bottom, cleanup-blocks-plus already split prior.)
+  Verified menu item presence, functional swap, devtools intact, no duplicate, clean dynamic disable.

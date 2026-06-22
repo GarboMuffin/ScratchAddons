@@ -1,0 +1,34 @@
+{
+  "name": "Swap variables and lists",
+  "description": "Adds a right-click option on a variable or list to switch all of its uses in the current sprite over to another variable or list.",
+  "credits": [
+    {
+      "name": "griffpatch"
+    },
+    {
+      "name": "Chrome_Cat",
+      "link": "https://scratch.mit.edu/users/Chrome_Cat/"
+    },
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude-code"
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "enabledByDefault": true,
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "../../libraries/common/cs/blockly-menu-separators.css",
+      "matches": ["projects"]
+    }
+  ],
+  "versionAdded": "1.46.0",
+  "tags": ["editor", "codeEditor", "recommended"]
+}
