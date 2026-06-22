@@ -3,6 +3,11 @@
 One issue per loop. "Processed" = implemented, or judged already-done / invalid / infeasible.
 Do not re-pick an issue listed here.
 
+- **#1758** — Customize front page (7 👍) — **IMPLEMENTED**.
+  New addon `customize-homepage`: hide built-in homepage rows (Featured Projects/Studios, SDS,
+  curator, community loving/remixing, news, what's-happening, following) via structure-based
+  detection (language-independent), plus add custom rows from a studio or explore (trending/popular).
+  Verified hide + custom rows render + dynamic disable in Chromium.
 - **#2217** — Resizable editor areas (8 👍) — **IMPLEMENTED (scoped to stage)**.
   New addon `resizable-stage`: drag a divider between code area and stage to resize the stage
   (real CSS resize + renderer.resize, controls stay crisp; sprite pane uses native compact

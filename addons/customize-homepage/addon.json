@@ -1,0 +1,131 @@
+{
+  "name": "Customize homepage",
+  "description": "Hide rows you don't care about on the Scratch homepage, and add your own rows from a studio or the explore page.",
+  "credits": [
+    {
+      "name": "Claude Opus 4.8 (Claude Code)"
+    }
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["https://scratch.mit.edu/"]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "style.css",
+      "matches": ["https://scratch.mit.edu/"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Hide \"Featured Projects\"",
+      "id": "hideFeaturedProjects",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "Hide \"Featured Studios\"",
+      "id": "hideFeaturedStudios",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "Hide \"Scratch Design Studio\"",
+      "id": "hideScratchDesignStudio",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "Hide \"Projects Curated by…\"",
+      "id": "hideCuratorTopProjects",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "Hide \"What the Community is Loving\"",
+      "id": "hideCommunityLoving",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "Hide \"What the Community is Remixing\"",
+      "id": "hideCommunityRemixing",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "Hide \"Scratch News\" (when signed in)",
+      "id": "hideScratchNews",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "Hide \"What's Happening?\" (when signed in)",
+      "id": "hideWhatsHappening",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "Hide \"…by/loved by Scratchers I'm Following\" rows (when signed in)",
+      "id": "hideFollowing",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "name": "Custom rows",
+      "id": "customRows",
+      "type": "table",
+      "default": [],
+      "row": [
+        {
+          "name": "Row title",
+          "id": "name",
+          "type": "untranslated",
+          "default": "My row"
+        },
+        {
+          "name": "Source",
+          "id": "source",
+          "type": "select",
+          "default": "studio",
+          "potentialValues": [
+            { "id": "studio", "name": "Studio" },
+            { "id": "trending", "name": "Trending (explore)" },
+            { "id": "popular", "name": "Popular (explore)" }
+          ]
+        },
+        {
+          "name": "Studio URL or ID (Studio source only)",
+          "id": "studio",
+          "type": "untranslated",
+          "default": ""
+        }
+      ],
+      "presets": [
+        {
+          "name": "Trending projects",
+          "values": { "name": "Trending", "source": "trending", "studio": "" }
+        },
+        {
+          "name": "Popular projects",
+          "values": { "name": "Popular", "source": "popular", "studio": "" }
+        },
+        {
+          "name": "Scratch Design Studio archive",
+          "values": {
+            "name": "Design Studio Archive",
+            "source": "studio",
+            "studio": "https://scratch.mit.edu/studios/146521/"
+          }
+        }
+      ]
+    }
+  ],
+  "tags": ["community"],
+  "versionAdded": "1.46.0",
+  "enabledByDefault": false,
+  "dynamicEnable": true,
+  "dynamicDisable": true
+}

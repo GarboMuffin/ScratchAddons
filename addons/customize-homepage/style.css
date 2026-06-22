@@ -1,0 +1,32 @@
+/* Custom homepage rows added by this addon. We render our own simple
+   horizontally-scrolling row instead of fighting react-slick. */
+
+.box-content.sa-homepage-customrow-content {
+  /* override scratch-www's ".box .box-content { display: block }" */
+  display: flex !important;
+  flex-direction: row;
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+}
+
+.sa-homepage-customrow-content .sa-homepage-thumb {
+  flex: 0 0 auto;
+  width: 168px;
+  margin: 0;
+}
+
+.sa-homepage-customrow-content .sa-homepage-thumb .thumbnail-image img {
+  width: 168px;
+  height: 126px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+.sa-homepage-customrow-empty {
+  color: hsla(0, 0%, 0%, 0.5);
+  font-style: italic;
+  margin: 0.5rem 0;
+}
