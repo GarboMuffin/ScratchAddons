@@ -27,7 +27,7 @@
       "id": "vanilla"
     }
   ],
-  "tags": ["editor", "codeEditor"],
+  "tags": ["editor", "codeEditor", "AI"],
   "versionAdded": "1.46.0",
   "enabledByDefault": false,
   "dynamicEnable": true,

@@ -5,6 +5,12 @@ export default [
     name: chrome.i18n.getMessage("all"),
   },
   {
+    id: "AI",
+    icon: "star",
+    name: chrome.i18n.getMessage("aiCategory"),
+    marginBottom: true,
+  },
+  {
     id: "editor",
     icon: "puzzle",
     name: chrome.i18n.getMessage("editorFeatures"),

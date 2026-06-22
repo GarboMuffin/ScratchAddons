@@ -13,6 +13,10 @@ export default {
       weight: 1,
     },
     {
+      name: "tags",
+      weight: 1,
+    },
+    {
       name: "description",
       weight: 0.5,
     },

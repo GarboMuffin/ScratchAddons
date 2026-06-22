@@ -1,7 +1,7 @@
 {
   "name": "Autoscroll while dragging",
   "description": "Automatically scrolls the code area while you drag a block or script toward its edges, so you can move scripts far across the workspace in one continuous drag.",
-  "tags": ["editor", "codeEditor"],
+  "tags": ["editor", "codeEditor", "AI"],
   "userscripts": [
     {
       "url": "userscript.js",

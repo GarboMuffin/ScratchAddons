@@ -68,6 +68,6 @@
   ],
   "dynamicEnable": true,
   "dynamicDisable": true,
-  "tags": ["community", "theme"],
+  "tags": ["community", "theme", "AI"],
   "versionAdded": "1.46.0"
 }

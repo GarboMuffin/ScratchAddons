@@ -14,6 +14,13 @@ export default [
     color: "blue",
   },
   {
+    name: "aiTag",
+    tooltipText: "aiTagTooltip",
+    matchName: "AI",
+    color: "purple",
+    iframeAlwaysShow: true,
+  },
+  {
     name: "new",
     matchName: "new",
     color: "orange",

@@ -1,7 +1,7 @@
 {
   "name": "Block help",
   "description": "Adds a \"Help\" option to the right-click menu of blocks that opens the matching Scratch Wiki page, so you can quickly look up what a block does.",
-  "tags": ["editor", "codeEditor"],
+  "tags": ["editor", "codeEditor", "AI"],
   "credits": [
     {
       "name": "Claude Opus 4.8 (Claude Code)",

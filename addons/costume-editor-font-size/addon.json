@@ -21,6 +21,6 @@
       "matches": ["projects"]
     }
   ],
-  "tags": ["editor", "costumeEditor"],
+  "tags": ["editor", "costumeEditor", "AI"],
   "versionAdded": "1.46.0"
 }

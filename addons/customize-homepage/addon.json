@@ -123,7 +123,7 @@
       ]
     }
   ],
-  "tags": ["community"],
+  "tags": ["community", "AI"],
   "versionAdded": "1.46.0",
   "enabledByDefault": false,
   "dynamicEnable": true,

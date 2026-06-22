@@ -35,6 +35,6 @@
       "default": true
     }
   ],
-  "tags": ["editor", "codeEditor"],
+  "tags": ["editor", "codeEditor", "AI"],
   "versionAdded": "1.46.0"
 }

@@ -35,6 +35,6 @@
       "default": true
     }
   ],
-  "tags": ["community", "profiles"],
+  "tags": ["community", "profiles", "AI"],
   "versionAdded": "1.46.0"
 }

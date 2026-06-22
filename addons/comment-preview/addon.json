@@ -20,6 +20,6 @@
     }
   ],
   "dynamicEnable": true,
-  "tags": ["community", "comments"],
+  "tags": ["community", "comments", "AI"],
   "versionAdded": "1.46.0"
 }

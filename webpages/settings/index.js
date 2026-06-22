@@ -518,6 +518,9 @@ let fuse;
       // it's categorized as an editor addon, not as easterEgg
       if (addonId === "cat-blocks") manifest._categories.push("easterEgg");
 
+      // AI addons get a cross-cutting "AI" category in addition to their primary one
+      if (manifest.tags.includes("AI")) manifest._categories.push("AI");
+
       manifest._icon = manifest._categories[0];
 
       manifest._enabled = addonsEnabled[addonId];

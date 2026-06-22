@@ -1,7 +1,7 @@
 {
   "name": "Readable operator symbols",
   "description": "Makes the tiny symbols in math and comparison operator blocks (+ - * / < > =) bolder, and lets you swap in clearer signs like × and ÷.",
-  "tags": ["editor", "codeEditor", "theme"],
+  "tags": ["editor", "codeEditor", "theme", "AI"],
   "credits": [
     {
       "name": "astrosticks",

@@ -1,7 +1,7 @@
 {
   "name": "Copy blocks as scratchblocks",
   "description": "Adds a right-click option in the editor to copy a script (or the whole workspace) to the clipboard as scratchblocks text, ready to paste into the forums, the wiki, or an LLM.",
-  "tags": ["editor", "codeEditor"],
+  "tags": ["editor", "codeEditor", "AI"],
   "userscripts": [
     {
       "url": "userscript.js",

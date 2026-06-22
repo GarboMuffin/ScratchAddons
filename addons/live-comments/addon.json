@@ -1,7 +1,7 @@
 {
   "name": "Live comment refreshing",
   "description": "Checks a project's comments every so often and shows newly posted comments (and replies in threads you've opened) without you having to reload the page.",
-  "tags": ["community", "comments"],
+  "tags": ["community", "comments", "AI"],
   "credits": [
     {
       "name": "Claude Opus 4.8 (Claude Code)",

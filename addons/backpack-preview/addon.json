@@ -2,7 +2,7 @@
   "name": "Backpack item preview",
   "description": "Hover over an item in the backpack to see a larger preview of it, making it easy to read full scripts and tell costumes, sprites and sounds apart.",
   "credits": [{ "name": "Claude Opus 4.8 (Claude Code)", "link": "https://www.anthropic.com/claude-code" }],
-  "tags": ["editor"],
+  "tags": ["editor", "AI"],
   "userscripts": [
     {
       "url": "userscript.js",
