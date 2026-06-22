@@ -8,6 +8,11 @@ export function setDuplication(newEnabled) {
   enableDuplication = newEnabled;
 }
 
+let enableVariableReporter = false;
+export function setVariableReporter(newEnabled) {
+  enableVariableReporter = newEnabled;
+}
+
 // mostRecentEvent_ is sometimes a fake event, so we can't rely on reading its properties.
 let ctrlOrMetaPressed = false;
 let altPressed = false;
@@ -37,6 +42,50 @@ export async function load(addon) {
     if (!this.targetBlock) {
       oldUpdateIsDragging.call(this, e);
       return;
+    }
+
+    // Alt-dragging the variable dropdown of a "set"/"change" block pulls out a
+    // reporter of that variable, instead of duplicating the whole statement block.
+    if (
+      enableDuplication &&
+      enableVariableReporter &&
+      e.altKey &&
+      !this.flyout &&
+      this.startField &&
+      this.startField.name === "VARIABLE" &&
+      (this.targetBlock.type === "data_setvariableto" || this.targetBlock.type === "data_changevariableby")
+    ) {
+      this.startWorkspace_.setResizesEnabled(false);
+      ScratchBlocks.Events.disable();
+      let newBlock;
+      try {
+        const variableId = this.targetBlock.getFieldValue("VARIABLE");
+        if (variableId) {
+          newBlock = this.startWorkspace_.newBlock("data_variable");
+          newBlock.setFieldValue(variableId, "VARIABLE");
+          newBlock.initSvg();
+          newBlock.render();
+          const xy = this.targetBlock.getRelativeToSurfaceXY();
+          newBlock.moveBy(xy.x, xy.y);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      ScratchBlocks.Events.enable();
+      this.startWorkspace_.setResizesEnabled(true);
+
+      if (newBlock) {
+        if (ScratchBlocks.Events.isEnabled()) {
+          ScratchBlocks.Events.setGroup(true);
+          // setGroup(false) will be called in endDrag() (overridden below)
+          ScratchBlocks.Events.fire(new (ScratchBlocks.Events.get(ScratchBlocks.Events.BLOCK_CREATE))(newBlock));
+        }
+        this.targetBlock = newBlock;
+        ScratchBlocks.common.setSelected(newBlock);
+        newBlock.dragStrategy.saIsDuplicating = true;
+        oldUpdateIsDragging.call(this, e);
+        return;
+      }
     }
 
     const isDuplicating =

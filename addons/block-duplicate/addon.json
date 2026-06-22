@@ -4,6 +4,10 @@
   "credits": [
     {
       "name": "GarboMuffin"
+    },
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude-code"
     }
   ],
   "info": [
@@ -16,6 +20,14 @@
     {
       "url": "userscript.js",
       "matches": ["projects"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Alt-drag the variable in a \"set\"/\"change\" block to pull out a reporter",
+      "id": "variableReporter",
+      "type": "boolean",
+      "default": true
     }
   ],
   "dynamicEnable": true,
