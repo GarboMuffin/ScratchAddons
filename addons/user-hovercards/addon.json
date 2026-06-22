@@ -1,0 +1,40 @@
+{
+  "name": "User hovercards",
+  "description": "Hover over a username or profile picture anywhere on the website to see a card with that user's avatar, About me, What I'm working on, country and join date.",
+  "credits": [
+    {
+      "name": "Claude Opus 4.8 (Claude Code)",
+      "link": "https://www.anthropic.com/claude-code"
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["profiles", "projects", "studios", "forums", "scratchWWWNoProject"]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "style.css",
+      "matches": ["profiles", "projects", "studios", "forums", "scratchWWWNoProject"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Delay before showing (ms)",
+      "id": "delay",
+      "type": "positive_integer",
+      "default": 500
+    },
+    {
+      "name": "Show profile text (About me / What I'm working on)",
+      "id": "bio",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "tags": ["community", "profiles"],
+  "versionAdded": "1.46.0"
+}

@@ -60,3 +60,7 @@ Do not re-pick an issue listed here.
   which ships as `forum-live-preview` (auto server-preview on typing pause); BBCode-insertion toolbar
   ships as `forum-toolbar`. True client-side WYSIWYG needs an inaccurate BBCode/scratchblocks parser and
   the post editor is login-gated, so untestable per loop rules.
+- **#2271** — Hovercards (or tooltips) (7 👍) — **IMPLEMENTED (user hovercards)**.
+  New addon `user-hovercards`: hover any username/avatar (profile links sitewide) → floating card with
+  avatar, ST badge, country, join date, About me / What I'm working on (api.scratch.mit.edu, cached).
+  Auto-adapts to dark backgrounds (dark-www). Verified light/dark, ST badge, project comments + disable.

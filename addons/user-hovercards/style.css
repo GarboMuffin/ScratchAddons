@@ -1,0 +1,181 @@
+.sa-hovercard {
+  position: fixed;
+  z-index: 99999;
+  width: 320px;
+  max-width: calc(100vw - 8px);
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #575e75;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  font-size: 13px;
+  line-height: 1.45;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease;
+}
+
+.sa-hovercard.sa-hovercard-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.sa-hovercard-header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.sa-hovercard-avatar {
+  flex: 0 0 auto;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: block;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.sa-hovercard-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sa-hovercard-headtext {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding-top: 2px;
+}
+
+.sa-hovercard-username {
+  display: inline-block;
+  font-size: 16px;
+  font-weight: bold;
+  color: #4d97ff;
+  text-decoration: none;
+  word-break: break-word;
+}
+
+.sa-hovercard-username:hover {
+  text-decoration: underline;
+}
+
+.sa-hovercard-badge {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #4d97ff;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.sa-hovercard-meta {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 12px;
+  color: #7d8499;
+}
+
+.sa-hovercard-metaitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sa-hovercard-metaitem svg {
+  flex: 0 0 auto;
+  opacity: 0.85;
+}
+
+.sa-hovercard-section {
+  margin-top: 12px;
+}
+
+.sa-hovercard-label {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9aa0b3;
+  margin-bottom: 2px;
+}
+
+.sa-hovercard-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  max-height: 5.8em;
+}
+
+/* Loading skeleton */
+.sa-hovercard-skeleton {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.11) 37%, rgba(0, 0, 0, 0.06) 63%);
+  background-size: 400% 100%;
+  animation: sa-hovercard-shimmer 1.2s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+.sa-hovercard-skline {
+  height: 12px;
+  margin: 6px 0;
+}
+
+@keyframes sa-hovercard-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* Dark page background (e.g. Website dark mode addon) */
+.sa-hovercard.sa-hovercard-dark {
+  background: #1e1e2a;
+  color: #c2c5d1;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.sa-hovercard-dark .sa-hovercard-avatar {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sa-hovercard-dark .sa-hovercard-meta {
+  color: #9b9fb0;
+}
+
+.sa-hovercard-dark .sa-hovercard-label {
+  color: #8a8fa3;
+}
+
+.sa-hovercard-dark .sa-hovercard-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 25%,
+    rgba(255, 255, 255, 0.12) 37%,
+    rgba(255, 255, 255, 0.06) 63%
+  );
+  background-size: 400% 100%;
+}
