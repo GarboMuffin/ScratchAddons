@@ -111,3 +111,8 @@ Do not re-pick an issue listed here.
   Process/meta issue; its one concrete deliverable was a testing checklist in the PR template's Tests
   section. Added optional reminders (browser, console, settings, dynamic enable/disable, other-addon
   interplay) — framed as encouragement, not requirements, per maintainer pushback against mandating it.
+- **#5719** — Groups of settings (6 👍) — **IMPLEMENTED (extension-side; awaits schema)**.
+  Added the maintainer-agreed Option-2 rendering: settings sharing a `group` render inside a labelled
+  `<fieldset>` (top-level `settingGroups` give localized names). Works on the settings page + popup iframe.
+  NOTE: addon.json can't declare it until the external manifest-schema adds the fields (CI-validated,
+  additionalProperties:false). Verified end-to-end with a temp scratch-notifier manifest (reverted).

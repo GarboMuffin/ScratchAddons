@@ -178,6 +178,16 @@ const localizeSettings = (addonId, setting, tableId) => {
         manifest.popup.name = scratchAddons.l10n.get(`${addonId}/@popup-name`, {}, manifest.popup.name);
       }
 
+      for (const settingGroup of manifest.settingGroups || []) {
+        if (settingGroup.name) {
+          settingGroup.name = scratchAddons.l10n.get(
+            `${addonId}/@settingGroups-${settingGroup.id}`,
+            {},
+            settingGroup.name
+          );
+        }
+      }
+
       const localizedSettings = [];
 
       for (const setting of manifest.settings || []) {

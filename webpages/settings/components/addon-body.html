@@ -80,17 +80,26 @@
         />
       </div>
       <div class="settings-column" v-bind:class="[!addon._enabled ? 'disabled' : '']">
-        <addon-setting
-          v-for="setting of addon.settings"
-          :class="{'setting-highlighted': highlightedSettingId === setting.id}"
-          :addon="addon"
-          :group-id="groupId"
-          :setting="setting"
-          :setting-path="[setting.id]"
-          :addon-settings="addonSettings"
-          @mouseenter="hoveredSettingId = setting.id"
-          @mouseleave="hoveredSettingId = null"
-        ></addon-setting>
+        <fieldset
+          v-for="(blockIndex, block) of groupedSettings"
+          :key="'sa-block-' + blockIndex"
+          class="setting-group"
+          :class="{ 'setting-group-bare': !block.group }"
+        >
+          <legend v-if="block.group && block.group.name" class="setting-group-legend">{{ block.group.name }}</legend>
+          <addon-setting
+            v-for="setting of block.settings"
+            :key="setting.id"
+            :class="{'setting-highlighted': highlightedSettingId === setting.id}"
+            :addon="addon"
+            :group-id="groupId"
+            :setting="setting"
+            :setting-path="[setting.id]"
+            :addon-settings="addonSettings"
+            @mouseenter="hoveredSettingId = setting.id"
+            @mouseleave="hoveredSettingId = null"
+          ></addon-setting>
+        </fieldset>
       </div>
       <div class="presets-column" v-if="addon.presets" v-bind:class="[!addon._enabled ? 'disabled' : '']">
         <div class="setting-label">{{ msg("presets") }}</div>
@@ -328,6 +337,30 @@
     display: flex;
     flex-wrap: wrap;
   }
+  /* A group of related settings, drawn as a labelled box. */
+  .settings-column > .setting-group {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 4px 0;
+    padding: 2px 14px 8px;
+    border: 1px solid var(--content-separator);
+    border-radius: 6px;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  /* Ungrouped settings: the fieldset wrapper is transparent so layout is unchanged. */
+  .settings-column > .setting-group-bare {
+    display: contents;
+  }
+  .setting-group-legend {
+    text-transform: uppercase;
+    color: var(--label-text);
+    font-weight: 500;
+    font-size: 14px;
+    padding: 0 6px;
+  }
   .preview-column {
     margin: 10px 0;
     padding-left: 10px;
@@ -377,18 +410,25 @@
     .settings-column {
       flex-direction: column;
     }
-    .settings-column > .addon-setting {
+    .settings-column > .setting-group {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .settings-column > .addon-setting,
+    .setting-group > .addon-setting {
       margin: 10px 0;
       min-height: 0;
       flex-direction: column;
       align-items: flex-start;
     }
-    .settings-column > .addon-setting.boolean-setting {
+    .settings-column > .addon-setting.boolean-setting,
+    .setting-group > .addon-setting.boolean-setting {
       margin: 5px 0;
       flex-direction: row;
       align-items: center;
     }
-    .settings-column > .addon-setting.boolean-setting .setting-label-container {
+    .settings-column > .addon-setting.boolean-setting .setting-label-container,
+    .setting-group > .addon-setting.boolean-setting .setting-label-container {
       margin-bottom: 0;
     }
     .presets-column > .setting-label {

@@ -43,6 +43,27 @@ export default async function ({ template }) {
       addonSettings() {
         return this.$root.addonSettings[this.addon._addonId];
       },
+      // Walks the flat settings list into "blocks", merging consecutive settings that share a
+      // `group` into one block so they can render inside a labelled <fieldset>. Settings without
+      // a (known) group stay as standalone blocks. Order is preserved.
+      groupedSettings() {
+        const groupById = Object.fromEntries((this.addon.settingGroups || []).map((group) => [group.id, group]));
+        const blocks = [];
+        for (const setting of this.addon.settings || []) {
+          const group = setting.group && groupById[setting.group];
+          if (group) {
+            const last = blocks[blocks.length - 1];
+            if (last && last.group && last.group.id === group.id) {
+              last.settings.push(setting);
+            } else {
+              blocks.push({ group, settings: [setting] });
+            }
+          } else {
+            blocks.push({ group: null, settings: [setting] });
+          }
+        }
+        return blocks;
+      },
       devMode() {
         return this.$root.devMode;
       },
