@@ -94,3 +94,8 @@ Do not re-pick an issue listed here.
   Confirmation dialogs now name the project: share reads the redux title (project page + editor), unshare/
   delete read the My Stuff row title (.media-info-item.title>a); falls back to the generic message if no
   name. Verified share (real redux title), unshare+delete (mock row), and fallback in Chromium.
+- **#1930** — Read /messages without auto-marking as read (6 👍) — **INFEASIBLE (account-gated)**.
+  Mechanism known: block the `POST /site-api/messages/messages-clear/` request scratch-www fires after
+  messages load (needs DNR/webRequest, per maintainer) + add a manual "Mark all as read" button. But the
+  unread counter, the request (403 without auth), and the button all live on the login-only /messages page,
+  so nothing is observable/verifiable without an account — out of scope per loop rules.
