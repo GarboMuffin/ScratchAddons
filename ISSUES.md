@@ -120,3 +120,7 @@ Do not re-pick an issue listed here.
   New addon `resize-palette`: draggable divider on the flyout's right edge resizes the block palette
   (overrides Scratch's fixed flyout getWidth() + reflow); persists via localStorage, double-click resets.
   Verified widen/narrow, persistence, reset, disable, and hide-flyout compatibility in Chromium.
+- **#5490** — Separate branch for beta/translation period (6 👍) — **INFEASIBLE (process/governance)**.
+  Pure release-workflow proposal (master/beta branching, release cadence) — needs maintainer policy
+  adoption + Transifex reconfig + branch/CI automation, no consensus (apple502j skeptical, cadence
+  debated). No concrete in-repo code deliverable; can't implement/verify in a loop. Out of scope.
