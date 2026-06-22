@@ -1,0 +1,34 @@
+{
+  "name": "Autoscroll while dragging",
+  "description": "Automatically scrolls the code area while you drag a block or script toward its edges, so you can move scripts far across the workspace in one continuous drag.",
+  "tags": ["editor", "codeEditor"],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": ["projects"]
+    }
+  ],
+  "settings": [
+    {
+      "name": "Scroll speed",
+      "id": "scrollSpeed",
+      "type": "integer",
+      "min": 1,
+      "max": 50,
+      "default": 16
+    },
+    {
+      "name": "Edge activation size (px)",
+      "id": "activationMargin",
+      "type": "integer",
+      "min": 10,
+      "max": 200,
+      "default": 60
+    }
+  ],
+  "credits": [{ "name": "Claude Opus 4.8 (Claude Code)", "link": "https://www.anthropic.com/claude-code" }],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "enabledByDefault": false,
+  "versionAdded": "1.46.0"
+}
