@@ -77,9 +77,22 @@ export class Conn {
     return res.result.value;
   }
 
+  // Auto-accept any JS dialog (alert/confirm/beforeunload) so navigation/reload never hangs.
+  // The Scratch editor installs a beforeunload "unsaved changes" prompt that otherwise
+  // blocks Page.navigate/reload indefinitely. Safe to call multiple times.
+  async autoAcceptDialogs() {
+    await this.send("Page.enable");
+    this.onEvent((m) => {
+      if (m.method === "Page.javascriptDialogOpening") {
+        this.send("Page.handleJavaScriptDialog", { accept: true }).catch(() => {});
+      }
+    });
+  }
+
   // Navigate and resolve once the load event fires (or after timeoutMs).
   async navigate(url, timeoutMs = 30000) {
     await this.send("Page.enable");
+    await this.autoAcceptDialogs();
     await this.send("Page.navigate", { url });
     await new Promise((resolve) => {
       const t = setTimeout(resolve, timeoutMs);
@@ -103,6 +116,31 @@ export async function openScratchPage() {
   const pt = await scratchPage();
   if (!pt) throw new Error("No scratch.mit.edu page target open");
   return Conn.open(pt.webSocketDebuggerUrl);
+}
+
+// Open a FRESH editor tab and (by default) force-close existing Scratch tabs.
+//
+// Prefer this over `page.navigate()` when you've just edited addon files: a brand-new tab
+// loads the latest code from disk, and creating one never triggers the current editor tab's
+// "unsaved changes" beforeunload prompt (which blocks navigate/reload). Old tabs are closed
+// with Target.closeTarget, which force-closes without running beforeunload.
+// Returns a Conn already wired with autoAcceptDialogs(); wait for the VM yourself.
+export async function openFreshScratchTab(url = "https://scratch.mit.edu/projects/editor/", { closeOthers = true } = {}) {
+  const browser = await Conn.open(await browserWs());
+  const { targetId } = await browser.send("Target.createTarget", { url });
+  if (closeOthers) {
+    for (const t of await listTargets()) {
+      if (t.type === "page" && t.id !== targetId && t.url.includes("scratch.mit.edu")) {
+        await browser.send("Target.closeTarget", { targetId: t.id }).catch(() => {});
+      }
+    }
+  }
+  browser.close();
+  const pt = (await listTargets()).find((t) => t.id === targetId);
+  if (!pt) throw new Error("Failed to open fresh Scratch tab");
+  const conn = await Conn.open(pt.webSocketDebuggerUrl);
+  await conn.autoAcceptDialogs();
+  return conn;
 }
 
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

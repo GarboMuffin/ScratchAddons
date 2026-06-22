@@ -84,8 +84,26 @@ page.close();
 ```
 
 Helpers in `cdp.mjs`: `listTargets()`, `scratchPage()`, `serviceWorker()`, `browserWs()`,
-`openScratchPage()`, and `Conn` with `.eval()`, `.navigate()`, `.screenshot()`, `.send()` (raw CDP),
-`.onEvent()`. `page.eval()` runs in the page **main world**, where the Scratch globals below live.
+`openScratchPage()`, `openFreshScratchTab()`, and `Conn` with `.eval()`, `.navigate()`,
+`.screenshot()`, `.autoAcceptDialogs()`, `.send()` (raw CDP), `.onEvent()`. `page.eval()` runs in the
+page **main world**, where the Scratch globals below live.
+
+### Reloading after you edit addon files — use a fresh tab, not navigate
+
+The Scratch **editor installs a `beforeunload` "unsaved changes" prompt**. Once the project has been
+touched (and many tests touch it — dragging, dispatching VM actions), `page.navigate()` or a reload
+**hangs forever** on that native dialog, and your script times out with no output. Two fixes, both in
+`cdp.mjs`:
+
+- **Preferred:** `const page = await openFreshScratchTab()` — opens a brand-new editor tab (which loads
+  your latest edited files from disk) and force-closes the old Scratch tab(s) without triggering their
+  beforeunload. This is the clean way to pick up file edits between test runs.
+- If you must reuse a tab, `page.navigate()` now calls `autoAcceptDialogs()` first so the prompt is
+  auto-accepted instead of hanging. You can also call `await page.autoAcceptDialogs()` yourself once
+  after connecting.
+
+Don't poll a backgrounded test with `sleep N && cat …` at increasing delays — it's slow. Keep waits
+inside the script (`await sleep(...)`), run it once, and read its output when it returns.
 
 ### Reaching Scratch internals from `page.eval()`
 
